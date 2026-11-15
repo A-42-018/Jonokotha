@@ -1,19 +1,28 @@
 import Link from "next/link";
 import Badge from "@/components/ui/Badge";
 import { buttonClass } from "@/components/ui/Button";
+import MyReports from "@/components/me/MyReports";
 import Card from "@/components/ui/Card";
+import State from "@/components/ui/State";
 import { dict, getLang } from "@/lib/i18n";
+import { listMyReports, parseFilter, parsePage, type MyReport } from "@/lib/my-reports";
 import { currentUser } from "@/lib/supabase/server";
 
-export default async function Me() {
+export default async function Me({ searchParams }: PageProps<"/me">) {
   const lang = await getLang();
   const t = dict[lang];
+  const sp = await searchParams;
   let email: string | null = null;
   let isStaff = false;
+  let reports: MyReport[] = [];
+  let failed = false;
   try {
-    const { user, isStaff: staff } = await currentUser();
+    const { sb, user, isStaff: staff } = await currentUser();
     email = user?.email ?? null;
     isStaff = staff;
+    if (user) {
+      try { reports = await listMyReports(sb, user.id); } catch { failed = true; }
+    }
   } catch { /* Supabase not configured: treat as signed out */ }
 
   return (
@@ -34,8 +43,16 @@ export default async function Me() {
           </div>
         )}
       </Card>
-      <Card title={<span className="inline-flex flex-wrap items-center gap-2">{t.meMyReports} <Badge>{t.comingSoon}</Badge></span>}>
-        <p className="text-muted">{t.meMyReportsSoon}</p>
+      <Card title={t.meMyReports}>
+        {!email ? (
+          <State kind="expired" as="h2" title={t.stExpiredTitle} body={t.stExpiredBody} compact live="polite">
+            <Link href="/login" className={buttonClass()}>{t.signIn}</Link>
+          </State>
+        ) : failed ? (
+          <p role="alert" className="text-danger">{t.mrError}</p>
+        ) : (
+          <MyReports reports={reports} filter={parseFilter(sp.status)} page={parsePage(sp.page)} base="/me" t={t} lang={lang} />
+        )}
       </Card>
       <Card title={t.meLanguage}>
         <a href="/lang" aria-label={t.navLangSwitch} className={buttonClass({ variant: "secondary" })}>{t.switchLang}</a>
