@@ -5,6 +5,7 @@ import "./globals.css";
 import AccountMenu from "@/components/AccountMenu";
 import ConstituencyPicker from "@/components/ConstituencyPicker";
 import RegisterSW from "@/components/RegisterSW";
+import OfflineBanner from "@/components/ui/OfflineBanner";
 import { getConstituencyId } from "@/lib/constituency-server";
 import { currentUser } from "@/lib/supabase/server";
 import { dict, getLang } from "@/lib/i18n";
@@ -55,6 +56,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             />
           </div>
         </header>
+        <OfflineBanner />
         <RegisterSW />
         <main className="mx-auto w-full max-w-3xl px-4 py-6">{children}</main>
       </body>

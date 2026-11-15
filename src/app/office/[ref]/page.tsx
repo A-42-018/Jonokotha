@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import ApproveButtons from "@/components/ApproveButtons";
+import NoAccess from "@/components/ui/NoAccess";
 import { AGENCIES } from "@/lib/demo-data";
 import { dict, getLang } from "@/lib/i18n";
 import { getCase } from "@/lib/store";
@@ -11,10 +12,10 @@ import { redirect } from "next/navigation";
 export default async function Case({ params }: PageProps<"/office/[ref]">) {
   const { ref } = await params;
   const { sb, user, isStaff } = await currentUser();
-  if (!user) redirect("/login");
+  if (!user) redirect("/login?expired=1");
   const lang = await getLang();
   const t = dict[lang];
-  if (!isStaff) return <p className="py-8 text-center text-slate-600">{t.noAccess}</p>;
+  if (!isStaff) return <NoAccess t={t} />;
   const c = await getCase(sb, ref);
   if (!c) notFound();
   const agency = AGENCIES.find((a) => a.id === c.ai.agencyId)!;

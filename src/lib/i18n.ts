@@ -1,9 +1,9 @@
-import { cookies } from "next/headers";
-
 export type Lang = "bn" | "en";
 
 export async function getLang(): Promise<Lang> {
-  const c = (await cookies()).get("lang")?.value;
+  // Lazy import keeps this module importable from client components (dict only).
+  const { cookies } = await import("next/headers");
+  const c =(await cookies()).get("lang")?.value;
   return c === "en" ? "en" : "bn";
 }
 
@@ -88,6 +88,23 @@ export const dict = {
     humanOnly: "কর্মী অনুমোদন না করা পর্যন্ত কিছু পাঠানো হয় না।",
     back: "ফিরুন",
     noAccess: "এই পাতা শুধু অফিসের কর্মীদের জন্য।",
+    stLoading: "লোড হচ্ছে…",
+    stRetry: "আবার চেষ্টা করুন",
+    stGoHome: "হোমে ফিরুন",
+    stErrorTitle: "কিছু একটা ঠিকমতো হয়নি",
+    stErrorBody: "আমাদের দিকে সমস্যা হয়েছে। আপনার লেখা হারায়নি। আবার চেষ্টা করুন।",
+    stNotFoundTitle: "পাতাটি পাওয়া যায়নি",
+    stNotFoundBody: "লিংকটি ভুল হতে পারে, অথবা পাতাটি সরিয়ে ফেলা হয়েছে।",
+    stNoAccessTitle: "এই পাতায় ঢোকার অনুমতি নেই",
+    stNoAccessBody: "এই পাতা শুধু অফিসের কর্মীদের জন্য। আপনি কর্মী হলে সঠিক অ্যাকাউন্টে সাইন ইন করুন।",
+    stExpiredTitle: "আবার সাইন ইন করুন",
+    stExpiredBody: "আপনার সাইন ইনের মেয়াদ শেষ হয়েছে, অথবা এই পাতা দেখতে সাইন ইন দরকার। সাইন ইন করে আবার চেষ্টা করুন।",
+    stOfflineTitle: "ইন্টারনেট নেই",
+    stOfflineBody: "সংযোগ ফিরলে আবার চেষ্টা করুন।",
+    stOfflineBanner: "আপনি অফলাইনে আছেন। সংযোগ ফিরলে আবার চেষ্টা করুন।",
+    stBackOnline: "আবার অনলাইনে এসেছেন",
+    stEmptyTitle: "এখানে এখনো কিছু নেই",
+    stNoResultsTitle: "কিছু মেলেনি",
     cats: { roads: "রাস্তা", drainage: "ড্রেন", water: "পানি", electricity: "বিদ্যুৎ", waste: "ময়লা", flooding: "জলাবদ্ধতা", health: "স্বাস্থ্য", education: "শিক্ষা", safety: "নিরাপত্তা", environment: "পরিবেশ", facilities: "সুবিধা", other: "অন্যান্য" },
   },
   en: {
@@ -170,6 +187,23 @@ export const dict = {
     humanOnly: "Nothing is sent until staff approve it.",
     back: "Back",
     noAccess: "This page is for office staff only.",
+    stLoading: "Loading…",
+    stRetry: "Try again",
+    stGoHome: "Back to home",
+    stErrorTitle: "Something went wrong",
+    stErrorBody: "The problem is on our side. Nothing you wrote was lost. Please try again.",
+    stNotFoundTitle: "Page not found",
+    stNotFoundBody: "The link may be wrong, or the page has been removed.",
+    stNoAccessTitle: "You do not have access to this page",
+    stNoAccessBody: "This page is for office staff only. If you are staff, sign in with the right account.",
+    stExpiredTitle: "Please sign in again",
+    stExpiredBody: "Your session has ended, or this page needs you to sign in. Sign in and try again.",
+    stOfflineTitle: "You are offline",
+    stOfflineBody: "Please try again when you are back online.",
+    stOfflineBanner: "You are offline. Please try again when the connection is back.",
+    stBackOnline: "You are back online",
+    stEmptyTitle: "Nothing here yet",
+    stNoResultsTitle: "No matches found",
     cats: { roads: "Roads", drainage: "Drainage", water: "Water", electricity: "Electricity", waste: "Waste", flooding: "Flooding", health: "Health", education: "Education", safety: "Safety", environment: "Environment", facilities: "Facilities", other: "Other" },
   },
 } as const;
