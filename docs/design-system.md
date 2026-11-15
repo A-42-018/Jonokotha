@@ -38,3 +38,7 @@ Review every primitive and state at `/dev/ui` (bn and en side by side). The page
 ## Report wizard (task 1.3)
 
 `ReportForm` is a 5-step wizard (ধরন, বিবরণ, জায়গা, ছবি, দেখুন) on React Hook Form + Zod; schema and limits in `src/lib/report.ts` (messages from `i18n.ts`, limits match the API's `CaseInput`). Parts in `src/components/report/`: `CategoryPicker` (cat-* tiles, native radio group), `EvidenceStep` (on-device compression via `src/lib/image.ts`, caption, face/ID warning), `PrivacyWarning`. The Back/Next bar is `fixed` and lifts above the keyboard with `useKeyboardInset` (`ui/`). Draft autosave key is `jonokotha:report-draft:v2` (v1 drafts are migrated). Photos are compressed and previewed only; the API has no attachment field yet, so they are not sent and the UI says so.
+
+## Issue detail v2 (task 1.4)
+
+`/issue/[ref]` renders `components/issue/IssueView` (two columns from lg: report + official response left, timeline + actions right). Parts: `StatusTimeline` (StatusChip + `fmtDate` per step, notes never shown), `OfficialResponse` (placeholder until the API exposes a public reply), `IssueActions` (client, UI only: "আমারও একই সমস্যা" disabled with "শীঘ্রই", follow toggle, copy/share, report-content Dialog with required reason). Copy/share logic is the shared `ui/useShare` hook, also used by `ReportSuccess`. Privacy: the view reads title, category, area, description, status and timeline `status/at` only; `ai.*` and reporter data are never rendered. Strings are the `is*` keys in `i18n.ts`.
