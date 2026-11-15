@@ -1,4 +1,6 @@
 import Link from "next/link";
+import NoAccess from "@/components/ui/NoAccess";
+import State from "@/components/ui/State";
 import { dict, getLang } from "@/lib/i18n";
 import { listCases } from "@/lib/store";
 import { currentUser } from "@/lib/supabase/server";
@@ -8,19 +10,13 @@ import { redirect } from "next/navigation";
 export default async function Office() {
   const t = dict[await getLang()];
   const { sb, user, isStaff } = await currentUser();
-  if (!user) redirect("/login");
-  if (!isStaff) return <p className="py-8 text-center text-slate-600">{t.noAccess}</p>;
+  if (!user) redirect("/login?expired=1");
+  if (!isStaff) return <NoAccess t={t} />;
   const cases = await listCases(sb);
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-semibold text-civic">{t.queue}</h1>
-      {cases.length === 0 && (
-        <div className="py-8 text-center">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/illustrations/office-empty-inbox.svg" alt="" className="mx-auto w-48" />
-          <p className="mt-3 text-slate-600">{t.emptyQueue}</p>
-        </div>
-      )}
+      {cases.length === 0 && <State kind="officeEmpty" title={t.emptyQueue} as="h2" />}
       <ul className="space-y-2">
         {cases.map((c) => (
           <li key={c.ref}>
