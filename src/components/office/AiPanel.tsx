@@ -14,9 +14,9 @@ export default function AiPanel({ c, agency, t, lang, children }: { c: CaseRecor
           <span aria-hidden>🔒</span>{t.ofStaffOnly}
         </span>
       </div>
-      <p className="-mt-2 text-xs text-slate-500">{t.ofStaffOnlyHint} {t.ofAiSuggestion}</p>
+      <p className="-mt-2 text-xs text-slate-600">{t.ofStaffOnlyHint} {t.ofAiSuggestion}</p>
 
-      <p>{c.ai.summary || <span className="text-sm text-slate-500">{t.noAiSummary}</span>}</p>
+      <p>{c.ai.summary || <span className="text-sm text-slate-600">{t.noAiSummary}</span>}</p>
 
       <div>
         <h3 className="font-medium">{t.similar}</h3>
@@ -29,7 +29,7 @@ export default function AiPanel({ c, agency, t, lang, children }: { c: CaseRecor
             ))}
           </ul>
         ) : (
-          <p className="text-sm text-slate-500">{t.noSimilar}</p>
+          <p className="text-sm text-slate-600">{t.noSimilar}</p>
         )}
       </div>
 
@@ -38,12 +38,12 @@ export default function AiPanel({ c, agency, t, lang, children }: { c: CaseRecor
         {agency ? (
           <>
             <p>{lang === "bn" ? agency.nameBn : agency.nameEn}</p>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-slate-600">
               {t.source}: {agency.url ? <a href={agency.url} className="underline" target="_blank" rel="noreferrer">{agency.source}</a> : agency.source} · {t.confidence}: {pct}%
             </p>
           </>
         ) : (
-          <p className="text-xs text-slate-500">{t.confidence}: {pct}%</p>
+          <p className="text-xs text-slate-600">{t.confidence}: {pct}%</p>
         )}
       </div>
 

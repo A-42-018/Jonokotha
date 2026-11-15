@@ -33,7 +33,7 @@ export default function ConstituencyPicker({ selectedId, signedIn, lang, labels 
         type="button"
         onClick={() => dialog.current?.showModal()}
         aria-haspopup="dialog"
-        aria-label={`${labels.open}: ${current ? name(current) : labels.none}`}
+        aria-label={current ? `${labels.open}: ${name(current)}` : `${labels.choose}: ${labels.none}`}
         className="inline-flex min-h-11 max-w-full items-center gap-1 rounded-lg border border-slate-300 bg-white px-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-civic sm:max-w-64"
       >
         <span aria-hidden>📍</span>

@@ -19,7 +19,7 @@ export default async function Issue({ params }: PageProps<"/issue/[ref]">) {
       <h2 className="pt-2 text-lg font-semibold">{t.timeline}</h2>
       <ol className="space-y-2 border-l-2 border-teal pl-4">
         {c.timeline.map((e, i) => (
-          <li key={i}><b>{t.statuses[e.status]}</b> <span className="text-xs text-slate-500">{fmtDate(e.at, lang)}</span></li>
+          <li key={i}><b>{t.statuses[e.status]}</b> <span className="text-xs text-slate-600">{fmtDate(e.at, lang)}</span></li>
         ))}
       </ol>
     </div>

@@ -138,7 +138,7 @@ export default function ReportForm({ t, lang, constituencyId }: { t: Dict; lang:
           </label>
           <label className="block text-sm">{t.fDescription}{badge("description")}<textarea className={input} rows={4} value={draft.description} onChange={(e) => editField("description", e.target.value)} /></label>
           <label className="block text-sm">{t.fArea}{badge("area")}<input className={input} value={draft.area} onChange={(e) => editField("area", e.target.value)} /></label>
-          <p className="text-xs text-slate-500">{t.draftSaved}</p>
+          <p className="text-xs text-slate-600">{t.draftSaved}</p>
           <button type="button" disabled={busy !== ""} onClick={submit} className="min-h-11 w-full rounded-lg bg-leaf px-4 py-3 font-medium text-white disabled:opacity-50">{busy === "submit" ? t.submitting : t.submit}</button>
         </div>
       )}

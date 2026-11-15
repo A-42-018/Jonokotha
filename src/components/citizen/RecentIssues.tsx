@@ -23,7 +23,7 @@ export default function RecentIssues({ t, lang, cases, failed }: { t: Dict; lang
                 <img src={`/illustrations/cat-${c.category}.svg`} alt="" className="h-12 w-12 shrink-0" />
                 <span className="min-w-0 flex-1">
                   <span className="block truncate font-medium text-slate-800">{c.title}</span>
-                  <span className="block truncate text-sm text-slate-500">{t.cats[c.category]}{c.area && ` · ${c.area}`} · {fmtDate(c.createdAt, lang)}</span>
+                  <span className="block truncate text-sm text-slate-600">{t.cats[c.category]}{c.area && ` · ${c.area}`} · {fmtDate(c.createdAt, lang)}</span>
                 </span>
                 <span className="shrink-0 rounded-full border border-teal/40 bg-teal/10 px-2 py-0.5 text-xs text-teal">{t.statuses[c.status]}</span>
               </Link>

@@ -10,7 +10,7 @@ export default function RepresentativeCard({ t, areaName }: { t: Dict; areaName:
         <h2 id="home-rep" className="text-lg font-semibold text-slate-800">{t.homeRepTitle}</h2>
         <p className="font-medium">{t.homeRepName} <span className="rounded-full bg-amber/20 px-2 py-0.5 text-xs text-amber-900">{t.cpSample}</span></p>
         <p className="text-sm text-slate-600">{areaName}</p>
-        <p className="text-sm text-slate-500">{t.homeRepNote}</p>
+        <p className="text-sm text-slate-600">{t.homeRepNote}</p>
       </div>
     </section>
   );

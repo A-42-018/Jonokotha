@@ -18,7 +18,11 @@ export const metadata: Metadata = {
   title: "জনকথা — Jonokotha",
   description: "আপনার এলাকার সমস্যা, সরাসরি জনপ্রতিনিধির কাছে",
 };
-export const viewport: Viewport = { themeColor: "#1d5fa8" };
+export const viewport: Viewport = {
+  themeColor: "#1d5fa8",
+  width: "device-width",
+  initialScale: 1,
+};
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const lang = await getLang();
