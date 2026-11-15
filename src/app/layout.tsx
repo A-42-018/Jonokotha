@@ -4,6 +4,7 @@ import "./globals.css";
 import AccountMenu from "@/components/AccountMenu";
 import ConstituencyPicker from "@/components/ConstituencyPicker";
 import RegisterSW from "@/components/RegisterSW";
+import BottomTabBar from "@/components/ui/BottomTabBar";
 import MainShell from "@/components/ui/MainShell";
 import OfflineBanner from "@/components/ui/OfflineBanner";
 import TopNav from "@/components/ui/TopNav";
@@ -23,6 +24,7 @@ export const viewport: Viewport = {
   themeColor: "#1d5fa8",
   width: "device-width",
   initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
@@ -39,7 +41,6 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     <html lang={lang} className={`${head.variable} ${body.variable}`}>
       <body className="min-h-screen">
         <TopNav
-          t={t}
           isStaff={isStaff}
           picker={
             <ConstituencyPicker
@@ -62,6 +63,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <ToastProvider>
           <MainShell>{children}</MainShell>
         </ToastProvider>
+        <BottomTabBar />
       </body>
     </html>
   );

@@ -30,3 +30,7 @@ Review every primitive and state at `/dev/ui` (bn and en side by side). The page
 ## Migrated as proof
 
 `LoginForm` (Input, Button, i18n; removed hard-coded bn/en strings and raw Supabase error text) and `ApproveButtons` (Button, Dialog, Toast). Other Phase 0 screens still use their own markup and are rebuilt in later Phase 1 tasks.
+
+## Navigation shell
+
+`TopNav` (header, all widths), `BottomTabBar` (phones, below lg), `MainShell` (container and bottom padding), `NotificationBell` (stub dialog), `ComingSoon` (placeholder page), shared rules in `nav.ts`. Tabs: হোম `/`, এলাকা `/area`, centre report button `/report`, আইডিয়া `/ideas`, আমি `/me`. `/area` and `/ideas` are labelled "শীঘ্রই" pages. The tab bar is hidden on `/report` and `/login` (typing flows); `MainShell` pads the bottom to match. Toast and install prompt sit above the bar on phones. Note: do not combine `hidden` with a component that sets `inline-flex` (Badge, `buttonClass`); wrap it in a `hidden` div instead.
