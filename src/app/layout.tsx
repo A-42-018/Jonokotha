@@ -2,7 +2,9 @@ import type { Metadata, Viewport } from "next";
 import { Anek_Bangla, Hind_Siliguri } from "next/font/google";
 import Link from "next/link";
 import "./globals.css";
+import AccountMenu from "@/components/AccountMenu";
 import RegisterSW from "@/components/RegisterSW";
+import { currentUser } from "@/lib/supabase/server";
 import { dict, getLang } from "@/lib/i18n";
 
 const head = Anek_Bangla({ variable: "--font-head", subsets: ["bengali", "latin"] });
@@ -17,6 +19,13 @@ export const viewport: Viewport = { themeColor: "#1d5fa8" };
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const lang = await getLang();
   const t = dict[lang];
+  let email: string | null = null;
+  let isStaff = false;
+  try {
+    const { user, isStaff: staff } = await currentUser();
+    email = user?.email ?? null;
+    isStaff = staff;
+  } catch { /* Supabase not configured: show signed-out header */ }
   return (
     <html lang={lang} className={`${head.variable} ${body.variable}`}>
       <body className="min-h-screen">
@@ -27,8 +36,13 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             {t.appName}
           </Link>
           <div className="flex items-center gap-3 text-sm">
-            <span className="rounded-full bg-amber/20 px-2 py-0.5 text-xs text-amber-900">{t.demoBadge}</span>
-            <a href="/lang" className="font-medium text-civic underline">{t.switchLang}</a>
+            <span className="hidden rounded-full bg-amber/20 px-2 py-0.5 text-xs text-amber-900 sm:inline">{t.demoBadge}</span>
+            <a href="/lang" className="inline-flex min-h-11 items-center font-medium text-civic underline">{t.switchLang}</a>
+            <AccountMenu
+              email={email}
+              isStaff={isStaff}
+              labels={{ account: t.account, signIn: t.signIn, signOut: t.signOut, signingOut: t.signingOut, staff: t.staffRole }}
+            />
           </div>
         </header>
         <RegisterSW />
