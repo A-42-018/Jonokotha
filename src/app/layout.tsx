@@ -7,6 +7,7 @@ import RegisterSW from "@/components/RegisterSW";
 import MainShell from "@/components/ui/MainShell";
 import OfflineBanner from "@/components/ui/OfflineBanner";
 import TopNav from "@/components/ui/TopNav";
+import { ToastProvider } from "@/components/ui/Toast";
 import { getConstituencyId } from "@/lib/constituency-server";
 import { currentUser } from "@/lib/supabase/server";
 import { dict, getLang } from "@/lib/i18n";
@@ -58,7 +59,9 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         />
         <OfflineBanner />
         <RegisterSW />
-        <MainShell>{children}</MainShell>
+        <ToastProvider>
+          <MainShell>{children}</MainShell>
+        </ToastProvider>
       </body>
     </html>
   );

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import ApproveButtons from "@/components/ApproveButtons";
 import AiPanel from "@/components/office/AiPanel";
-import StatusChip from "@/components/office/StatusChip";
+import StatusChip from "@/components/ui/StatusChip";
 import NoAccess from "@/components/ui/NoAccess";
 import { AGENCIES } from "@/lib/demo-data";
 import { dict, fmtDate, getLang } from "@/lib/i18n";
@@ -29,7 +29,7 @@ export default async function Case({ params }: PageProps<"/office/[ref]">) {
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-600">
           <span>{c.ref}</span>
           <StatusChip status={c.status} label={t.statuses[c.status]} />
-          <span className="text-teal">{t.cats[c.category]}</span>
+          <span className="text-teal-strong">{t.cats[c.category]}</span>
           <span>{c.area || t.ofNoArea}</span>
           <span>{fmtDate(c.createdAt, lang)}</span>
         </div>

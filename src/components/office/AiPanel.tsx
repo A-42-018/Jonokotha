@@ -9,7 +9,7 @@ export default function AiPanel({ c, agency, t, lang, children }: { c: CaseRecor
   return (
     <section aria-labelledby="ai-title" className="space-y-4 rounded-xl border border-teal/40 bg-white p-4 shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 id="ai-title" className="font-semibold text-teal"><span aria-hidden>✨ </span>{t.aiSummary}</h2>
+        <h2 id="ai-title" className="font-semibold text-teal-strong"><span aria-hidden>✨ </span>{t.aiSummary}</h2>
         <span className="inline-flex items-center gap-1 rounded-full border border-amber/60 bg-amber/20 px-2.5 py-0.5 text-xs font-medium text-amber-900">
           <span aria-hidden>🔒</span>{t.ofStaffOnly}
         </span>

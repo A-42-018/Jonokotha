@@ -25,7 +25,7 @@ export default function RecentIssues({ t, lang, cases, failed }: { t: Dict; lang
                   <span className="block truncate font-medium text-slate-800">{c.title}</span>
                   <span className="block truncate text-sm text-slate-600">{t.cats[c.category]}{c.area && ` · ${c.area}`} · {fmtDate(c.createdAt, lang)}</span>
                 </span>
-                <span className="shrink-0 rounded-full border border-teal/40 bg-teal/10 px-2 py-0.5 text-xs text-teal">{t.statuses[c.status]}</span>
+                <span className="shrink-0 rounded-full border border-teal/40 bg-teal/10 px-2 py-0.5 text-xs text-teal-strong">{t.statuses[c.status]}</span>
               </Link>
             </li>
           ))}

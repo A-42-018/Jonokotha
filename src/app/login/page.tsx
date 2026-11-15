@@ -8,7 +8,7 @@ export default async function Login({ searchParams }: PageProps<"/login">) {
   return (
     <>
       {expired && <SessionExpired t={dict[lang]} />}
-      <LoginForm bn={lang === "bn"} />
+      <LoginForm />
     </>
   );
 }

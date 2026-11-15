@@ -30,7 +30,7 @@ export default function ReportSuccess({ t, refId, onAnother }: { t: Dict; refId:
     await copy("link");
   }
 
-  const btn = "inline-flex min-h-11 items-center justify-center rounded-lg border border-teal px-4 py-2 text-teal";
+  const btn = "inline-flex min-h-11 items-center justify-center rounded-lg border border-teal px-4 py-2 text-teal-strong";
   return (
     <div className="mx-auto max-w-md space-y-4 text-center">
       {/* eslint-disable-next-line @next/next/no-img-element */}

@@ -1,4 +1,4 @@
-import { SkeletonBlock } from "@/components/ui/State";
+import { Skeleton as SkeletonBlock } from "@/components/ui/Skeleton";
 import { dict, getLang } from "@/lib/i18n";
 
 export default async function Loading() {

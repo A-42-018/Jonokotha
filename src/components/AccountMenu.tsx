@@ -54,7 +54,7 @@ export default function AccountMenu({ email, isStaff, labels }: { email: string 
       {open && (
         <div role="menu" className="absolute right-0 z-20 mt-2 w-64 rounded-xl border border-slate-200 bg-white p-3 shadow-lg">
           <p className="truncate text-sm text-slate-600">{email}</p>
-          {isStaff && <p className="mt-1 inline-block rounded-full bg-teal/15 px-2 py-0.5 text-xs text-teal">{labels.staff}</p>}
+          {isStaff && <p className="mt-1 inline-block rounded-full bg-teal/15 px-2 py-0.5 text-xs text-teal-strong">{labels.staff}</p>}
           <button
             type="button"
             role="menuitem"

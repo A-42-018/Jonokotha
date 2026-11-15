@@ -140,7 +140,47 @@ export const dict = {
     installDismiss: "এখন নয়",
     stEmptyTitle: "এখানে এখনো কিছু নেই",
     stNoResultsTitle: "কিছু মেলেনি",
+    uiError: "ত্রুটি:",
+    uiOptional: "ঐচ্ছিক",
+    uiClose: "বন্ধ করুন",
+    uiDismiss: "বার্তা বন্ধ করুন",
+    uiPagination: "পাতা বদলান",
+    uiPrev: "আগের",
+    uiNext: "পরের",
+    uiPageN: "পাতা {n}",
+    uiStepOf: "ধাপ {current}/{total}",
+    uiStepperAria: "ধাপ",
+    loginTitle: "সাইন ইন",
+    loginHint: "ইমেইলে একটি কোড পাঠানো হবে।",
+    loginEmail: "ইমেইল",
+    loginEmailBad: "সঠিক ইমেইল লিখুন।",
+    loginSend: "কোড পাঠান",
+    loginSending: "পাঠানো হচ্ছে…",
+    loginSendFail: "কোড পাঠানো যায়নি। ইমেইল দেখে আবার চেষ্টা করুন।",
+    loginCode: "ইমেইলে পাওয়া কোড",
+    loginCodeHint: "৬ বা তার বেশি সংখ্যার কোড।",
+    loginVerify: "যাচাই করুন",
+    loginVerifying: "যাচাই হচ্ছে…",
+    loginVerifyFail: "কোডটি মেলেনি বা মেয়াদ শেষ। আবার চেষ্টা করুন।",
     cats: { roads: "রাস্তা", drainage: "ড্রেন", water: "পানি", electricity: "বিদ্যুৎ", waste: "ময়লা", flooding: "জলাবদ্ধতা", health: "স্বাস্থ্য", education: "শিক্ষা", safety: "নিরাপত্তা", environment: "পরিবেশ", facilities: "সুবিধা", other: "অন্যান্য" },
+    dev: {
+      title: "ডিজাইন সিস্টেম (শুধু রিভিউর জন্য)",
+      intro: "প্রতিটি উপাদান ও তার অবস্থা। এই পাতা প্রোডাকশনে খোলে না।",
+      sButtons: "বাটন", sFields: "ইনপুট ও ফর্ম", sChoices: "চেকবক্স ও রেডিও", sDialog: "ডায়ালগ ও টোস্ট", sTabs: "ট্যাব",
+      sBadges: "ব্যাজ ও স্ট্যাটাস", sCards: "কার্ড", sSkeleton: "স্কেলিটন", sEmpty: "খালি অবস্থা", sStepper: "ধাপ", sTable: "টেবিল", sPagination: "পেজিনেশন",
+      primary: "প্রধান", secondary: "দ্বিতীয়", success: "সফল", danger: "বিপদ", ghost: "হালকা", disabled: "বন্ধ", loading: "হচ্ছে…", large: "বড়",
+      fName: "আপনার নাম", fNameHint: "যেভাবে অফিসে দেখানো হবে।", fNameErr: "নাম লিখুন।", fNote: "বিবরণ", fNoteErr: "কমপক্ষে ১০ অক্ষর লিখুন।",
+      fCat: "ধরন", fChoose: "বাছুন", fCatErr: "একটি ধরন বাছুন।", fDisabled: "বন্ধ ঘর",
+      chAgree: "আমি শর্তে রাজি", chAgreeErr: "চালিয়ে যেতে রাজি হতে হবে।", chOff: "বন্ধ অপশন", chContact: "যোগাযোগের মাধ্যম", chPhone: "ফোন", chEmail: "ইমেইল", chNone: "কোনোটিই নয়",
+      openDialog: "ডায়ালগ খুলুন", dialogTitle: "নিশ্চিত করবেন?", dialogBody: "এটি শুধু একটি নমুনা ডায়ালগ।", dialogYes: "হ্যাঁ",
+      toastOk: "সংরক্ষিত হয়েছে", toastErr: "হয়নি, আবার চেষ্টা করুন", toastInfo: "নতুন তথ্য এসেছে",
+      tabsAria: "নমুনা ট্যাব", tabA: "জনপ্রিয়", tabB: "নতুন", tabC: "বিবেচনায়", tabD: "বন্ধ", panelA: "জনপ্রিয় তালিকা এখানে।", panelB: "নতুন তালিকা এখানে।", panelC: "বিবেচনাধীন তালিকা এখানে।",
+      cardTitle: "কার্ডের শিরোনাম", cardBody: "কার্ডের ভেতরের লেখা।",
+      bNeutral: "সাধারণ", bInfo: "তথ্য", bWarn: "সতর্কতা", bDanger: "সমস্যা",
+      emptyTitle: "এখনো কিছু নেই", emptyBody: "প্রথম অভিযোগটি আপনি জানাতে পারেন।", noResultsTitle: "কিছু মেলেনি", noResultsBody: "অন্য শব্দে খুঁজে দেখুন।",
+      steps: { category: "ধরন", describe: "বিবরণ", location: "জায়গা", evidence: "ছবি", review: "দেখুন" },
+      tRef: "নম্বর", tSubject: "বিষয়", tStatus: "অবস্থা", tCaption: "নমুনা অভিযোগের তালিকা", rowA: "রাস্তায় বড় গর্ত", rowB: "ড্রেন বন্ধ", rowC: "রাতে বাতি নেই",
+    },
   },
   en: {
     appName: "Jonokotha",
@@ -274,12 +314,65 @@ export const dict = {
     installDismiss: "Not now",
     stEmptyTitle: "Nothing here yet",
     stNoResultsTitle: "No matches found",
+    uiError: "Error:",
+    uiOptional: "optional",
+    uiClose: "Close",
+    uiDismiss: "Dismiss message",
+    uiPagination: "Page navigation",
+    uiPrev: "Previous",
+    uiNext: "Next",
+    uiPageN: "Page {n}",
+    uiStepOf: "Step {current} of {total}",
+    uiStepperAria: "Steps",
+    loginTitle: "Sign in",
+    loginHint: "We will email you a code.",
+    loginEmail: "Email",
+    loginEmailBad: "Enter a valid email address.",
+    loginSend: "Send code",
+    loginSending: "Sending…",
+    loginSendFail: "Could not send the code. Check the email and try again.",
+    loginCode: "Code from your email",
+    loginCodeHint: "A code of 6 or more digits.",
+    loginVerify: "Verify",
+    loginVerifying: "Verifying…",
+    loginVerifyFail: "The code did not match or has expired. Please try again.",
     cats: { roads: "Roads", drainage: "Drainage", water: "Water", electricity: "Electricity", waste: "Waste", flooding: "Flooding", health: "Health", education: "Education", safety: "Safety", environment: "Environment", facilities: "Facilities", other: "Other" },
+    dev: {
+      title: "Design system (review only)",
+      intro: "Every primitive and its states. This page does not open in production.",
+      sButtons: "Buttons", sFields: "Inputs and forms", sChoices: "Checkbox and radio", sDialog: "Dialog and toast", sTabs: "Tabs",
+      sBadges: "Badges and status", sCards: "Cards", sSkeleton: "Skeleton", sEmpty: "Empty states", sStepper: "Stepper", sTable: "Table", sPagination: "Pagination",
+      primary: "Primary", secondary: "Secondary", success: "Success", danger: "Danger", ghost: "Ghost", disabled: "Disabled", loading: "Working…", large: "Large",
+      fName: "Your name", fNameHint: "How it will show to the office.", fNameErr: "Enter your name.", fNote: "Details", fNoteErr: "Write at least 10 characters.",
+      fCat: "Category", fChoose: "Choose", fCatErr: "Choose a category.", fDisabled: "Disabled field",
+      chAgree: "I agree to the terms", chAgreeErr: "You must agree to continue.", chOff: "Disabled option", chContact: "How to contact you", chPhone: "Phone", chEmail: "Email", chNone: "Neither",
+      openDialog: "Open dialog", dialogTitle: "Are you sure?", dialogBody: "This is only a sample dialog.", dialogYes: "Yes",
+      toastOk: "Saved", toastErr: "Failed, please try again", toastInfo: "New information arrived",
+      tabsAria: "Sample tabs", tabA: "Popular", tabB: "Newest", tabC: "Under review", tabD: "Disabled", panelA: "The popular list goes here.", panelB: "The newest list goes here.", panelC: "The under-review list goes here.",
+      cardTitle: "Card title", cardBody: "Text inside the card.",
+      bNeutral: "Neutral", bInfo: "Info", bWarn: "Warning", bDanger: "Problem",
+      emptyTitle: "Nothing here yet", emptyBody: "You could report the first problem.", noResultsTitle: "No matches found", noResultsBody: "Try different words.",
+      steps: { category: "Category", describe: "Describe", location: "Location", evidence: "Photos", review: "Review" },
+      tRef: "Number", tSubject: "Subject", tStatus: "Status", tCaption: "Sample report list", rowA: "Large pothole on the road", rowB: "Blocked drain", rowC: "No street light at night",
+    },
   },
 } as const;
 
 type Widen<T> = T extends string ? string : { [K in keyof T]: Widen<T[K]> };
 export type Dict = Widen<(typeof dict)["en"]>;
+
+/** Formats a number with Bangla digits in bn (e.g. 12 -> ১২). */
+export function fmtNum(n: number, lang: Lang) {
+  return n.toLocaleString(lang === "bn" ? "bn-BD" : "en-GB", { useGrouping: false });
+}
+
+/** Fills `{name}` placeholders; numeric values are formatted for the language. */
+export function fillNum(template: string, values: Record<string, string | number>, lang: Lang) {
+  return template.replace(/\{(\w+)\}/g, (_, k: string) => {
+    const v = values[k];
+    return typeof v === "number" ? fmtNum(v, lang) : String(v ?? "");
+  });
+}
 
 export function fmtDate(iso: string, lang: Lang) {
   return new Date(iso).toLocaleString(lang === "bn" ? "bn-BD" : "en-GB", { timeZone: "Asia/Dhaka", dateStyle: "medium", timeStyle: "short" });

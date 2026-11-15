@@ -1,5 +1,5 @@
 import Link from "next/link";
-import StatusChip from "./StatusChip";
+import StatusChip from "@/components/ui/StatusChip";
 import { fmtDate, type Dict, type Lang } from "@/lib/i18n";
 import type { CaseRecord } from "@/lib/types";
 
@@ -21,7 +21,7 @@ export default function CaseQueue({ cases, t, lang }: { cases: CaseRecord[]; t: 
               </div>
               <div className="font-medium">{c.title}</div>
               <div className="flex flex-wrap items-center justify-between gap-x-3 text-sm">
-                <span className="text-teal">{t.cats[c.category]}</span>
+                <span className="text-teal-strong">{t.cats[c.category]}</span>
                 <span className="text-slate-600">{c.area || t.ofNoArea} · {fmtDate(c.createdAt, lang)}</span>
               </div>
             </Link>
@@ -49,7 +49,7 @@ export default function CaseQueue({ cases, t, lang }: { cases: CaseRecord[]; t: 
                     <span className="sr-only"> — {t.ofOpenCase}</span>
                   </Link>
                 </td>
-                <td className="whitespace-nowrap px-3 py-1 text-teal">{t.cats[c.category]}</td>
+                <td className="whitespace-nowrap px-3 py-1 text-teal-strong">{t.cats[c.category]}</td>
                 <td className="px-3 py-1">{c.area || <span className="text-slate-400">{t.ofNoArea}</span>}</td>
                 <td className="px-3 py-1"><StatusChip status={c.status} label={t.statuses[c.status]} /></td>
                 <td className="whitespace-nowrap px-3 py-1 text-slate-600">{fmtDate(c.createdAt, lang)}</td>

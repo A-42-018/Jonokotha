@@ -124,7 +124,7 @@ export default function ReportForm({ t, lang, constituencyId }: { t: Dict; lang:
         </div>
       )}
       <div className="flex gap-3">
-        <button type="button" onClick={speak} className="min-h-11 rounded-lg border border-teal px-4 py-2 text-teal">{listening ? t.listening : `🎤 ${t.speak}`}</button>
+        <button type="button" onClick={speak} className="min-h-11 rounded-lg border border-teal px-4 py-2 text-teal-strong">{listening ? t.listening : `🎤 ${t.speak}`}</button>
         <button type="button" disabled={text.trim().length < 3 || busy !== ""} onClick={makeDraft} className="min-h-11 rounded-lg bg-civic px-4 py-2 text-white disabled:opacity-50">{busy === "draft" ? t.drafting : t.draft}</button>
       </div>
       {draft && (
