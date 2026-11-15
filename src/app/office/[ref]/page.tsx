@@ -1,13 +1,13 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import ApproveButtons from "@/components/ApproveButtons";
+import AiPanel from "@/components/office/AiPanel";
+import StatusChip from "@/components/office/StatusChip";
 import NoAccess from "@/components/ui/NoAccess";
 import { AGENCIES } from "@/lib/demo-data";
-import { dict, getLang } from "@/lib/i18n";
+import { dict, fmtDate, getLang } from "@/lib/i18n";
 import { getCase } from "@/lib/store";
 import { currentUser } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
-
 
 export default async function Case({ params }: PageProps<"/office/[ref]">) {
   const { ref } = await params;
@@ -18,28 +18,27 @@ export default async function Case({ params }: PageProps<"/office/[ref]">) {
   if (!isStaff) return <NoAccess t={t} />;
   const c = await getCase(sb, ref);
   if (!c) notFound();
-  const agency = AGENCIES.find((a) => a.id === c.ai.agencyId)!;
+  const agency = AGENCIES.find((a) => a.id === c.ai.agencyId);
   return (
     <div className="space-y-4">
-      <Link href="/office" className="text-civic underline">← {t.back}</Link>
-      <h1 className="text-2xl font-semibold text-civic">{c.title}</h1>
-      <p className="text-sm text-slate-600">{c.ref} · {t.statuses[c.status]} · {t.cats[c.category]}</p>
-      <p>{c.description}</p>
-      <section className="space-y-3 rounded-xl border border-teal/40 bg-white p-4">
-        <h2 className="font-semibold text-teal">✨ {t.aiSummary}</h2>
-        <p>{c.ai.summary || <span className="text-sm text-slate-500">{t.noAiSummary}</span>}</p>
-        <div>
-          <h3 className="font-medium">{t.similar}</h3>
-          <p className="text-sm">{c.ai.similarRefs.length ? c.ai.similarRefs.map((r) => <Link key={r} href={`/office/${r}`} className="mr-2 underline">{r}</Link>) : t.noSimilar}</p>
+      <Link href="/office" className="inline-flex min-h-11 items-center text-civic underline focus-visible:outline-2 focus-visible:outline-civic">← {t.back}</Link>
+      <header className="space-y-2">
+        <h1 className="text-2xl font-semibold text-civic">{c.title}</h1>
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-600">
+          <span>{c.ref}</span>
+          <StatusChip status={c.status} label={t.statuses[c.status]} />
+          <span className="text-teal">{t.cats[c.category]}</span>
+          <span>{c.area || t.ofNoArea}</span>
+          <span>{fmtDate(c.createdAt, lang)}</span>
         </div>
-        <div>
-          <h3 className="font-medium">{t.routing}</h3>
-          <p>{lang === "bn" ? agency.nameBn : agency.nameEn}</p>
-          <p className="text-xs text-slate-500">{t.source}: {agency.url ? <a href={agency.url} className="underline" target="_blank" rel="noreferrer">{agency.source}</a> : agency.source} · {t.confidence}: {Math.round(c.ai.confidence * 100)}%</p>
-        </div>
-        <p className="text-xs text-amber-800">{t.humanOnly}</p>
-        <ApproveButtons cref={c.ref} ack={t.approveAck} refer={t.approveRefer} />
+      </header>
+      <section aria-labelledby="rep-title" className="space-y-2 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <h2 id="rep-title" className="font-semibold text-slate-700">{t.ofReport}</h2>
+        <p className="whitespace-pre-wrap break-words">{c.description}</p>
       </section>
+      <AiPanel c={c} agency={agency} t={t} lang={lang}>
+        <ApproveButtons cref={c.ref} status={c.status} />
+      </AiPanel>
     </div>
   );
 }
