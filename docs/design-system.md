@@ -34,3 +34,7 @@ Review every primitive and state at `/dev/ui` (bn and en side by side). The page
 ## Navigation shell
 
 `TopNav` (header, all widths), `BottomTabBar` (phones, below lg), `MainShell` (container and bottom padding), `NotificationBell` (stub dialog), `ComingSoon` (placeholder page), shared rules in `nav.ts`. Tabs: হোম `/`, এলাকা `/area`, centre report button `/report`, আইডিয়া `/ideas`, আমি `/me`. `/area` and `/ideas` are labelled "শীঘ্রই" pages. The tab bar is hidden on `/report` and `/login` (typing flows); `MainShell` pads the bottom to match. Toast and install prompt sit above the bar on phones. Note: do not combine `hidden` with a component that sets `inline-flex` (Badge, `buttonClass`); wrap it in a `hidden` div instead.
+
+## Report wizard (task 1.3)
+
+`ReportForm` is a 5-step wizard (ধরন, বিবরণ, জায়গা, ছবি, দেখুন) on React Hook Form + Zod; schema and limits in `src/lib/report.ts` (messages from `i18n.ts`, limits match the API's `CaseInput`). Parts in `src/components/report/`: `CategoryPicker` (cat-* tiles, native radio group), `EvidenceStep` (on-device compression via `src/lib/image.ts`, caption, face/ID warning), `PrivacyWarning`. The Back/Next bar is `fixed` and lifts above the keyboard with `useKeyboardInset` (`ui/`). Draft autosave key is `jonokotha:report-draft:v2` (v1 drafts are migrated). Photos are compressed and previewed only; the API has no attachment field yet, so they are not sent and the UI says so.

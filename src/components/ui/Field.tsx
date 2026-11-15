@@ -33,7 +33,7 @@ export function FieldHint({ id, children }: { id?: string; children: ReactNode }
 /** Error text: icon and words, never colour alone. `prefix` is a screen-reader-only "Error:" label. */
 export function FieldError({ id, children, prefix }: { id?: string; children: ReactNode; prefix?: string }) {
   return (
-    <p id={id} className="mt-1 flex items-start gap-1 text-sm font-medium text-danger">
+    <p id={id} data-field-error className="mt-1 flex items-start gap-1 text-sm font-medium text-danger">
       <span aria-hidden>⚠</span>
       <span>{prefix && <span className="sr-only">{prefix} </span>}{children}</span>
     </p>
