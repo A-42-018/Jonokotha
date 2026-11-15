@@ -1,11 +1,16 @@
 import Link from "next/link";
 import { dict, getLang } from "@/lib/i18n";
 import { listCases } from "@/lib/store";
+import { currentUser } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 
 
 export default async function Office() {
   const t = dict[await getLang()];
-  const cases = listCases();
+  const { sb, user, isStaff } = await currentUser();
+  if (!user) redirect("/login");
+  if (!isStaff) return <p className="py-8 text-center text-slate-600">{t.noAccess}</p>;
+  const cases = await listCases(sb);
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-semibold text-civic">{t.queue}</h1>

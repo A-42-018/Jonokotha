@@ -1,11 +1,12 @@
 import { notFound } from "next/navigation";
 import { dict, fmtDate, getLang } from "@/lib/i18n";
 import { getCase } from "@/lib/store";
+import { supabaseServer } from "@/lib/supabase/server";
 
 
 export default async function Issue({ params }: PageProps<"/issue/[ref]">) {
   const { ref } = await params;
-  const c = getCase(ref);
+  const c = await getCase(await supabaseServer(), ref);
   if (!c) notFound();
   const lang = await getLang();
   const t = dict[lang];

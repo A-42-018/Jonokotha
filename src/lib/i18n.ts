@@ -46,6 +46,7 @@ export const dict = {
     approveRefer: "সংস্থায় রেফার অনুমোদন করুন",
     humanOnly: "কর্মী অনুমোদন না করা পর্যন্ত কিছু পাঠানো হয় না।",
     back: "ফিরুন",
+    noAccess: "এই পাতা শুধু অফিসের কর্মীদের জন্য।",
     cats: { roads: "রাস্তা", drainage: "ড্রেন", water: "পানি", electricity: "বিদ্যুৎ", waste: "ময়লা", flooding: "জলাবদ্ধতা", health: "স্বাস্থ্য", education: "শিক্ষা", safety: "নিরাপত্তা", environment: "পরিবেশ", facilities: "সুবিধা", other: "অন্যান্য" },
   },
   en: {
@@ -86,6 +87,7 @@ export const dict = {
     approveRefer: "Approve referral",
     humanOnly: "Nothing is sent until staff approve it.",
     back: "Back",
+    noAccess: "This page is for office staff only.",
     cats: { roads: "Roads", drainage: "Drainage", water: "Water", electricity: "Electricity", waste: "Waste", flooding: "Flooding", health: "Health", education: "Education", safety: "Safety", environment: "Environment", facilities: "Facilities", other: "Other" },
   },
 } as const;

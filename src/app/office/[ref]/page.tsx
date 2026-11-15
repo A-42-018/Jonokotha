@@ -4,14 +4,19 @@ import ApproveButtons from "@/components/ApproveButtons";
 import { AGENCIES } from "@/lib/demo-data";
 import { dict, getLang } from "@/lib/i18n";
 import { getCase } from "@/lib/store";
+import { currentUser } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 
 
 export default async function Case({ params }: PageProps<"/office/[ref]">) {
   const { ref } = await params;
-  const c = getCase(ref);
-  if (!c) notFound();
+  const { sb, user, isStaff } = await currentUser();
+  if (!user) redirect("/login");
   const lang = await getLang();
   const t = dict[lang];
+  if (!isStaff) return <p className="py-8 text-center text-slate-600">{t.noAccess}</p>;
+  const c = await getCase(sb, ref);
+  if (!c) notFound();
   const agency = AGENCIES.find((a) => a.id === c.ai.agencyId)!;
   return (
     <div className="space-y-4">
