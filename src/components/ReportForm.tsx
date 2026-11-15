@@ -6,7 +6,7 @@ import type { Dict, Lang } from "@/lib/i18n";
 
 type SR = { new (): { lang: string; onresult: ((e: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null; onend: (() => void) | null; start(): void } };
 
-export default function ReportForm({ t, lang }: { t: Dict; lang: Lang }) {
+export default function ReportForm({ t, lang, constituencyId }: { t: Dict; lang: Lang; constituencyId: string }) {
   const router = useRouter();
   const [text, setText] = useState("");
   const [draft, setDraft] = useState<{ title: string; category: string; description: string; area: string } | null>(null);
@@ -34,7 +34,7 @@ export default function ReportForm({ t, lang }: { t: Dict; lang: Lang }) {
 
   async function submit() {
     setBusy("submit");
-    const res = await fetch("/api/cases", { method: "POST", body: JSON.stringify(draft) });
+    const res = await fetch("/api/cases", { method: "POST", body: JSON.stringify({ ...draft, constituencyId }) });
     if (res.ok) router.push(`/issue/${(await res.json()).ref}`);
     else setBusy("");
   }
