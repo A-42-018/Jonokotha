@@ -22,6 +22,8 @@ export default async function Case({ params }: PageProps<"/office/[ref]">) {
   return (
     <div className="space-y-4">
       <Link href="/office" className="inline-flex min-h-11 items-center text-civic underline focus-visible:outline-2 focus-visible:outline-civic">← {t.back}</Link>
+      <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:gap-6">
+      <div className="space-y-4">
       <header className="space-y-2">
         <h1 className="text-2xl font-semibold text-civic">{c.title}</h1>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-600">
@@ -36,9 +38,13 @@ export default async function Case({ params }: PageProps<"/office/[ref]">) {
         <h2 id="rep-title" className="font-semibold text-slate-700">{t.ofReport}</h2>
         <p className="whitespace-pre-wrap break-words">{c.description}</p>
       </section>
+      </div>
+      <div className="lg:sticky lg:top-4">
       <AiPanel c={c} agency={agency} t={t} lang={lang}>
         <ApproveButtons cref={c.ref} status={c.status} />
       </AiPanel>
+      </div>
+      </div>
     </div>
   );
 }

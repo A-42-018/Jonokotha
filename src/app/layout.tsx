@@ -1,11 +1,12 @@
 import type { Metadata, Viewport } from "next";
 import { Anek_Bangla, Hind_Siliguri } from "next/font/google";
-import Link from "next/link";
 import "./globals.css";
 import AccountMenu from "@/components/AccountMenu";
 import ConstituencyPicker from "@/components/ConstituencyPicker";
 import RegisterSW from "@/components/RegisterSW";
+import MainShell from "@/components/ui/MainShell";
 import OfflineBanner from "@/components/ui/OfflineBanner";
+import TopNav from "@/components/ui/TopNav";
 import { getConstituencyId } from "@/lib/constituency-server";
 import { currentUser } from "@/lib/supabase/server";
 import { dict, getLang } from "@/lib/i18n";
@@ -32,33 +33,28 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang={lang} className={`${head.variable} ${body.variable}`}>
       <body className="min-h-screen">
-        <header className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 bg-white px-4 py-3 shadow-sm">
-          <Link href="/" className="flex items-center gap-2 font-heading text-xl font-semibold text-civic">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/illustrations/logo-mark.svg" alt="" className="h-8 w-8" />
-            {t.appName}
-          </Link>
-          <div className="order-last flex w-full sm:order-none sm:w-auto">
+        <TopNav
+          t={t}
+          isStaff={isStaff}
+          picker={
             <ConstituencyPicker
               selectedId={await getConstituencyId()}
               signedIn={!!email}
               lang={lang}
               labels={{ open: t.cpOpen, choose: t.cpChoose, none: t.cpNone, title: t.cpTitle, hint: t.cpHint, sample: t.cpSample, close: t.cpClose }}
             />
-          </div>
-          <div className="flex items-center gap-3 text-sm">
-            <span className="hidden rounded-full bg-amber/20 px-2 py-0.5 text-xs text-amber-900 lg:inline">{t.demoBadge}</span>
-            <a href="/lang" className="inline-flex min-h-11 items-center font-medium text-civic underline">{t.switchLang}</a>
+          }
+          account={
             <AccountMenu
               email={email}
               isStaff={isStaff}
               labels={{ account: t.account, signIn: t.signIn, signOut: t.signOut, signingOut: t.signingOut, staff: t.staffRole }}
             />
-          </div>
-        </header>
+          }
+        />
         <OfflineBanner />
         <RegisterSW />
-        <main className="mx-auto w-full max-w-3xl px-4 py-6">{children}</main>
+        <MainShell>{children}</MainShell>
       </body>
     </html>
   );

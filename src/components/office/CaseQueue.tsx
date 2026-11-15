@@ -43,7 +43,7 @@ export default function CaseQueue({ cases, t, lang }: { cases: CaseRecord[]; t: 
             {cases.map((c) => (
               <tr key={c.ref} className="hover:bg-slate-50">
                 <td className="whitespace-nowrap px-3 py-1 text-slate-500">{c.ref}</td>
-                <td className="px-3 py-1 font-medium">
+                <td className="min-w-64 px-3 py-1 font-medium">
                   <Link href={`/office/${c.ref}`} className={`-mx-1 inline-flex min-h-11 items-center rounded px-1 text-civic underline ${focus}`}>
                     {c.title}
                     <span className="sr-only"> — {t.ofOpenCase}</span>
