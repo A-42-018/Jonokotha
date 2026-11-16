@@ -2,7 +2,6 @@ import Link from "next/link";
 import OnboardingCard from "@/components/citizen/OnboardingCard";
 import AreaNews from "@/components/citizen/AreaNews";
 import FollowedFeed from "@/components/citizen/FollowedFeedLazy";
-import HomeFooter from "@/components/citizen/HomeFooter";
 import ActionCards from "@/components/citizen/ActionCards";
 import HomeHero from "@/components/citizen/HomeHero";
 import { ActivePolls, AreaRepCard, ExploreLinks, HomeSnapshot, PopularIdeas } from "@/components/citizen/HomeBlocks";
@@ -57,7 +56,6 @@ export default async function Home() {
           {isStaff && <Link href="/office" className="inline-flex min-h-11 items-center text-civic underline">{t.officeCta}</Link>}
         </div>
       </div>
-      <HomeFooter t={t} />
     </div>
   );
 }

@@ -17,7 +17,7 @@ describe("navigation (F5.1)", () => {
     const hrefs = primaryNav({ consultations: false }).map((i) => i.href);
     expect(hrefs).toEqual(["/", "/area", "/projects", "/ideas", "/ask", "/mp"]);
     expect(primaryNav({ consultations: true }).map((i) => i.href)).toContain("/consultations");
-    expect(moreNav().map((i) => i.href)).toEqual(["/polls", "/help", "/terms"]);
+    expect(moreNav().map((i) => i.href)).toEqual(["/polls", "/help", "/about", "/terms"]);
   });
   it("More menu opens, lists polls and help, and closes on Escape", async () => {
     render(<MoreMenu path="/" />);

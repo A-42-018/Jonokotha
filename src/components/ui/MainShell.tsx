@@ -8,7 +8,7 @@ import { tabBarHidden } from "./nav";
  * Page container. Browsing and workspace pages use the full desktop width (to 120rem, matching the header); forms and reading pages keep a narrow column.
  * On phones it reserves room for the fixed bottom tab bar (64px bar + raised button + safe area).
  */
-export default function MainShell({ children }: { children: ReactNode }) {
+export default function MainShell({ children, footer }: { children: ReactNode; footer?: ReactNode }) {
   const path = usePathname();
   // Workspace and browsing pages use the full desktop width; forms and reading pages keep a centred narrow column.
   const wide = path === "/" || ["/office", "/admin", "/area", "/ideas"].some((p) => path === p || path.startsWith(`${p}/`)) && !path.startsWith("/ideas/new");
@@ -22,6 +22,7 @@ export default function MainShell({ children }: { children: ReactNode }) {
       )}
     >
       {children}
+      {footer}
     </main>
   );
 }

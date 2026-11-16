@@ -94,7 +94,7 @@ export function ActivePolls({ t }: { t: Dict }) {
 
 /** Pages that are not in the phone tab bar: projects, ask, find your MP, polls, help. */
 export function ExploreLinks({ t }: { t: Dict }) {
-  const items = [...primaryNav().filter((i) => !["navHome", "navArea", "navIdeas"].includes(i.key)), ...moreNav().filter((i) => i.key !== "navTerms")];
+  const items = [...primaryNav().filter((i) => !["navHome", "navArea", "navIdeas"].includes(i.key)), ...moreNav().filter((i) => i.key !== "navTerms" && i.key !== "navAbout")];
   return (
     <nav aria-labelledby="home-more" className="space-y-2">
       <h2 id="home-more" className="text-xl font-semibold text-slate-800">{t.hvMoreTitle}</h2>

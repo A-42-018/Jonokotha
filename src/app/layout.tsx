@@ -5,6 +5,7 @@ import AccountMenu from "@/components/AccountMenu";
 import ConstituencyPicker from "@/components/ConstituencyPicker";
 import RegisterSW from "@/components/RegisterSW";
 import BottomTabBar from "@/components/ui/BottomTabBar";
+import SiteFooter from "@/components/SiteFooter";
 import I18nProvider from "@/components/ui/I18nProvider";
 import PersonalizationApplier from "@/components/ui/PersonalizationApplier";
 import QueueSync from "@/components/offline/QueueSync";
@@ -75,7 +76,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           <RegisterSW />
           <ToastProvider>
             <QueueSync />
-            <MainShell>{children}</MainShell>
+            <MainShell footer={<SiteFooter t={t} />}>{children}</MainShell>
           </ToastProvider>
           <BottomTabBar />
         </I18nProvider>
