@@ -19,6 +19,8 @@ import Dialog from "./ui/Dialog";
 import Input from "./ui/Input";
 import Stepper from "./ui/Stepper";
 import Textarea from "./ui/Textarea";
+import LocationPicker from "./report/LocationPicker";
+import type { Pin } from "@/lib/places";
 import { useToast } from "./ui/Toast";
 import { useKeyboardInset } from "./ui/useKeyboardInset";
 
@@ -26,7 +28,7 @@ export { hasPersonalNumber };
 
 type SR = { new (): { lang: string; onresult: ((e: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null; onend: (() => void) | null; onerror: (() => void) | null; start(): void } };
 
-type Saved = { quick?: string; values?: Partial<ReportValues>; ai?: ReportField[]; edited?: ReportField[]; step?: number };
+type Saved = { quick?: string; values?: Partial<ReportValues>; ai?: ReportField[]; edited?: ReportField[]; step?: number; pin?: Pin };
 
 const LAST = 4;
 const isCategory = (v: unknown): v is Category => typeof v === "string" && (CATEGORIES as readonly string[]).includes(v);
@@ -59,6 +61,7 @@ export default function ReportForm({ t, lang, constituencyId }: { t: Dict; lang:
   const [quick, setQuick] = useState("");
   const [ai, setAi] = useState<ReportField[]>([]);
   const [edited, setEdited] = useState<ReportField[]>([]);
+  const [pin, setPin] = useState<Pin>();
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [sentRef, setSentRef] = useState("");
   const [restored, setRestored] = useState(false);
@@ -87,6 +90,7 @@ export default function ReportForm({ t, lang, constituencyId }: { t: Dict; lang:
           setQuick(d.quick ?? "");
           setAi(d.ai ?? []);
           setEdited(d.edited ?? []);
+          setPin(d.pin);
           setStep(Math.min(Math.max(d.step ?? 0, 0), LAST));
           setRestored(true);
         }
@@ -101,9 +105,9 @@ export default function ReportForm({ t, lang, constituencyId }: { t: Dict; lang:
     try {
       const empty = !quick && !values.title && !values.description && !values.area && !values.category;
       if (empty) localStorage.removeItem(DRAFT_KEY);
-      else localStorage.setItem(DRAFT_KEY, JSON.stringify({ quick, values, ai, edited, step } satisfies Saved));
+      else localStorage.setItem(DRAFT_KEY, JSON.stringify({ quick, values, ai, edited, step, pin } satisfies Saved));
     } catch { /* ignore */ }
-  }, [quick, values, ai, edited, step, sentRef]);
+  }, [quick, values, ai, edited, step, pin, sentRef]);
 
   // Move focus to the new step's heading (not on first load).
   useEffect(() => {
@@ -144,7 +148,7 @@ export default function ReportForm({ t, lang, constituencyId }: { t: Dict; lang:
   function clearDraft() {
     photos.forEach((p) => URL.revokeObjectURL(p.url));
     reset({ title: "", description: "", area: "" });
-    setQuick(""); setAi([]); setEdited([]); setPhotos([]); setStep(0); setRestored(false); setQuickDone(false);
+    setQuick(""); setAi([]); setEdited([]); setPhotos([]); setPin(undefined); setStep(0); setRestored(false); setQuickDone(false);
   }
 
   function speak() {
@@ -191,7 +195,7 @@ export default function ReportForm({ t, lang, constituencyId }: { t: Dict; lang:
   async function submit(data: ReportData) {
     setBusy("submit");
     try {
-      const res = await fetch("/api/cases", { method: "POST", body: JSON.stringify({ ...data, constituencyId }) });
+      const res = await fetch("/api/cases", { method: "POST", body: JSON.stringify({ ...data, constituencyId, ...(pin ? { lat: pin.lat, lng: pin.lng } : {}) }) });
       if (!res.ok) throw new Error("submit failed");
       const { ref } = (await res.json()) as { ref: string };
       try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
@@ -278,7 +282,7 @@ export default function ReportForm({ t, lang, constituencyId }: { t: Dict; lang:
 
       {step === 2 && (
         <div className="space-y-4">
-          <Card tone="info" className="text-sm">{t.locNote}</Card>
+          <LocationPicker pin={pin} onPin={setPin} onArea={(name) => setValue("area", name, { shouldDirty: true, shouldValidate: true })} />
           {withBadge("area", <Input label={t.fArea} hint={t.fAreaHint} placeholder={t.fAreaPlaceholder} maxLength={130} autoComplete="street-address" error={errors.area?.message} {...field("area")} />)}
         </div>
       )}
@@ -301,7 +305,7 @@ export default function ReportForm({ t, lang, constituencyId }: { t: Dict; lang:
           </ReviewRow>
           <ReviewRow t={t} label={t.fTitle} badge={badge("title")} onEdit={() => setStep(1)}>{getValues("title") || "—"}</ReviewRow>
           <ReviewRow t={t} label={t.fDescription} badge={badge("description")} onEdit={() => setStep(1)}><span className="whitespace-pre-wrap break-words">{getValues("description") || "—"}</span></ReviewRow>
-          <ReviewRow t={t} label={t.fArea} badge={badge("area")} onEdit={() => setStep(2)}>{getValues("area") || "—"}</ReviewRow>
+          <ReviewRow t={t} label={t.fArea} badge={badge("area")} onEdit={() => setStep(2)}>{getValues("area") || "—"}{pin ? ` · ${t.lpPinPlaced}` : ""}</ReviewRow>
           <ReviewRow t={t} label={t.wizSteps.evidence} onEdit={() => setStep(3)}>
             {photos.length === 0 ? <span className="text-muted">{t.evNone}</span> : (
               <div className="space-y-2">

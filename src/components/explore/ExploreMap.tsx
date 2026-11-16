@@ -3,15 +3,8 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import { useEffect, useRef, useState } from "react";
 import type { ExploreIssue } from "@/lib/explore";
 import { useT } from "@/components/ui/useT";
+import { CENTER, osmStyle, WORKER } from "@/lib/map";
 
-// OSM standard tiles: fine for an MVP demo with attribution; heavy production use needs a tile provider
-// (OSM tile usage policy). Bangladesh coverage is good at street level. Swap TILES for a provider later.
-const TILES = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
-// Cluster-count labels need a glyph server; MapLibre demo fonts are fine for a demo, self-host for production.
-const GLYPHS = "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf";
-// Worker file copied to public/vendor (see its README): the bundled default URL does not resolve.
-const WORKER = "/vendor/maplibre-gl-worker.mjs";
-const CENTER: [number, number] = [90.3687, 23.8069];
 
 type Props = { issues: ExploreIssue[]; onSelect: (ref: string) => void; origin?: { lat: number; lng: number } };
 
@@ -44,7 +37,7 @@ export default function ExploreMap({ issues, onSelect, origin }: Props) {
           center: CENTER,
           zoom: 12.5,
           attributionControl: { compact: true },
-          style: { version: 8, glyphs: GLYPHS, sources: { osm: { type: "raster", tiles: [TILES], tileSize: 256, maxzoom: 19, attribution: "© OpenStreetMap contributors" } }, layers: [{ id: "osm", type: "raster", source: "osm" }] },
+          style: osmStyle(),
         });
         mapRef.current = map;
         map.on("error", () => { /* tile errors (offline) are not fatal: markers still show */ });
