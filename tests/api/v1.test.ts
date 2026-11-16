@@ -349,29 +349,30 @@ describe("legacy aliases keep working", () => {
   });
 });
 
+const RUN = Date.now().toString(36);
 describe("audit trail through the API", () => {
   it("carries the request id from the HTTP request into audit_logs and names the actor", async () => {
     const issue = await seedIssue(citizen);
     as(manager);
-    const r = await office(issue.ref, "acknowledge", {}, { "x-request-id": "audit-e2e-0001" });
+    const r = await office(issue.ref, "acknowledge", {}, { "x-request-id": `audit-e2e-0001-${RUN}` });
     expect(r.status).toBe(200);
-    const { data } = await admin.from("audit_logs").select("action,actor_id,actor_role,actor_kind,request_id,before_data,after_data").eq("resource_id", issue.id).eq("request_id", "audit-e2e-0001");
+    const { data } = await admin.from("audit_logs").select("action,actor_id,actor_role,actor_kind,request_id,before_data,after_data").eq("resource_id", issue.id).eq("request_id", `audit-e2e-0001-${RUN}`);
     expect(data).toHaveLength(1);
     expect(data![0]).toMatchObject({ action: "issue.status_change", actor_id: manager.id, actor_role: "staff", actor_kind: "user", before_data: { status: "submitted" }, after_data: { status: "acknowledged", ref: issue.ref } });
     // The same id is in the API response, the log line and the issue event.
-    expect(r.json.request_id).toBe("audit-e2e-0001");
+    expect(r.json.request_id).toBe(`audit-e2e-0001-${RUN}`);
   });
 
   it("records an administrator reading a private issue, and nothing for a manager doing the same", async () => {
     const issue = await seedIssue(citizen);
     const adminUser = await makeUser("admin");
     as(adminUser);
-    const d = await call(getOffice, "GET", `/api/v1/office/issues/${issue.ref}`, { params: { ref: issue.ref }, headers: { "x-request-id": "audit-admin-0001" } });
+    const d = await call(getOffice, "GET", `/api/v1/office/issues/${issue.ref}`, { params: { ref: issue.ref }, headers: { "x-request-id": `audit-admin-0001-${RUN}` } });
     expect(d.status).toBe(200);
-    const q = await call(listOffice, "GET", "/api/v1/office/issues?status=submitted&limit=5", { headers: { "x-request-id": "audit-admin-0002" } });
+    const q = await call(listOffice, "GET", "/api/v1/office/issues?status=submitted&limit=5", { headers: { "x-request-id": `audit-admin-0002-${RUN}` } });
     expect(q.status).toBe(200);
     const rows = (await admin.from("audit_logs").select("action,actor_id,actor_role,resource_type,resource_id,request_id,metadata").eq("action", "admin.access").eq("actor_id", adminUser.id).order("created_at")).data!;
-    expect(rows.map((x) => [x.resource_type, x.resource_id, x.request_id])).toEqual([["issue", issue.ref, "audit-admin-0001"], ["issue_list", null, "audit-admin-0002"]]);
+    expect(rows.map((x) => [x.resource_type, x.resource_id, x.request_id])).toEqual([["issue", issue.ref, `audit-admin-0001-${RUN}`], ["issue_list", null, `audit-admin-0002-${RUN}`]]);
     expect(rows[0].actor_role).toBe("admin");
     expect(rows[1].metadata).toEqual({ filters: ["status"], limit: 5 }); // filter names only, never values
     as(manager);
@@ -383,9 +384,9 @@ describe("audit trail through the API", () => {
   it("audits issue creation by the citizen themself", async () => {
     const u = await makeUser("citizen");
     as(u);
-    const r = await call(createIssue, "POST", "/api/v1/issues", { body: { title: "Audited report", category: "roads", description: "text", constituencyId: A.key }, headers: { "idempotency-key": key(), "x-request-id": "audit-create-0001" } });
+    const r = await call(createIssue, "POST", "/api/v1/issues", { body: { title: "Audited report", category: "roads", description: "text", constituencyId: A.key }, headers: { "idempotency-key": key(), "x-request-id": `audit-create-0001-${RUN}` } });
     expect(r.status).toBe(201);
-    const { data } = await admin.from("audit_logs").select("action,actor_id,actor_kind,request_id").eq("request_id", "audit-create-0001").eq("action", "issue.create");
-    expect(data).toEqual([{ action: "issue.create", actor_id: u.id, actor_kind: "user", request_id: "audit-create-0001" }]);
+    const { data } = await admin.from("audit_logs").select("action,actor_id,actor_kind,request_id").eq("request_id", `audit-create-0001-${RUN}`).eq("action", "issue.create");
+    expect(data).toEqual([{ action: "issue.create", actor_id: u.id, actor_kind: "user", request_id: `audit-create-0001-${RUN}` }]);
   });
 });

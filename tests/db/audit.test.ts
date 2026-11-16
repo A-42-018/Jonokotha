@@ -166,7 +166,7 @@ describe("administrator access to private records is audited", () => {
     await asWithRequest(c, admin, "req-admin-0001");
     expect(await attempt(c, "select record_admin_access('issue', 'JK-2026-1001', '{\"why\":\"support ticket\"}')")).toMatchObject({ ok: true });
     await actAsOwner(c);
-    const row = (await auditFor(c, "action='admin.access'", []))[0];
+    const row = (await auditFor(c, "action='admin.access' and actor_id=$1", [admin]))[0];
     expect(row).toMatchObject({ actor_id: admin, actor_role: "admin", resource_type: "issue", resource_id: "JK-2026-1001", request_id: "req-admin-0001", metadata: { why: "support ticket" } });
     for (const [who, uid] of Object.entries({ manager, citizen, mod })) {
       await actAs(c, uid);
@@ -178,7 +178,8 @@ describe("administrator access to private records is audited", () => {
     await actAs(c, admin);
     expect(await attempt(c, "select record_admin_access('Bad Type!', 'x')")).toMatchObject({ ok: false, code: "22023" });
     await actAsOwner(c);
-    expect(await scalar<number>(c, "select count(*)::int from audit_logs where action='admin.access'")).toBe(1);
+    expect(await scalar<number>(c, "select count(*)::int from audit_logs where action='admin.access' and actor_id=$1", [admin])).toBe(1);
+    expect(await scalar<number>(c, "select count(*)::int from audit_logs where action='admin.access' and actor_id = any($1::uuid[])", [[manager, citizen, mod]])).toBe(0);
   })));
 
   it("nobody but an admin can read the audit log, and nobody can write to it through the API", () => withClient((c) => tx(c, async () => {
