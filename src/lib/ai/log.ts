@@ -1,4 +1,4 @@
-import { createClient } from "@supabase/supabase-js";
+import { serviceClient } from "../supabase/service";
 
 export type AiAgent = "intake" | "duplicate" | "routing" | "copilot" | "translation" | "insight" | "idea";
 export type AiStatus = "ok" | "timeout" | "refused" | "invalid_output" | "error" | "fallback";
@@ -15,10 +15,9 @@ export interface AiRunRecord {
  * Logging must never break the user's request, so this never throws.
  */
 export async function logAiRun(r: AiRunRecord): Promise<string | null> {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL, key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (url && key) {
+  const sb = serviceClient();
+  if (sb) {
     try {
-      const sb = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
       const { data, error } = await sb.rpc("log_ai_run", {
         p_agent: r.agent, p_status: r.status, p_model: r.model, p_prompt_id: r.promptId, p_prompt_version: r.promptVersion, p_input_hash: r.inputHash,
         p_output: r.output, p_latency_ms: r.latencyMs, p_token_usage: r.usage, p_cost_usd: r.costUsd,

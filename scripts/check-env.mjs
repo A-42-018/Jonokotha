@@ -1,7 +1,7 @@
 // npm run check:env — reports which settings are set and probes each service. Never prints secret values.
 const need = [
   ["NEXT_PUBLIC_SUPABASE_URL", true], ["NEXT_PUBLIC_SUPABASE_ANON_KEY", true], ["ANTHROPIC_API_KEY", true],
-  ["ANTHROPIC_MODEL", false], ["AI_BASE_URL", false], ["SUPABASE_SERVICE_ROLE_KEY", false],
+  ["ANTHROPIC_MODEL", false], ["AI_BASE_URL", false], ["SUPABASE_SERVICE_ROLE_KEY", false], ["EMBEDDINGS_BASE_URL", false], ["EMBEDDINGS_API_KEY", false],
 ];
 let bad = 0;
 const row = (ok, name, note = "") => { console.log(`${ok ? "OK     " : "FAIL   "} ${name}${note ? " — " + note : ""}`); if (!ok) bad++; };

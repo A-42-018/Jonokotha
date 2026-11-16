@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { ApiError, fromDbError } from "./api";
+import { indexIssueByRef } from "./ai/duplicates";
 import { summarize } from "./intake";
 import { afterCursor, decodeCursor, toPage } from "./pagination";
 import { redactPii } from "./pii";
@@ -10,7 +11,9 @@ import { z } from "zod";
 /** Shared by POST /api/cases (legacy) and POST /api/v1/issues. Reports are public, so personal data is removed before storing. */
 export async function submitIssue(sb: SupabaseClient, userId: string, input: z.infer<typeof CaseInput>) {
   const clean = { ...input, title: redactPii(input.title).text, description: redactPii(input.description).text, area: redactPii(input.area).text };
-  return createCase(sb, userId, clean, await summarize(clean));
+  const ref = await createCase(sb, userId, clean, await summarize(clean));
+  await indexIssueByRef(ref); // embedding for the Duplicate Agent; best-effort, capped at a few seconds
+  return ref;
 }
 
 /** The constituency a citizen reports into must exist and be active. (Area lookup by place arrives in Phase 2.) */
