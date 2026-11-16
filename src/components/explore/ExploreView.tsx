@@ -12,8 +12,9 @@ import Select from "@/components/ui/Select";
 import StatusChip from "@/components/ui/StatusChip";
 import Tabs from "@/components/ui/Tabs";
 import { useLang } from "@/components/ui/useLang";
-import { useLocalValue } from "@/components/ui/useLocalValue";
-import { FOLLOWS_KEY, isFollowing, NO_FOLLOWS, toggleFollow } from "@/lib/follows";
+import { ApiError } from "@/lib/api-client";
+import { useFollows } from "@/components/ui/useFollows";
+import { useToast } from "@/components/ui/Toast";
 import { useT } from "@/components/ui/useT";
 import { filterIssues, NO_FILTERS, sortIssues, type DateRange, type ExploreIssue, type Filters, type SortKey } from "@/lib/explore";
 import { fillNum, fmtDate } from "@/lib/format";
@@ -39,10 +40,11 @@ function ExploreInner() {
   const [origin, setOrigin] = useState<{ lat: number; lng: number }>();
   const [geo, setGeo] = useState<"idle" | "busy" | "denied">("idle");
   const [selected, setSelected] = useState<string>();
-  const [follows, setFollows] = useLocalValue(FOLLOWS_KEY, NO_FOLLOWS);
+  const toast = useToast();
+  const { isFollowing, toggle: toggleFollow, follows } = useFollows(true);
   const [now] = useState(() => Date.now());
   const AREA = "demo-1";
-  const followingArea = isFollowing(follows, "areas", AREA);
+  const followingArea = isFollowing("area", AREA);
 
   // Category and date range are filtered by the server; status and text search work on what is loaded.
   const from = filters.range === "all" ? undefined : new Date(now - Number(filters.range) * 86_400_000).toISOString().slice(0, 10);
@@ -125,7 +127,10 @@ function ExploreInner() {
       <h1 className="text-2xl font-semibold text-civic">{t.exTitle}</h1>
       {hasSample && <p className="rounded-xl border border-amber/60 bg-amber/10 p-3 text-sm">{t.exSampleBanner}</p>}
       <div className="flex flex-wrap items-center gap-3">
-        <Button variant={followingArea ? "success" : "secondary"} aria-pressed={followingArea} onClick={() => setFollows(toggleFollow(follows, "areas", AREA))}>
+        <Button variant={followingArea ? "success" : "secondary"} aria-pressed={followingArea} loading={toggleFollow.isPending || follows === undefined}
+          onClick={() => toggleFollow.mutate({ type: "area", target: AREA }, {
+            onError: (e) => toast("error", e instanceof ApiError && e.status === 401 ? t.enSignIn : t.enActionFail),
+          })}>
           {followingArea ? t.enFollowingArea : t.enFollowArea}
         </Button>
         <span className="text-sm text-muted">{followingArea ? t.enFollowAreaOn : t.enFollowLocal}</span>

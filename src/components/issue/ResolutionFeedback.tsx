@@ -1,5 +1,9 @@
 "use client";
+import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
+import QueryProvider from "@/components/QueryProvider";
+import { ApiError } from "@/lib/api-client";
+import { sendFeedback, sendReopen } from "@/lib/engagement-api";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import { RadioGroup } from "@/components/ui/Choice";
@@ -12,8 +16,12 @@ import { useT } from "@/components/ui/useT";
 import { FEEDBACK_KEY, isRating, NO_FEEDBACK } from "@/lib/follows";
 import { fillNum } from "@/lib/format";
 
-/** After resolution: 1–5 satisfaction, and reopen / appeal (reason required). Device-local until the API exists. */
-export default function ResolutionFeedback({ refId }: { refId: string }) {
+export default function ResolutionFeedback(props: { refId: string }) {
+  return <QueryProvider><FeedbackInner {...props} /></QueryProvider>;
+}
+
+/** After resolution: 1–5 satisfaction, and reopen / appeal (reason required), sent to /api/v1. This device only remembers what was sent, so the screen shows it after a reload. */
+function FeedbackInner({ refId }: { refId: string }) {
   const t = useT();
   const lang = useLang();
   const toast = useToast();
@@ -26,18 +34,35 @@ export default function ResolutionFeedback({ refId }: { refId: string }) {
   const [rErr, setRErr] = useState("");
   const now = () => new Date().toISOString();
 
+  const rating = useMutation({
+    mutationFn: (n: number) => sendFeedback(refId, n),
+    onSuccess: (_r, n) => setAll({ ...all, [refId]: { ...saved, rating: n, at: now() } }),
+    // "Already sent" (409 conflict) is not an error for the person: show it as saved.
+    onError: (e, n) => {
+      if (e instanceof ApiError && e.code === "conflict") setAll({ ...all, [refId]: { ...saved, rating: n, at: now() } });
+      else toast("error", e instanceof ApiError && e.code === "rule_not_met" ? t.enRateNotYet : t.enActionFail);
+    },
+  });
+  const reopen = useMutation({
+    mutationFn: (r: string) => sendReopen(refId, r),
+    onSuccess: (_x, r) => {
+      setAll({ ...all, [refId]: { ...saved, [dlg || "reopen"]: r, at: now() } });
+      toast("success", dlg === "appeal" ? t.enAppealSent : t.enReopenSent);
+      close();
+    },
+    onError: (e) => setRErr(e instanceof ApiError && e.code === "rule_not_met" ? t.enReopenWindow : e instanceof ApiError && e.code === "invalid_transition" ? t.enReopenWindow : t.enActionFail),
+  });
+
   function rate() {
     const n = Number(pick);
     if (!isRating(n)) { setErr(t.enRateRequired); return; }
     setErr("");
-    setAll({ ...all, [refId]: { ...saved, rating: n, at: now() } });
+    rating.mutate(n);
   }
 
   function send() {
     if (reason.trim().length < 5) { setRErr(t.enReasonRequired); return; }
-    setAll({ ...all, [refId]: { ...saved, [dlg]: reason.trim(), at: now() } });
-    toast("success", dlg === "reopen" ? t.enReopenSent : t.enAppealSent);
-    close();
+    reopen.mutate(reason.trim());
   }
   function close() { setDlg(""); setReason(""); setRErr(""); }
 
@@ -51,7 +76,7 @@ export default function ResolutionFeedback({ refId }: { refId: string }) {
             <>
               <RadioGroup legend={t.enRateLegend} name={`rate-${refId}`} value={pick} onChange={(v) => { setPick(v); setErr(""); }} error={err}
                 options={[1, 2, 3, 4, 5].map((n) => ({ value: String(n), label: `${"★".repeat(n)} ${fillNum(t.enRateStar, { n }, lang)}` }))} />
-              <Button onClick={rate}>{t.enRateSave}</Button>
+              <Button loading={rating.isPending} onClick={rate}>{t.enRateSave}</Button>
             </>
           )}
           <div className="border-t border-line/30 pt-3">
@@ -61,12 +86,11 @@ export default function ResolutionFeedback({ refId }: { refId: string }) {
               <Button variant="secondary" onClick={() => setDlg("appeal")} disabled={!!saved?.appeal}>{t.enAppeal}</Button>
             </div>
             {(saved?.reopen || saved?.appeal) && <p role="status" className="mt-2 text-sm">{fillNum(t.enRequested, { kind: saved.reopen ? t.enReopen : t.enAppeal }, lang)}</p>}
-            <p className="mt-2 text-xs text-muted">{t.enFeedbackLocal}</p>
           </div>
         </div>
       </Card>
       <Dialog open={dlg !== ""} onClose={close} title={dlg === "appeal" ? t.enAppealTitle : t.enReopenTitle} description={dlg === "appeal" ? t.enAppealBody : t.enReopenBody}
-        actions={<><Button variant="ghost" onClick={close}>{t.enCancel}</Button><Button onClick={send}>{dlg === "appeal" ? t.enSubmitAppeal : t.enSubmitReopen}</Button></>}>
+        actions={<><Button variant="ghost" onClick={close}>{t.enCancel}</Button><Button loading={reopen.isPending} onClick={send}>{dlg === "appeal" ? t.enSubmitAppeal : t.enSubmitReopen}</Button></>}>
         <Textarea label={t.enReasonLabel} rows={4} maxLength={1000} value={reason} error={rErr} onChange={(e) => { setReason(e.target.value); setRErr(""); }} />
       </Dialog>
     </>
