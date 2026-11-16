@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { can, OFFICE_PERMISSIONS, type Actor, type OfficeAction, type OfficeRole } from "../../src/lib/auth";
-import { actAs, actAsOwner, addMember, createConstituency, createIssue, createUser, scalar, tx } from "./fixtures";
+import { actAs, actAsOwner, addMember, attempt, createConstituency, createIssue, createUser, scalar, tx } from "./fixtures";
 import { withClient } from "./helpers";
 
 const ROLES: OfficeRole[] = ["case_officer", "office_manager", "mp", "agency_liaison"];
@@ -102,13 +102,16 @@ describe("roles and scopes (migration 0006)", () => {
     await expect(addMember(c, citizen, A, "case_officer")).rejects.toMatchObject({ code: "23514" });
   })));
 
-  it("users read only their own memberships through the API", () => withClient((c) => tx(c, async () => {
+  it("users read their own memberships; managers also read their office roster",() => withClient((c) => tx(c, async () => {
     const A = await createConstituency(c);
     const a = await createUser(c, "staff"), b = await createUser(c, "staff");
     await addMember(c, a, A, "office_manager"); await addMember(c, b, A, "case_officer");
-    await actAs(c, a);
-    expect((await c.query("select user_id from office_members")).rows.map((r) => r.user_id)).toEqual([a]);
+    await actAs(c, b); // a case officer sees only their own membership
+    expect((await c.query("select user_id from office_members")).rows.map((r) => r.user_id)).toEqual([b]);
+    await actAs(c, a); // an office manager also sees the roster of their own office (needed to assign cases)
+    expect((await c.query("select user_id from office_members")).rows.map((r) => r.user_id).sort()).toEqual([a, b].sort());
     await actAs(c, null);
-    expect((await c.query("select 1 from office_members")).rowCount).toBe(0);
+    const anon = await attempt(c, "select 1 from office_members"); // anon holds no grant at all after 0007
+    expect(anon.ok ? anon.rowCount : 0).toBe(0);
   })));
 });

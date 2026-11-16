@@ -47,3 +47,16 @@ export async function scalar<T = unknown>(c: Client, sql: string, params: unknow
   const { rows } = await c.query(sql, params);
   return Object.values(rows[0] ?? {})[0] as T;
 }
+
+/** Run a statement that may be refused. Uses a savepoint so a refusal does not abort the surrounding transaction. */
+export async function attempt(c: Client, sql: string, params: unknown[] = []): Promise<{ ok: true; rowCount: number; rows: Record<string, unknown>[] } | { ok: false; code: string }> {
+  await c.query("savepoint attempt");
+  try {
+    const r = await c.query(sql, params);
+    await c.query("release savepoint attempt");
+    return { ok: true, rowCount: r.rowCount ?? 0, rows: r.rows };
+  } catch (e) {
+    await c.query("rollback to savepoint attempt");
+    return { ok: false, code: (e as { code?: string }).code ?? "unknown" };
+  }
+}

@@ -41,5 +41,43 @@ Case officers recommend forwarding or resolution; the office manager performs it
 - Before real MP, moderator or admin accounts exist: enable TOTP in Supabase Auth settings, ship the enrol/challenge screens, create the accounts, then set the flag with `update app_settings set value = 'true' where key = 'enforce_mfa';`. This is a Phase 3 security-review gate at the latest.
 - Hosted Supabase may require the Pro plan for some MFA settings; confirm before relying on it.
 
-## Still to come in this document
-The full table-by-table RLS matrix (citizen A/B, office A/B, moderator, admin) is added with the RLS suite in step 3.
+## Table-by-table RLS matrix (migration `0007_rls.sql`)
+
+Deny by default: RLS is on for every table in `public`, and a table with no policy is unreachable from a user session. Tested with six accounts (citizen A, citizen B, office A, office B, moderator, admin) plus anonymous, in `tests/rls/read.test.ts` (reads), `tests/rls/write.test.ts` (writes) and `tests/rls/coverage.test.ts` (every table must be listed). Run with `npm run test:rls` against a local Supabase; a failing test fails CI.
+
+"Office" means a staff account with an active membership whose role holds the `view` permission for that issue's constituency. "Own" means `reporter_id`, `user_id` or `uploader_id` equals the session user.
+
+| Table | Anonymous | Citizen (own) | Office (own scope) | Moderator | Admin |
+|---|---|---|---|---|---|
+| public_cases, public_case_events (views) | read, safe columns only | same | same | same | same |
+| constituencies, agencies, issue_categories, office_permissions, knowledge_sources, representative_constituencies | read | read | read | read | read |
+| representatives | verified only | verified only | verified only | verified only | all |
+| profiles | none | own | own + reporters of viewable issues | own | all (read) |
+| issues | none | read own; insert own with clean initial state | read per role; update status/assignment only for manager-grade roles | none | read and update all |
+| issue_events | none | none (public timeline via view) | read for viewable issues | none | read all |
+| issue_media | none | read own; insert own, private and pending | read for viewable issues | none | read all |
+| issue_assignments | none | none | read for viewable issues | none | read all |
+| issue_agency_referrals | none | public-visibility rows on own issues | read for viewable issues | none | read all |
+| notifications | none | read own; mark own read | none | none | none |
+| consents | none | read, insert and withdraw own | none | none | none |
+| user_preferences | none | read, insert, update own | none | none | none |
+| office_members | none | none | own row; managers read their office roster | none | read all |
+| audit_logs | none | none | none | none | read |
+| ai_runs, ai_suggestions | none | none | read only for issues in scope | none | read all |
+| knowledge_chunks | none | none | read | none | read |
+| graph_edges | none | none | none | none | read |
+| issue_embeddings, app_settings | none | none | none | none | none (service role only) |
+
+Rules that hold across tables:
+- Nobody deletes or truncates anything through the API (no privileges, no policies).
+- Server-written tables (audit_logs, notifications, ai_runs, ai_suggestions, graph_edges, issue_events, issue_assignments, issue_agency_referrals, office_members, app_settings, knowledge_chunks, issue_embeddings) refuse inserts from every user session; server code uses the service role or SECURITY DEFINER functions.
+- The content of a report (title, description, area, category, constituency, reporter, reference, timestamps) cannot be changed by any user session, including staff and admin (trigger `issues_guard`). Corrections need the service role and are audited.
+- Anonymous visitors hold privileges only on reference tables and the two public views.
+- Internal events (`issue_events.is_public = false`) and `internal_note` never reach `public_case_events`.
+- Moderators can read none of this yet; they get access to moderation queues when `moderation_reports` is built (Phase 2).
+
+## Known gaps (tracked)
+- **AI fields at insert.** `issues.ai_summary`, `ai_agency`, `ai_similar` and `ai_confidence` are written by the citizen's own session during submission, so a determined citizen could forge them through the API. Impact: advisory fields shown to staff. Fix: step 8/9 moves them into server-written `ai_suggestions`, after which the insert policy rejects them.
+- **Status changes by non-manager roles.** Only manager-grade office roles (and admin) can update an issue today. Case officers, assigned liaisons and the MP use the state machine and office-action endpoints (steps 4 and 5), which will run as controlled transitions.
+- **Citizen sees `assigned_to` on own issues** (a staff user id, no name). Acceptable for now; the office-actions API will expose a display name instead.
+- **MFA is not enforced yet** (see above).
