@@ -48,3 +48,11 @@ Review every primitive and state at `/dev/ui` (bn and en side by side). The page
 ## Issue detail v2 (task 1.4)
 
 `/issue/[ref]` renders `components/issue/IssueView` (two columns from lg: report + official response left, timeline + actions right). Parts: `StatusTimeline` (StatusChip + `fmtDate` per step, notes never shown), `OfficialResponse` (placeholder until the API exposes a public reply), `IssueActions` (client, UI only: "আমারও একই সমস্যা" disabled with "শীঘ্রই", follow toggle, copy/share, report-content Dialog with required reason). Copy/share logic is the shared `ui/useShare` hook, also used by `ReportSuccess`. Privacy: the view reads title, category, area, description, status and timeline `status/at` only; `ai.*` and reporter data are never rendered. Strings are the `is*` keys in `i18n.ts`.
+
+## Phase 3 additions
+
+- **Strings in client components:** `I18nProvider` (root layout) carries the page language and its dictionary; `useT()` and `useLang()` read it. Do not import `dict` in a client component (it ships both languages). Number and date helpers: `lib/format.ts`.
+- `RouteError` (route `error.tsx` body with a route-specific hint) and `PageLoading` (list or detail skeleton for `loading.tsx`).
+- Offline queue UI: `components/offline/` (`QueueSync`, `QueuedReports`, `ReportQueued`); logic in `lib/offline-queue.ts`.
+- Audit-only demo screens: `/dev/screens/<name>` (see `docs/frontend.md`, Phase 3 status).
+- Reduced motion is handled globally in `globals.css`; maps use `mapAnimate()`.

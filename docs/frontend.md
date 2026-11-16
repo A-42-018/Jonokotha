@@ -152,3 +152,24 @@ All 13 Phase 2 items are built; each commit message ends with its task number. B
 Shared pieces: Phase 2 strings are in `src/lib/strings/*` (bn and en keys are type-checked equal, plus `tests/unit/i18n.test.ts`); sample data in `src/lib/sample.ts`, `mp.ts`, `admin.ts`; `useLocalValue` (localStorage-backed shared state) powers every device-local stub; the map worker is vendored in `public/vendor` (see its README).
 
 Checks: `npm run lint`, `npm run typecheck`, `npm test` (79 tests), `npm run test:e2e` (mobile 375 and desktop 1280, axe on every new public page). Not covered: axe on signed-in office and admin pages, screen-reader pass (Phase 3).
+
+## Phase 3 status (16 Nov)
+
+All seven Phase 3 items are built; each commit message ends with its task number. Full report and evidence: `docs/aibc/phase3-audit.md`.
+
+| # | Built | Blocked or needs someone |
+|---|---|---|
+| 3.1 | axe WCAG 2.2 AA on 14 screens x bn/en x 375/1280 with zero violations; 200% and 400% reflow; reduced motion; keyboard focus run. Signed-in screens are audited through labelled demo screens at `/dev/screens/<name>` | TalkBack and VoiceOver pass needs a person with devices: `docs/aibc/screen-reader-checklist.md` |
+| 3.2 | First-load JS for `/` 315 to 149 KB gzip; map, Supabase and Zod kept out (tested); Lighthouse mobile 3G 98 to 100 | Margin is 1 KB; default simulated Slow-4G profile scores 86 |
+| 3.3 | Offline report queue (saved on the phone, sent when back online, visible in My Reports), versioned service-worker cache, per-route error boundaries | Backend: idempotency on `POST /api/cases` (key already sent) |
+| 3.4 | Glossary, status and category labels aligned with section 19; automated language tests; Dhaka-time Bangla dates; review sheet | **Native-speaker review not done** (`docs/aibc/language/strings-review.csv`) |
+| 3.5 | Golden path, staff approval, role denial, offline, budget, security suites; 22 visual baselines | Linux CI skips visual tests until baselines are created there (`VISUAL=1 ... --update-snapshots`) |
+| 3.6 | `npm run check:bundle` (in CI), photo type by content and size limit, safe links, XSS test, CSP builder with zero violations | Backend: send the CSP and the other headers (`docs/aibc/security-ui.md`) |
+| 3.7 | Audit report, screenshots, axe and Lighthouse results in `docs/aibc/` | none |
+
+Things to know:
+- **Strings in client components** now come from `I18nProvider` (root layout, `useT()`), not from importing `dict`. Never import `dict` into a client component: it puts both languages (about 29 KB gzip) back into the first-load bundle. Format helpers live in `lib/format.ts`; the category list in `lib/categories.ts` (also re-exported by `types.ts`).
+- `/dev/screens/<name>` (report, issue, issue-long, issue-xss, office, case, case-long, announcements, admin-verification, admin-moderation, no-access-*, boom) needs `NODE_ENV !== production` or `JK_AUDIT=1`. Playwright's own server sets it; never set it in staging or production.
+- Shared files touched: `next.config.ts` (build id for the service-worker cache), `package.json` (`check:bundle`), `.github/workflows/ci.yml` (build and bundle scan before e2e), `src/lib/types.ts` (re-exports `CATEGORIES`). Tell the backend owner.
+- Fixed in the language commit: the I18nProvider introduced in 3.2 crashed English pages (server render asked for the Bangla strings); new tests render every page in both languages.
+- Checks: `npm run lint`, `npm run typecheck`, `npm test`, `npm run test:e2e`, `npm run check:bundle`.

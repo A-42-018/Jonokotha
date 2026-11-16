@@ -14,6 +14,7 @@ function isDismissed() {
 export default function InstallPrompt() {
   const t = useT();
   const [evt, setEvt] = useState<InstallEvent | null>(null);
+  const [touched, setTouched] = useState(false);
 
   useEffect(() => {
     if (isDismissed() || window.matchMedia("(display-mode: standalone)").matches) return;
@@ -24,7 +25,17 @@ export default function InstallPrompt() {
     return () => { window.removeEventListener("beforeinstallprompt", onPrompt); window.removeEventListener("appinstalled", onInstalled); };
   }, []);
 
-  if (!evt) return null;
+  // Shown only after the person has used the page (first tap, key or scroll): the banner never competes with the content
+  // on first paint, and it is not offered to someone who is only glancing.
+  useEffect(() => {
+    if (!evt || touched) return;
+    const go = () => setTouched(true);
+    const opts = { once: true, passive: true } as const;
+    for (const ev of ["pointerdown", "keydown", "scroll"] as const) window.addEventListener(ev, go, opts);
+    return () => { for (const ev of ["pointerdown", "keydown", "scroll"] as const) window.removeEventListener(ev, go); };
+  }, [evt, touched]);
+
+  if (!evt || !touched) return null;
 
   const dismiss = () => {
     try { localStorage.setItem(KEY, "1"); } catch { /* storage blocked: hide for this visit only */ }

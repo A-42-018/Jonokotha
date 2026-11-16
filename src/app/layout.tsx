@@ -15,10 +15,10 @@ import { getConstituencyId } from "@/lib/constituency-server";
 import { currentUser } from "@/lib/supabase/server";
 import { dict, getLang } from "@/lib/i18n";
 
-// preload: false keeps ~190 KB of font files from competing with the page on slow links; text shows in the system font first, then swaps.
+// preload: false keeps ~190 KB of font files from competing with the page on slow links; display: optional means a slow font never swaps in mid-read (no layout shift): the page keeps the system font for that visit and the brand font is used once cached.
 // Headings use one static weight: the variable Anek Bangla file (all weights and widths) is 156 KB, a single weight is far smaller.
-const head = Anek_Bangla({ variable: "--font-head", subsets: ["bengali", "latin"], weight: ["600"], preload: false });
-const body = Hind_Siliguri({ variable: "--font-body", subsets: ["bengali", "latin"], weight: ["400", "500", "600"], preload: false });
+const head = Anek_Bangla({ variable: "--font-head", subsets: ["bengali", "latin"], weight: ["600"], preload: false, display: "optional" });
+const body = Hind_Siliguri({ variable: "--font-body", subsets: ["bengali", "latin"], weight: ["400", "500", "600"], preload: false, display: "optional" });
 
 /** Title and description follow the page language (the Bangla default, or English when chosen). */
 export async function generateMetadata(): Promise<Metadata> {

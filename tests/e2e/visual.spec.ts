@@ -22,7 +22,11 @@ const SCREENS: [string, string][] = [
 ];
 
 async function settle(page: Page) {
+  // Fonts use display: optional, so a first visit may keep the system font. Reload once (fonts now cached) and wait for them.
   await page.waitForLoadState("networkidle");
+  await page.reload();
+  await page.waitForLoadState("networkidle");
+  await page.waitForFunction(() => [...document.fonts].some((f) => f.status === "loaded"), null, { timeout: 5000 }).catch(() => {});
   await page.evaluate(() => document.fonts.ready);
   await page.waitForTimeout(150);
 }
