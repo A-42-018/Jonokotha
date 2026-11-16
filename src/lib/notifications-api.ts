@@ -24,3 +24,15 @@ export async function fetchNotices(cursor?: string) {
 }
 export const markRead = (id: string) => api<unknown>(`/me/notifications/${encodeURIComponent(id)}/read`, { method: "POST" });
 export const markAllRead = () => api<unknown>("/me/notifications/read-all", { method: "POST" });
+
+/** Types a person can switch off one by one (PUT /me/notification-preferences `muted_types`). Same list as the server's. */
+export const MUTABLE_TYPES: readonly NoticeType[] = ["issue_status", "question_reply", "question_message", "new_in_area", "announcement", "project_update", "idea_decision"];
+/** The new muted list after switching one type on or off; others are kept, no duplicates. */
+export function toggleMuted(muted: readonly string[], type: NoticeType, on: boolean): string[] {
+  const rest = muted.filter((m) => m !== type);
+  return on ? rest : [...rest, type];
+}
+/** Only an https link is shown as the status page. */
+export function safeStatusUrl(v: string | undefined | null): string | null {
+  try { const u = new URL(v ?? ""); return u.protocol === "https:" ? u.href : null; } catch { return null; }
+}

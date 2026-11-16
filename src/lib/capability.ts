@@ -40,6 +40,7 @@ export function worstStatus(items: readonly ({ data_status?: unknown; is_sample?
  */
 export const FEATURES = {
   polls: { status: "planned", backend: "B5.5" },
+  realtime: { status: "planned", backend: "B5.8" },
   consultations: { status: "planned", backend: "B7.1" },
   staffDirectory: { status: "planned", backend: "B5.1" },
   authorContest: { status: "planned", backend: "M.9" },

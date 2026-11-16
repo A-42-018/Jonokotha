@@ -37,11 +37,13 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   const t = dict[lang];
   let email: string | null = null;
   let isStaff = false;
+  let userId: string | null = null;
   let role: "citizen" | "staff" | "admin" | null = null;
   try {
     const { user, isStaff: staff, role: r } = await currentUser();
     role = r;
     email = user?.email ?? null;
+    userId = user?.id ?? null;
     isStaff = staff;
   } catch { /* Supabase not configured: show signed-out header */ }
   return (
@@ -50,6 +52,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <I18nProvider lang={lang} dicts={{ [lang]: t }}>
         <TopNav
           isStaff={isStaff}
+          userId={userId}
           picker={
             <ConstituencyPicker
               selectedId={await getConstituencyId()}
