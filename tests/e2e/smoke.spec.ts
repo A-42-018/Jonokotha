@@ -113,11 +113,9 @@ test.describe("phase 2 public pages", () => {
     await expect(page.getByText("৯৯৯")).toBeVisible();
   });
 
-  test("notifications are labelled sample; settings can clear device data", async ({ page }) => {
+  test("notifications ask a signed-out visitor to sign in; settings can clear device data", async ({ page }) => {
     await page.goto("/notifications");
-    await expect(page.getByText("নমুনা: নিচের নোটিফিকেশনগুলো")).toBeVisible();
-    await page.getByRole("button", { name: "সব পড়া হয়েছে চিহ্নিত করুন" }).click();
-    await expect(page.getByText("নতুন", { exact: true })).toHaveCount(0);
+    await expect(page.getByText("নোটিফিকেশন দেখতে সাইন ইন করুন।")).toBeVisible();
     await page.goto("/settings");
     await page.getByRole("button", { name: "এই ডিভাইসের তথ্য মুছুন" }).click();
     await page.getByRole("button", { name: "হ্যাঁ, মুছুন" }).click();
