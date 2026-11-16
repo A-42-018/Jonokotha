@@ -29,3 +29,5 @@ Migration 0008 (state machine) was applied on the live project on 2026-11-16 aft
 `npm test` (unit, no database), `npm run test:db` (schema, roles, RLS, state machine, API routes; needs `npx supabase start` and a database reset with `npx supabase db reset`), `npm run test:rls`, `npm run test:api`. The database tests refuse any non-local URL. API tests sign in real local users and call the route handlers directly; they take the local URL and keys from `supabase status`, or from `SUPABASE_API_URL`, `SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY_LOCAL` in CI.
 Migration 0009 (feedback, idempotency, shared rate limits, notes) must be applied on the live project before the v1 routes are deployed.
 
+
+Migration 0009 (API support: issue_feedback, idempotency keys, shared rate limits, add_issue_note) was applied on the live project on 2026-11-16 after 0008. Verified: RLS on the three new tables, anonymous callers cannot execute the new functions or read the tables, existing data unchanged. The /api/v1 routes can now be deployed.
