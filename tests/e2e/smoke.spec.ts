@@ -65,4 +65,19 @@ test.describe("phase 2 public pages", () => {
     await page.goto("/ideas/new");
     await expect(page.getByRole("link", { name: "সাইন ইন" }).first()).toBeVisible();
   });
+
+  test("find your MP: area search shows a labelled card; border ward asks to confirm; profile shows period and no ranking", async ({ page }) => {
+    await page.goto("/mp");
+    await page.getByLabel("আপনার এলাকা বা ওয়ার্ডের নাম লিখুন").fill("ওয়ার্ড ৩");
+    await expect(page.getByRole("heading", { name: "নমুনা জনপ্রতিনিধি ১" })).toBeVisible();
+    await page.getByLabel("আপনার এলাকা বা ওয়ার্ডের নাম লিখুন").fill("ওয়ার্ড ৫");
+    await expect(page.getByText("দুটি নির্বাচনী এলাকার সীমানায়")).toBeVisible();
+    await page.goto("/mp/rep-demo-1");
+    await expect(page.getByText("সময়কাল:")).toBeVisible();
+    await expect(page.getByText("র‍্যাঙ্কিং করা হয় না")).toBeVisible();
+    await page.getByRole("link", { name: "এই সংখ্যা কীভাবে হিসাব করা হয়" }).click();
+    await expect(page).toHaveURL(/\/mp\/method/);
+    await page.goto("/mp/unknown");
+    await expect(page.getByRole("heading", { name: "পাতাটি পাওয়া যায়নি" })).toBeVisible();
+  });
 });
