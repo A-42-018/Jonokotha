@@ -1,18 +1,18 @@
 import AdminShell from "@/components/admin/AdminShell";
-import HotspotMap from "@/components/admin/HotspotMap";
+import HotspotMapLive from "@/components/admin/HotspotMapLive";
+import KpiPanel from "@/components/admin/KpiPanel";
 import StatBars from "@/components/admin/StatBars";
 import Card from "@/components/ui/Card";
 import NoAccess from "@/components/ui/NoAccess";
 import { analytics } from "@/lib/admin";
 import { guardAdmin } from "@/lib/guard";
 import { dict, fmtNum, getLang } from "@/lib/i18n";
-import { SAMPLE_ISSUES } from "@/lib/sample";
 import { listCases } from "@/lib/store";
 import { CATEGORIES, type CaseRecord, type Status } from "@/lib/types";
 
 const STATUSES: Status[] = ["received", "acknowledged", "referred", "resolved"];
 
-/** Basic analytics from real cases (counts only), plus a hotspot map of labelled sample issues. */
+/** Platform KPIs with definitions, counts from real cases, and a hotspot map of public issues at approximate positions. */
 export default async function Stats() {
   const lang = await getLang();
   const t = dict[lang];
@@ -23,8 +23,9 @@ export default async function Stats() {
   try { cases = await listCases(sb); } catch { failed = true; }
   const a = analytics(cases);
   return (
-    <AdminShell t={t} title={t.adStatsTitle} lead={t.adStatsLead} current="/admin/stats" sample={false}>
+    <AdminShell t={t} title={t.adStatsTitle} lead={t.adStatsLead} current="/admin/stats">
       {failed && <p role="alert" className="rounded-xl border border-amber/60 bg-amber/10 p-3 text-sm">{t.adLoadError}</p>}
+      <KpiPanel />
       <Card title={t.adStatsTotal}><p className="text-4xl font-semibold text-civic">{fmtNum(a.total, lang)}</p></Card>
       {a.total === 0 ? <p className="text-muted">{t.adStatsNoData}</p> : (
         <div className="grid gap-4 md:grid-cols-2">
@@ -35,7 +36,7 @@ export default async function Stats() {
       )}
       <Card title={t.adStatsMap}>
         <p className="mb-2 text-sm text-muted">{t.adStatsMapNote}</p>
-        <HotspotMap issues={SAMPLE_ISSUES} />
+        <HotspotMapLive />
       </Card>
     </AdminShell>
   );
