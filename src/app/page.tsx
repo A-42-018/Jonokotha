@@ -5,11 +5,12 @@ import HomeFooter from "@/components/citizen/HomeFooter";
 import IdeaCtaCard from "@/components/citizen/IdeaCtaCard";
 import RecentIssues from "@/components/citizen/RecentIssues";
 import ReportCtaCard from "@/components/citizen/ReportCtaCard";
-import RepresentativeCard from "@/components/citizen/RepresentativeCard";
+import { ActivePolls, AreaRepCard, ExploreLinks, HomeSnapshot, PopularIdeas } from "@/components/citizen/HomeBlocks";
 import { findConstituency } from "@/lib/constituency";
 import { getConstituencyId } from "@/lib/constituency-server";
 import { DEMO_CONSTITUENCY } from "@/lib/demo-data";
 import { dict, getLang } from "@/lib/i18n";
+import { loadAreaRep, loadPopularIdeas, loadSnapshot, type HomeRep, type HomeIdea, type Loaded, type Snapshot } from "@/lib/home-data";
 import { listCases } from "@/lib/store";
 import { currentUser } from "@/lib/supabase/server";
 import type { CaseRecord } from "@/lib/types";
@@ -23,11 +24,15 @@ export default async function Home() {
   let failed = false;
   let isStaff = false;
   let signedIn = false;
+  let snap: Loaded<Snapshot> = { ok: false };
+  let ideas: Loaded<HomeIdea[]> = { ok: false };
+  let rep: Loaded<HomeRep | null> = { ok: false };
   try {
     const { sb, user, isStaff: staff } = await currentUser();
     isStaff = staff;
     signedIn = !!user;
     cases = (await listCases(sb)).filter((c) => c.constituencyId === area.id).slice(0, 5);
+    [snap, ideas, rep] = await Promise.all([loadSnapshot(sb, area.id), loadPopularIdeas(sb, area.id), loadAreaRep(sb, area.id)]);
   } catch {
     failed = true;
   }
@@ -44,9 +49,13 @@ export default async function Home() {
         <ReportCtaCard t={t} />
         <IdeaCtaCard t={t} />
       </div>
+      <HomeSnapshot t={t} lang={lang} snap={snap} areaName={lang === "bn" ? area.nameBn : area.nameEn} sample={"sample" in area && !!area.sample} />
       <FollowedFeed signedIn={signedIn} />
       <RecentIssues t={t} lang={lang} cases={cases} failed={failed} />
-      <RepresentativeCard t={t} areaName={lang === "bn" ? area.nameBn : area.nameEn} />
+      <PopularIdeas t={t} lang={lang} ideas={ideas} />
+      <AreaRepCard t={t} lang={lang} rep={rep} areaName={lang === "bn" ? area.nameBn : area.nameEn} />
+      <ActivePolls t={t} />
+      <ExploreLinks t={t} />
       {isStaff && <Link href="/office" className="inline-flex min-h-11 items-center text-civic underline">{t.officeCta}</Link>}
       <HomeFooter t={t} />
     </div>
