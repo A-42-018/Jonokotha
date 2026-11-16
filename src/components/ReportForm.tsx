@@ -1,68 +1,381 @@
 "use client";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { CATEGORIES } from "@/lib/types";
-import type { Dict, Lang } from "@/lib/i18n";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useForm, useWatch } from "react-hook-form";
+import { fillNum } from "@/lib/format";
+import { type Dict, type Lang } from "@/lib/i18n";
+import {
+  DRAFT_KEY, FIELDS, LEGACY_DRAFT_KEY, STEP_FIELDS, hasPersonalNumber, reportSchema,
+  type ReportData, type ReportField, type ReportValues,
+} from "@/lib/report";
+import { CATEGORIES, type Category } from "@/lib/categories";
+import CategoryPicker from "./report/CategoryPicker";
+import EvidenceStep, { type Photo } from "./report/EvidenceStep";
+import PrivacyWarning from "./report/PrivacyWarning";
+import ReportSuccess from "./ReportSuccess";
+import ReportQueued from "./offline/ReportQueued";
+import { readQueue, writeQueue } from "./offline/queue-store";
+import { enqueue, newId, sendReport } from "@/lib/offline-queue";
+import Badge from "./ui/Badge";
+import Button from "./ui/Button";
+import Card from "./ui/Card";
+import Dialog from "./ui/Dialog";
+import Input from "./ui/Input";
+import Stepper from "./ui/Stepper";
+import Textarea from "./ui/Textarea";
+import { appendTranscript } from "@/lib/speech";
+import { useSpeech } from "./report/useSpeech";
+import LocationPicker from "./report/LocationPicker";
+import type { Pin } from "@/lib/places";
+import { useToast } from "./ui/Toast";
+import { useKeyboardInset } from "./ui/useKeyboardInset";
 
-type SR = { new (): { lang: string; onresult: ((e: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null; onend: (() => void) | null; start(): void } };
+export { hasPersonalNumber };
 
-export default function ReportForm({ t, lang }: { t: Dict; lang: Lang }) {
-  const router = useRouter();
-  const [text, setText] = useState("");
-  const [draft, setDraft] = useState<{ title: string; category: string; description: string; area: string } | null>(null);
+type Saved = { quick?: string; values?: Partial<ReportValues>; ai?: ReportField[]; edited?: ReportField[]; step?: number; pin?: Pin };
+
+const LAST = 4;
+const isCategory = (v: unknown): v is Category => typeof v === "string" && (CATEGORIES as readonly string[]).includes(v);
+
+function readSaved(): Saved | null {
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    if (raw) return JSON.parse(raw) as Saved;
+    // Drafts saved by the one-page form (v1) are carried over once.
+    const old = localStorage.getItem(LEGACY_DRAFT_KEY);
+    if (old) {
+      const d = JSON.parse(old) as { text?: string; draft?: Partial<ReportValues> | null; edited?: ReportField[] };
+      return { quick: d.text ?? "", values: d.draft ?? {}, ai: d.draft ? [...FIELDS] : [], edited: d.edited ?? [], step: d.draft ? 4 : 0 };
+    }
+  } catch { /* storage unavailable or corrupt: start empty */ }
+  return null;
+}
+
+export default function ReportForm({ t, lang, constituencyId }: { t: Dict; lang: Lang; constituencyId: string }) {
+  const toast = useToast();
+  const schema = useMemo(() => reportSchema(t), [t]);
+  const { register, control, setValue, reset, trigger, handleSubmit, getValues, formState: { errors } } = useForm<ReportValues, unknown, ReportData>({
+    resolver: zodResolver(schema),
+    mode: "onTouched",
+    defaultValues: { title: "", description: "", area: "" },
+  });
+  const values = useWatch({ control });
+
+  const [step, setStep] = useState(0);
+  const [quick, setQuick] = useState("");
+  const [ai, setAi] = useState<ReportField[]>([]);
+  const [edited, setEdited] = useState<ReportField[]>([]);
+  const [pin, setPin] = useState<Pin>();
+  const [photos, setPhotos] = useState<Photo[]>([]);
+  const [sentRef, setSentRef] = useState("");
+  const [queued, setQueued] = useState(false);
+  const [restored, setRestored] = useState(false);
+  const [confirmDiscard, setConfirmDiscard] = useState(false);
   const [busy, setBusy] = useState<"" | "draft" | "submit">("");
-  const [listening, setListening] = useState(false);
+  const [quickDone, setQuickDone] = useState(false);
+  const speech = useSpeech(lang === "bn" ? "bn-BD" : "en-US", (text) => setQuick((q) => appendTranscript(q, text)));
+  const loaded = useRef(false);
+  const heading = useRef<HTMLHeadingElement>(null);
+  const stepMounted = useRef(false);
+  const photosRef = useRef<Photo[]>([]);
+  const inset = useKeyboardInset();
 
-  function speak() {
-    const w = window as unknown as { SpeechRecognition?: SR; webkitSpeechRecognition?: SR };
-    const Rec = w.SpeechRecognition ?? w.webkitSpeechRecognition;
-    if (!Rec) return;
-    const r = new Rec();
-    r.lang = lang === "bn" ? "bn-BD" : "en-US";
-    r.onresult = (e) => setText((p) => `${p} ${e.results[0][0].transcript}`.trim());
-    r.onend = () => setListening(false);
-    setListening(true);
-    r.start();
+  useEffect(() => { photosRef.current = photos; }, [photos]);
+  useEffect(() => () => photosRef.current.forEach((p) => URL.revokeObjectURL(p.url)), []);
+
+  // Recover an interrupted draft once on mount, then autosave every change.
+  useEffect(() => {
+    const id = setTimeout(() => {
+      const d = readSaved();
+      if (d) {
+        const v = d.values ?? {};
+        const any = !!(d.quick || v.title || v.description || v.area || v.category);
+        if (any) {
+          reset({ title: v.title ?? "", description: v.description ?? "", area: v.area ?? "", ...(isCategory(v.category) ? { category: v.category } : {}) });
+          setQuick(d.quick ?? "");
+          setAi(d.ai ?? []);
+          setEdited(d.edited ?? []);
+          setPin(d.pin);
+          setStep(Math.min(Math.max(d.step ?? 0, 0), LAST));
+          setRestored(true);
+        }
+      }
+      loaded.current = true;
+    }, 0);
+    return () => clearTimeout(id);
+  }, [reset]);
+
+  useEffect(() => {
+    if (!loaded.current || sentRef || queued) return;
+    try {
+      const empty = !quick && !values.title && !values.description && !values.area && !values.category;
+      if (empty) localStorage.removeItem(DRAFT_KEY);
+      else localStorage.setItem(DRAFT_KEY, JSON.stringify({ quick, values, ai, edited, step, pin } satisfies Saved));
+    } catch { /* ignore */ }
+  }, [quick, values, ai, edited, step, pin, sentRef, queued]);
+
+  // Move focus to the new step's heading (not on first load).
+  useEffect(() => {
+    if (!stepMounted.current) { stepMounted.current = true; return; }
+    window.scrollTo({ top: 0 });
+    heading.current?.focus({ preventScroll: true });
+  }, [step]);
+
+  const touched = (name: ReportField) => setEdited((e) => (ai.includes(name) && !e.includes(name) ? [...e, name] : e));
+
+  function field(name: ReportField) {
+    const r = register(name);
+    return {
+      ...r,
+      onChange: async (e: Parameters<typeof r.onChange>[0]) => {
+        touched(name);
+        const out = await r.onChange(e);
+        // An error shown by "Next" clears as soon as the text becomes valid, without waiting for blur.
+        if (errors[name]) void trigger(name);
+        return out;
+      },
+    };
+  }
+
+  function badge(name: ReportField) {
+    if (!ai.includes(name)) return null;
+    return edited.includes(name)
+      ? <Badge tone="neutral" icon="✎">{t.editedBadge}</Badge>
+      : <Badge tone="warning" icon="✨">{t.aiBadge}</Badge>;
+  }
+  const withBadge = (name: ReportField, node: React.ReactNode) => (
+    <div className="relative">
+      {node}
+      {ai.includes(name) && <div className="absolute end-0 top-0">{badge(name)}</div>}
+    </div>
+  );
+
+  function clearDraft() {
+    photos.forEach((p) => URL.revokeObjectURL(p.url));
+    reset({ title: "", description: "", area: "" });
+    setQuick(""); setAi([]); setEdited([]); setPhotos([]); setPin(undefined); setStep(0); setRestored(false); setQuickDone(false);
   }
 
   async function makeDraft() {
     setBusy("draft");
-    const res = await fetch("/api/intake", { method: "POST", body: JSON.stringify({ text }) });
-    if (res.ok) setDraft((await res.json()).draft);
+    try {
+      const res = await fetch("/api/intake", { method: "POST", body: JSON.stringify({ text: quick }) });
+      if (!res.ok) throw new Error("draft failed");
+      const { draft } = (await res.json()) as { draft: Partial<ReportValues> };
+      for (const f of ["title", "description", "area"] as const) setValue(f, draft[f] ?? "", { shouldDirty: true });
+      if (isCategory(draft.category)) setValue("category", draft.category, { shouldDirty: true });
+      setAi([...FIELDS]);
+      setEdited([]);
+      setQuickDone(true);
+    } catch {
+      toast("error", t.draftFail);
+    }
     setBusy("");
   }
 
-  async function submit() {
-    setBusy("submit");
-    const res = await fetch("/api/cases", { method: "POST", body: JSON.stringify(draft) });
-    if (res.ok) router.push(`/issue/${(await res.json()).ref}`);
-    else setBusy("");
+  async function next() {
+    const names = STEP_FIELDS[step];
+    if (names.length && !(await trigger(names))) {
+      // Bring the first error into view (the category error sits below the tiles).
+      setTimeout(() => document.querySelector("[data-field-error]")?.scrollIntoView({ block: "center" }), 0);
+      return;
+    }
+    setRestored(false);
+    setStep((s) => Math.min(s + 1, LAST));
   }
 
-  const input = "w-full rounded-lg border border-slate-300 bg-white p-3";
+  async function submit(data: ReportData) {
+    setBusy("submit");
+    const item = { id: newId(), body: { ...data, constituencyId, ...(pin ? { lat: pin.lat, lng: pin.lng } : {}) } };
+    const result = navigator.onLine === false ? ({ kind: "network" } as const) : await sendReport(item);
+    if (result.kind === "sent") {
+      try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
+      setSentRef(result.ref);
+    } else if (result.kind === "network") {
+      // No signal: keep the report on the phone; QueueSync sends it when the connection returns.
+      writeQueue(enqueue(readQueue(), item.body, new Date(), item.id));
+      try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
+      setQueued(true);
+    } else {
+      toast("error", result.kind === "unauth" ? t.qSignInToSend : t.submitFail);
+    }
+    setBusy("");
+  }
+
+  // If something invalid slipped through (e.g. a restored draft), go to the first step with an error.
+  function jumpToError(errs: Record<string, unknown>) {
+    const i = STEP_FIELDS.findIndex((names) => names.some((n) => n in errs));
+    if (i >= 0) setStep(i);
+  }
+
+  const warn = hasPersonalNumber([quick, values.title, values.description, values.area, ...photos.map((p) => p.caption)].filter(Boolean).join(" "));
+  const category = values.category as Category | undefined;
+  const steps = [t.wizSteps.category, t.wizSteps.describe, t.wizSteps.location, t.wizSteps.evidence, t.wizSteps.review];
+  const titles = [t.stCategory, t.stDescribe, t.stLocation, t.stEvidence, t.stReview];
+
+  if (queued) return <ReportQueued t={t} onAnother={() => { setQueued(false); clearDraft(); }} />;
+  if (sentRef) return <ReportSuccess t={t} refId={sentRef} onAnother={() => { setSentRef(""); clearDraft(); }} />;
+
+  const isLast = step === LAST;
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-semibold text-civic">{t.reportTitle}</h1>
-      <p className="text-slate-600">{t.reportHint}</p>
-      <textarea className={input} rows={5} value={text} onChange={(e) => setText(e.target.value)} />
-      <div className="flex gap-3">
-        <button type="button" onClick={speak} className="rounded-lg border border-teal px-4 py-2 text-teal">{listening ? t.listening : `🎤 ${t.speak}`}</button>
-        <button type="button" disabled={text.trim().length < 3 || busy !== ""} onClick={makeDraft} className="rounded-lg bg-civic px-4 py-2 text-white disabled:opacity-50">{busy === "draft" ? t.drafting : t.draft}</button>
-      </div>
-      {draft && (
-        <div className="space-y-3 rounded-xl bg-white p-4 shadow-sm">
-          <p className="text-sm text-amber-800">{t.aiNote}</p>
-          <label className="block text-sm">{t.fTitle}<input className={input} value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} /></label>
-          <label className="block text-sm">{t.fCategory}
-            <select className={input} value={draft.category} onChange={(e) => setDraft({ ...draft, category: e.target.value })}>
-              {CATEGORIES.map((c) => <option key={c} value={c}>{t.cats[c]}</option>)}
-            </select>
-          </label>
-          <label className="block text-sm">{t.fDescription}<textarea className={input} rows={4} value={draft.description} onChange={(e) => setDraft({ ...draft, description: e.target.value })} /></label>
-          <label className="block text-sm">{t.fArea}<input className={input} value={draft.area} onChange={(e) => setDraft({ ...draft, area: e.target.value })} /></label>
-          <button type="button" disabled={busy !== ""} onClick={submit} className="w-full rounded-lg bg-leaf px-4 py-3 font-medium text-white disabled:opacity-50">{busy === "submit" ? t.submitting : t.submit}</button>
+    <form
+      noValidate
+      aria-label={t.reportCta}
+      onSubmit={(e) => { e.preventDefault(); if (isLast) void handleSubmit(submit, jumpToError)(); else void next(); }}
+      className="space-y-5 pb-28 [&_input]:scroll-mb-32 [&_select]:scroll-mb-32 [&_textarea]:scroll-mb-32"
+    >
+      <h1 className="text-2xl font-semibold text-civic">{t.reportCta}</h1>
+      <Stepper steps={steps} current={step} label={t.uiStepperAria} stepOf={fillNum(t.uiStepOf, { current: step + 1, total: steps.length }, lang)} />
+
+      {restored && (
+        <Card tone="info" className="flex flex-wrap items-center justify-between gap-2 text-sm">
+          <p role="status">{t.draftRestored}</p>
+          <Button variant="ghost" onClick={() => setConfirmDiscard(true)}>{t.draftDiscard}</Button>
+        </Card>
+      )}
+
+      <h2 ref={heading} tabIndex={-1} className="text-xl font-semibold text-civic outline-none">{titles[step]}</h2>
+
+      {step === 0 && (
+        <div className="space-y-5">
+          <Card tone="info" className="space-y-3">
+            <Textarea
+              label={t.quickTitle}
+              hint={t.quickHint}
+              placeholder={t.quickPlaceholder}
+              rows={4}
+              maxLength={3000}
+              value={quick}
+              onChange={(e) => setQuick(e.target.value)}
+            />
+            {warn && hasPersonalNumber(quick) && <PrivacyWarning t={t} />}
+            <div className="flex flex-wrap gap-3">
+              {speech.listening
+                ? <Button variant="danger" icon={<span aria-hidden>⏹</span>} onClick={speech.stop}>{t.vStop}</Button>
+                : <Button variant="secondary" icon={<span aria-hidden>🎤</span>} onClick={speech.start}>{t.speak}</Button>}
+              <Button loading={busy === "draft"} disabled={quick.trim().length < 3 || busy !== ""} onClick={() => void makeDraft()}>
+                {busy === "draft" ? t.drafting : t.draft}
+              </Button>
+            </div>
+            <p role="status" className="sr-only">{busy === "draft" ? t.drafting : ""}</p>
+            {speech.listening && (
+              <div role="status" aria-live="polite" className="rounded-xl border border-civic/30 bg-white p-3 text-sm">
+                <p className="font-medium text-civic"><span aria-hidden>🎤 </span>{t.listening} {t.vLive}</p>
+                <p className="mt-1 min-h-6 text-foreground">{speech.interim || t.vLiveEmpty}</p>
+              </div>
+            )}
+            {speech.problem && (
+              <p role="alert" className="rounded-xl border border-amber/60 bg-amber/10 p-3 text-sm">
+                {speech.problem === "unsupported" ? t.speakUnsupported : speech.problem === "denied" ? t.vDenied : speech.problem === "silence" ? t.vSilence : speech.problem === "network" ? t.vNetwork : t.vOther}
+              </p>
+            )}
+            {!speech.problem && <p className="text-sm text-muted">{t.vHint}</p>}
+            {quickDone && <p role="status" className="text-sm font-medium text-leaf-strong">✓ {t.quickDone}</p>}
+            {ai.length > 0 && <p className="text-sm text-muted">{t.aiNote}</p>}
+          </Card>
+          <CategoryPicker
+            t={t}
+            value={category}
+            badge={badge("category")}
+            error={errors.category?.message}
+            onChange={(c) => { touched("category"); setValue("category", c, { shouldDirty: true, shouldValidate: true }); }}
+          />
         </div>
       )}
-    </div>
+
+      {step === 1 && (
+        <div className="space-y-4">
+          {withBadge("title", <Input label={t.fTitle} hint={t.fTitleHint} maxLength={130} error={errors.title?.message} {...field("title")} />)}
+          {withBadge("description", <Textarea label={t.fDescription} hint={t.fDescHint} rows={7} maxLength={2100} error={errors.description?.message} {...field("description")} />)}
+          {warn && <PrivacyWarning t={t} />}
+        </div>
+      )}
+
+      {step === 2 && (
+        <div className="space-y-4">
+          <LocationPicker pin={pin} onPin={setPin} onArea={(name) => setValue("area", name, { shouldDirty: true, shouldValidate: true })} />
+          {withBadge("area", <Input label={t.fArea} hint={t.fAreaHint} placeholder={t.fAreaPlaceholder} maxLength={130} autoComplete="street-address" error={errors.area?.message} {...field("area")} />)}
+        </div>
+      )}
+
+      {step === 3 && <EvidenceStep t={t} lang={lang} photos={photos} onChange={setPhotos} />}
+
+      {step === 4 && (
+        <div className="space-y-4">
+          <p className="text-muted">{t.reviewHint}</p>
+          {warn && <PrivacyWarning t={t} />}
+          {ai.length > 0 && <p className="text-sm text-muted">{t.aiNote}</p>}
+          <ReviewRow t={t} label={t.fCategory} badge={badge("category")} onEdit={() => setStep(0)}>
+            {category ? (
+              <span className="flex items-center gap-3">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img loading="lazy" decoding="async" src={`/illustrations/cat-${category}.svg`} alt="" width={40} height={40} className="size-10" />
+                {t.cats[category]}
+              </span>
+            ) : "—"}
+          </ReviewRow>
+          <ReviewRow t={t} label={t.fTitle} badge={badge("title")} onEdit={() => setStep(1)}>{getValues("title") || "—"}</ReviewRow>
+          <ReviewRow t={t} label={t.fDescription} badge={badge("description")} onEdit={() => setStep(1)}><span className="whitespace-pre-wrap break-words">{getValues("description") || "—"}</span></ReviewRow>
+          <ReviewRow t={t} label={t.fArea} badge={badge("area")} onEdit={() => setStep(2)}>{getValues("area") || "—"}{pin ? ` · ${t.lpPinPlaced}` : ""}</ReviewRow>
+          <ReviewRow t={t} label={t.wizSteps.evidence} onEdit={() => setStep(3)}>
+            {photos.length === 0 ? <span className="text-muted">{t.evNone}</span> : (
+              <div className="space-y-2">
+                <ul className="flex flex-wrap gap-2">
+                  {photos.map((p, i) => (
+                    <li key={p.id}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={p.url} alt={fillNum(t.evAlt, { n: i + 1 }, lang)} className="size-20 rounded-lg object-cover" />
+                    </li>
+                  ))}
+                </ul>
+                <p className="text-sm text-muted">{t.evSoon}</p>
+              </div>
+            )}
+          </ReviewRow>
+          <p className="text-xs text-muted">{t.draftSaved}</p>
+        </div>
+      )}
+
+      <div
+        style={{ bottom: inset, paddingBottom: inset > 0 ? 0 : "env(safe-area-inset-bottom)" }}
+        className="fixed inset-x-0 z-30 border-t border-line/40 bg-white/95 backdrop-blur"
+      >
+        <div className="mx-auto flex max-w-3xl items-center gap-3 px-4 py-3">
+          {step > 0 && <Button variant="secondary" onClick={() => setStep((s) => s - 1)} disabled={busy === "submit"}>{t.wizBack}</Button>}
+          {isLast ? (
+            <Button type="submit" variant="success" size="lg" className="flex-1" loading={busy === "submit"} disabled={busy !== ""}>
+              {busy === "submit" ? t.submitting : t.submit}
+            </Button>
+          ) : (
+            <Button type="submit" className="flex-1" disabled={busy === "draft"}>{t.wizNext}</Button>
+          )}
+        </div>
+      </div>
+
+      <Dialog
+        open={confirmDiscard}
+        onClose={() => setConfirmDiscard(false)}
+        title={t.discardTitle}
+        description={t.discardBody}
+        actions={
+          <>
+            <Button variant="secondary" onClick={() => setConfirmDiscard(false)}>{t.discardNo}</Button>
+            <Button variant="danger" onClick={() => { clearDraft(); setConfirmDiscard(false); }}>{t.discardYes}</Button>
+          </>
+        }
+      />
+    </form>
+  );
+}
+
+function ReviewRow({ t, label, badge, onEdit, children }: { t: Dict; label: string; badge?: React.ReactNode; onEdit: () => void; children: React.ReactNode }) {
+  return (
+    <Card as="section" className="space-y-1">
+      <div className="flex items-center justify-between gap-2">
+        <h3 className="flex flex-wrap items-center gap-2 text-sm font-medium text-muted">{label}{badge}</h3>
+        <Button variant="ghost" onClick={onEdit} aria-label={t.reviewEditFor.replace("{field}", label)}>{t.reviewEdit}</Button>
+      </div>
+      <div className="text-base">{children}</div>
+    </Card>
   );
 }

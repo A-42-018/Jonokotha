@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { z } from "zod";
 import { ApiError, ERROR_STATUS, fromDbError, newRequestId, parse, problem } from "@/lib/api";
 import { decodeCursor, encodeCursor, PageQuery, toPage, afterCursor } from "@/lib/pagination";
-import { performOfficeAction } from "@/lib/office-actions";
+import { performOfficeAction } from "@/lib/office-endpoints";
 import { performCitizenAction } from "@/lib/citizen-actions";
 
 describe("error format", () => {

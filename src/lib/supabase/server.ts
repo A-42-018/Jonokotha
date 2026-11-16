@@ -19,17 +19,21 @@ export async function supabaseServer(requestId?: string) {
   });
 }
 
+/** Platform role as the frontend sees it (profiles.role; the finer office roles live in `actor`). */
+export type Role = "citizen" | "staff" | "admin";
+
 export async function currentUser(requestId?: string) {
   const sb = await supabaseServer(requestId);
   const { data } = await sb.auth.getUser();
-  if (!data.user) return { sb, user: null, isStaff: false, actor: null as Actor | null };
+  if (!data.user) return { sb, user: null, role: null, isStaff: false, actor: null as Actor | null };
   const { data: p } = await sb.from("profiles").select("role").eq("id", data.user.id).maybeSingle();
-  const isStaff = p?.role === "staff" || p?.role === "admin";
+  const role: Role = p?.role === "admin" ? "admin" : p?.role === "staff" ? "staff" : "citizen";
+  const isStaff = role !== "citizen";
   // Office scopes and roles come from the database for this session user, never from the request.
   let aal: Actor["aal"] = "aal1";
-  if (p?.role && p.role !== "citizen") {
+  if (isStaff) {
     const { data: lvl } = await sb.auth.mfa.getAuthenticatorAssuranceLevel();
     if (lvl?.currentLevel === "aal2") aal = "aal2";
   }
-  return { sb, user: data.user, isStaff, actor: await loadActor(sb, data.user.id, aal) };
+  return { sb, user: data.user, role, isStaff, actor: await loadActor(sb, data.user.id, aal) };
 }

@@ -1,89 +1,63 @@
-import { z } from "zod";
-import { ApiError, fromDbError, parse, type Ctx, type Result } from "./api";
-import { TRANSITIONS } from "./transitions";
-import { transitionIssue } from "./store";
-import type { IssueStatus } from "./types";
+import type { Status } from "./types";
 
-const text = (min: number, max: number) => z.string().trim().min(min, `at least ${min} characters`).max(max, `at most ${max} characters`);
-const optional = (max: number) => z.string().trim().max(max, `at most ${max} characters`).optional();
-const shared = { message: optional(1000), internal_note: optional(1000) };
+/** Staff actions on a report. `request_info` does not change the public status. */
+export const OFFICE_ACTIONS = ["acknowledge", "request_info", "refer", "resolve"] as const;
+export type OfficeAction = (typeof OFFICE_ACTIONS)[number];
 
-/** Request body per office action. Unknown keys are rejected so typos do not silently do nothing. */
-const SCHEMAS = {
-  acknowledge: z.strictObject({ ...shared }),
-  assign: z.strictObject({ assignee: z.uuid("must be a user id"), reason: optional(500) }),
-  "request-information": z.strictObject({ message: text(3, 1000), internal_note: optional(1000) }),
-  forward: z.strictObject({
-    agency_id: z.uuid().optional(), agency_name: optional(200), contact_channel: optional(300), external_reference: optional(100), ...shared,
-  }).superRefine((v, ctx) => {
-    if (!v.agency_id && !v.agency_name) ctx.addIssue({ code: "custom", path: ["agency_id"], message: "agency_id or agency_name is required" });
-    if (!v.contact_channel && !v.external_reference) ctx.addIssue({ code: "custom", path: ["contact_channel"], message: "contact_channel or external_reference is required" });
-  }),
-  update: z.strictObject({
-    note: text(1, 1000).optional(), public: z.boolean().optional(),
-    status: z.enum(["under_review", "in_progress"]).optional(),
-    assignee: z.uuid().optional(), agency_id: z.uuid().optional(), agency_name: optional(200), contact_channel: optional(300), external_reference: optional(100),
-    ...shared,
-  }).superRefine((v, ctx) => {
-    if (!!v.note === !!v.status) ctx.addIssue({ code: "custom", path: ["note"], message: "send either a note or a status" });
-  }),
-  resolve: z.strictObject({ resolution_note: text(5, 2000), evidence_url: z.url().max(500).optional(), ...shared }),
-  close: z.strictObject({ reason: optional(500), message: optional(1000) }),
-  reject: z.strictObject({ reason: text(5, 1000), appeal_route: text(5, 500), ...shared }),
-  "mark-duplicate": z.strictObject({ master_ref: z.string().trim().regex(/^[A-Za-z0-9-]{3,40}$/, "must be an issue reference"), reason: optional(500), ...shared }),
-  "out-of-jurisdiction": z.strictObject({ reason: text(5, 1000), ...shared }),
-  reopen: z.strictObject({ reason: text(5, 1000), ...shared }),
-} as const;
-export type OfficeEndpoint = keyof typeof SCHEMAS;
-export const isOfficeAction = (s: string): s is OfficeEndpoint => s in SCHEMAS;
+export const NOTE_MIN = 10;
+export const NOTE_MAX = 500;
 
-/** Target status for actions that map 1:1 onto a transition. */
-const TARGET: Partial<Record<OfficeEndpoint, IssueStatus>> = {
-  acknowledge: "acknowledged", "request-information": "needs_information", forward: "referred_to_authority", resolve: "resolved",
-  close: "closed", reject: "rejected", "mark-duplicate": "duplicate", "out-of-jurisdiction": "out_of_jurisdiction", reopen: "reopened",
+/** Which actions make sense at each status (UI only; the backend must enforce the same rules). */
+export function canDo(action: OfficeAction, status: Status): boolean {
+  switch (action) {
+    case "acknowledge": return status === "received";
+    case "request_info":
+    case "refer": return status === "received" || status === "acknowledged";
+    case "resolve": return status !== "resolved";
+  }
+}
+
+export type NoteError = "empty" | "short" | "long" | null;
+
+export function validateNote(raw: string): NoteError {
+  const n = raw.trim().length;
+  if (n === 0) return "empty";
+  if (n < NOTE_MIN) return "short";
+  if (n > NOTE_MAX) return "long";
+  return null;
+}
+
+/** One line of the staff-only audit trail. Staff only: never render this on public pages or in My Reports. */
+export interface AuditEntry {
+  id: string;
+  /** Display name of the staff member. null when the backend does not record the actor yet. */
+  actor: string | null;
+  action: OfficeAction | "received";
+  at: string;
+  note?: string;
+}
+
+export type SubmitResult = "ok" | "forbidden" | "fail";
+export type SubmitAction = (action: OfficeAction, note: string) => Promise<SubmitResult>;
+
+const STATUS_ACTION: Record<Status, AuditEntry["action"]> = {
+  received: "received", acknowledged: "acknowledge", referred: "refer", resolved: "resolve",
 };
 
-type IssueRef = { id: string; status: IssueStatus };
-
-function transitionError(r: Extract<Awaited<ReturnType<typeof transitionIssue>>, { ok: false }>) {
-  switch (r.code) {
-    case "not_found": return new ApiError("not_found", "Issue not found.");
-    case "forbidden": return new ApiError("forbidden", "You are not allowed to do this.");
-    case "invalid_transition": return new ApiError("invalid_transition", "This change is not allowed from the issue's current status.");
-    case "missing_field": return new ApiError("validation_failed", "A required field is missing or invalid.", { [r.field ?? "_"]: "required_or_invalid" });
-    case "rule_not_met": return new ApiError("rule_not_met", r.field === "review_period_active" ? "The citizen review period is still running." : "A rule is not met.", r.field ? { _: r.field } : {});
-    default: return new ApiError("internal_error", "Something went wrong.");
-  }
+/**
+ * Builds audit entries from what the store returns today (status events with an optional note).
+ * There is no actor and no "request_info" event yet, so actor is null.
+ */
+export function auditFromTimeline(timeline: { status: Status; at: string; note?: string }[]): AuditEntry[] {
+  return timeline.map((e, i) => ({ id: `${i}-${e.at}`, actor: null, action: STATUS_ACTION[e.status], at: e.at, note: e.note }));
 }
 
-export async function performOfficeAction(c: Ctx, action: OfficeEndpoint, issue: IssueRef): Promise<Result> {
-  const body = parse(SCHEMAS[action] as z.ZodType<Record<string, unknown>>, c.body);
-  const run = async (to: IssueStatus, fields: Record<string, unknown>) => {
-    const r = await transitionIssue(c.sb, issue.id, to, fields, c.rid);
-    if (!r.ok) throw transitionError(r);
-    return { data: { ref: c.params.ref, status: r.status } };
-  };
-
-  if (action === "assign") {
-    // Where the table has an "assigned" transition for this status, assigning also moves the issue to "assigned";
-    // otherwise only the assignee changes.
-    if (TRANSITIONS.some((t) => t.from === issue.status && t.to === "assigned" && t.actor === "office")) return run("assigned", body);
-    const { data, error } = await c.sb.rpc("assign_issue", { p_issue: issue.id, p_assignee: body.assignee, p_reason: body.reason ?? null, p_request_id: c.rid });
-    if (error) throw fromDbError(error);
-    return { data: { ref: c.params.ref, ...(data as object) } };
-  }
-  if (action === "update") {
-    if (body.note) {
-      const { data, error } = await c.sb.rpc("add_issue_note", { p_issue: issue.id, p_note: body.note, p_public: body.public === true, p_request_id: c.rid });
-      if (error) throw fromDbError(error);
-      return { status: 201, data: { ref: c.params.ref, ...(data as object) } };
-    }
-    return run(body.status as IssueStatus, body);
-  }
-  if (action === "mark-duplicate") {
-    const { data: master } = await c.sb.from("issues").select("id").eq("ref", body.master_ref as string).maybeSingle();
-    if (!master) throw new ApiError("validation_failed", "Master issue not found in your office.", { master_ref: "not_found" });
-    return run("duplicate", { ...body, master_issue: master.id });
-  }
-  return run(TARGET[action]!, body);
-}
+/** Default submitter: the existing approve route. It accepts acknowledge and refer only, and ignores `note` today. */
+export const submitToApproveRoute = (cref: string): SubmitAction => async (action, note) => {
+  try {
+    const r = await fetch(`/api/cases/${cref}/approve`, { method: "POST", body: JSON.stringify({ action, note: note.trim() }), signal: AbortSignal.timeout(15000) });
+    if (r.ok) return "ok";
+    if (r.status === 401 || r.status === 403) return "forbidden";
+  } catch { /* fall through */ }
+  return "fail";
+};

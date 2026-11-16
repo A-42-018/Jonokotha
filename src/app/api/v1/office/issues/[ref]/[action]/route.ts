@@ -1,5 +1,5 @@
 import { ApiError, run } from "@/lib/api";
-import { isOfficeAction, performOfficeAction, type OfficeEndpoint } from "@/lib/office-actions";
+import { isOfficeAction, performOfficeAction, type OfficeEndpoint } from "@/lib/office-endpoints";
 
 const REF = /^[A-Za-z0-9-]{3,40}$/;
 
