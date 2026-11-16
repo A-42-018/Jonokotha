@@ -6,6 +6,7 @@ import { mfaRequired, type Actor } from "./auth";
 import { clientIp, sameOrigin } from "./http";
 import { rateLimit } from "./rate-limit";
 import { captureError } from "./monitor";
+import { kickDeliveries } from "./notify/opportunistic";
 import { currentUser } from "./supabase/server";
 
 /**
@@ -162,6 +163,7 @@ export async function run(req: Request, params: Record<string, string>, opts: Op
     status = out.status ?? 200;
     const payload = { data: out.data ?? null, ...(out.page ? { page: out.page } : {}) };
     if (idem) { await idem.sb.rpc("idempotency_finish", { p_key: idem.key, p_endpoint: opts.name, p_status: status, p_body: payload }); idem = null; }
+    if (req.method !== "GET" && req.method !== "HEAD") kickDeliveries();
     return NextResponse.json({ ...payload, request_id: rid }, { status, headers: { "x-request-id": rid, ...out.headers } });
   } catch (e) {
     if (idem) await idem.sb.rpc("idempotency_release", { p_key: idem.key, p_endpoint: opts.name }).then(() => null, () => null);
