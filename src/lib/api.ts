@@ -91,6 +91,16 @@ export function fromDbError(error: { code?: string; details?: string | null; mes
   }
 }
 
+/**
+ * Administrators reading private records leave an audit row (masterplan §5.6). Fails closed: if the trace cannot be
+ * written the read does not happen. Other roles are not logged here (their access is scoped and routine).
+ */
+export async function auditAdminRead(c: Ctx, resourceType: string, resourceId: string | null, meta: Record<string, unknown> = {}) {
+  if (c.actor?.role !== "admin") return;
+  const { error } = await c.sb.rpc("record_admin_access", { p_resource_type: resourceType, p_resource_id: resourceId, p_meta: meta });
+  if (error) throw new ApiError("internal_error", "The access could not be recorded, so it was not allowed.");
+}
+
 function log(entry: Record<string, unknown>) {
   // One JSON line per request. Never log bodies, tokens or query strings (they can hold personal data).
   console.log(JSON.stringify({ ts: new Date().toISOString(), ...entry }));
@@ -107,7 +117,7 @@ export async function run(req: Request, params: Record<string, string>, opts: Op
       if (!r.ok) throw new ApiError("rate_limited", "Too many requests. Try again shortly.", {}, { "Retry-After": String(r.retryAfterSec) });
     }
     const { data: body, raw } = await readBody(req, opts.maxBytes ?? 16 * 1024);
-    const { sb, user, actor } = await currentUser();
+    const { sb, user, actor } = await currentUser(rid);
     actorId = user?.id;
     if (opts.auth === "required" && !user) throw new ApiError("unauthenticated", "Sign in to continue.");
 

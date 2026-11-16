@@ -1,4 +1,4 @@
-import { ApiError, parse, run } from "@/lib/api";
+import { ApiError, auditAdminRead, parse, run } from "@/lib/api";
 import { listOffice, OfficeFilters } from "@/lib/issues-service";
 import { PageQuery } from "@/lib/pagination";
 
@@ -8,6 +8,8 @@ export async function GET(req: Request) {
     if (!c.actor || (c.actor.role !== "admin" && c.actor.offices.length === 0)) throw new ApiError("forbidden", "Office access is required.");
     const q = Object.fromEntries(c.url.searchParams);
     const { limit, cursor } = parse(PageQuery, q);
-    return listOffice(c.sb, c.user!.id, parse(OfficeFilters, q), limit, cursor);
+    const filters = parse(OfficeFilters, q);
+    await auditAdminRead(c, "issue_list", null, { filters: Object.keys(filters), limit }); // names only, never values
+    return listOffice(c.sb, c.user!.id, filters, limit, cursor);
   });
 }

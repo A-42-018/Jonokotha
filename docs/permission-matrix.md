@@ -63,7 +63,7 @@ Deny by default: RLS is on for every table in `public`, and a table with no poli
 | consents | none | read, insert and withdraw own | none | none | none |
 | user_preferences | none | read, insert, update own | none | none | none |
 | office_members | none | none | own row; managers read their office roster | none | read all |
-| audit_logs | none | none | none | none | read |
+| audit_logs | none | none | none | none | read (append-only; see docs/audit.md) |
 | ai_runs, ai_suggestions | none | none | read only for issues in scope | none | read all |
 | knowledge_chunks | none | none | read | none | read |
 | graph_edges | none | none | none | none | read |

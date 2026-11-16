@@ -2,9 +2,14 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { loadActor, type Actor } from "../auth";
 
-export async function supabaseServer() {
+/**
+ * Server-side client for the signed-in user. When a request id is given it is sent to the database as
+ * x-jk-request-id, so audit_logs rows written by triggers carry the same id as the API log line.
+ */
+export async function supabaseServer(requestId?: string) {
   const jar = await cookies();
   return createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
+    ...(requestId ? { global: { headers: { "x-jk-request-id": requestId } } } : {}),
     cookies: {
       getAll: () => jar.getAll(),
       setAll(list) {
@@ -14,8 +19,8 @@ export async function supabaseServer() {
   });
 }
 
-export async function currentUser() {
-  const sb = await supabaseServer();
+export async function currentUser(requestId?: string) {
+  const sb = await supabaseServer(requestId);
   const { data } = await sb.auth.getUser();
   if (!data.user) return { sb, user: null, isStaff: false, actor: null as Actor | null };
   const { data: p } = await sb.from("profiles").select("role").eq("id", data.user.id).maybeSingle();
