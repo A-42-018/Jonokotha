@@ -5,6 +5,7 @@ import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import { Checkbox } from "@/components/ui/Choice";
 import DataRights from "@/components/me/DataRights";
+import PushSettings from "@/components/me/PushSettings";
 import Dialog from "@/components/ui/Dialog";
 import { useToast } from "@/components/ui/Toast";
 import { useLang } from "@/components/ui/useLang";
@@ -29,9 +30,9 @@ export default function SettingsPanel({ email, role }: { email: string | null; r
         <Checkbox label={t.stNotifStatus} checked={prefs.status} onChange={(e) => setPrefs({ ...prefs, status: e.target.checked })} />
         <Checkbox label={t.stNotifReply} checked={prefs.reply} onChange={(e) => setPrefs({ ...prefs, reply: e.target.checked })} />
         <Checkbox label={t.stNotifArea} checked={prefs.area} onChange={(e) => setPrefs({ ...prefs, area: e.target.checked })} />
-        <Checkbox label={t.stNotifPush} hint={t.stNotifPushSoon} checked={false} disabled readOnly />
         <p className="mt-2 text-sm text-muted">{t.stNotifLocal}</p>
       </Card>
+      <PushSettings signedIn={!!email} />
       <Card title={t.stAccount}>
         {email ? <p className="break-all font-medium">{email}{role ? ` · ${role}` : ""}</p> : (
           <div className="space-y-2"><p className="text-muted">{t.stSignedOut}</p><Link href="/login" className="inline-flex min-h-11 items-center text-civic underline">{t.signIn}</Link></div>
