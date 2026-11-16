@@ -32,8 +32,10 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   const t = dict[lang];
   let email: string | null = null;
   let isStaff = false;
+  let role: "citizen" | "staff" | "admin" | null = null;
   try {
-    const { user, isStaff: staff } = await currentUser();
+    const { user, isStaff: staff, role: r } = await currentUser();
+    role = r;
     email = user?.email ?? null;
     isStaff = staff;
   } catch { /* Supabase not configured: show signed-out header */ }
@@ -53,8 +55,8 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           account={
             <AccountMenu
               email={email}
-              isStaff={isStaff}
-              labels={{ account: t.account, signIn: t.signIn, signOut: t.signOut, signingOut: t.signingOut, staff: t.staffRole }}
+              role={role}
+              labels={{ account: t.account, signIn: t.signIn, signOut: t.signOut, signingOut: t.signingOut, staff: t.staffRole, admin: t.roleAdmin, citizen: t.roleCitizen }}
             />
           }
         />

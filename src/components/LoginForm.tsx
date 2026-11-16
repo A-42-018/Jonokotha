@@ -6,7 +6,7 @@ import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import { useT } from "@/components/ui/useT";
 
-export default function LoginForm() {
+export default function LoginForm({ next = "/report" }: { next?: string }) {
   const t = useT();
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -27,7 +27,7 @@ export default function LoginForm() {
     setBusy(true); setCodeErr("");
     const { error } = await supabaseBrowser().auth.verifyOtp({ email, token: code.trim(), type: "email" });
     setBusy(false);
-    if (error) setCodeErr(t.loginVerifyFail); else { router.push("/report"); router.refresh(); }
+    if (error) setCodeErr(t.loginVerifyFail); else { router.push(next); router.refresh(); }
   }
 
   return (

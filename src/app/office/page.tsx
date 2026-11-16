@@ -1,17 +1,15 @@
-import { redirect } from "next/navigation";
 import CaseQueue from "@/components/office/CaseQueue";
 import NoAccess from "@/components/ui/NoAccess";
 import State from "@/components/ui/State";
 import { dict, getLang } from "@/lib/i18n";
 import { listCases } from "@/lib/store";
-import { currentUser } from "@/lib/supabase/server";
+import { guardStaff } from "@/lib/guard";
 
 export default async function Office() {
   const lang = await getLang();
   const t = dict[lang];
-  const { sb, user, isStaff } = await currentUser();
-  if (!user) redirect("/login?expired=1");
-  if (!isStaff) return <NoAccess t={t} />;
+  const { sb, denied } = await guardStaff("/office");
+  if (denied) return <NoAccess t={t} email={denied.email} role={denied.role} next="/office" />;
   const cases = await listCases(sb);
   return (
     <div className="space-y-4">

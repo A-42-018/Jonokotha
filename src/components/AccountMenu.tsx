@@ -4,9 +4,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabaseBrowser } from "@/lib/supabase/client";
 
-type Labels = { account: string; signIn: string; signOut: string; signingOut: string; staff: string };
+type Labels = { account: string; signIn: string; signOut: string; signingOut: string; staff: string; admin: string; citizen: string };
 
-export default function AccountMenu({ email, isStaff, labels }: { email: string | null; isStaff: boolean; labels: Labels }) {
+export default function AccountMenu({ email, role, labels }: { email: string | null; role: "citizen" | "staff" | "admin" | null; labels: Labels }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -54,7 +54,7 @@ export default function AccountMenu({ email, isStaff, labels }: { email: string 
       {open && (
         <div role="menu" className="absolute end-0 z-20 mt-2 w-64 rounded-xl border border-slate-200 bg-white p-3 shadow-lg">
           <p className="truncate text-sm text-slate-600">{email}</p>
-          {isStaff && <p className="mt-1 inline-block rounded-full bg-teal/15 px-2 py-0.5 text-xs text-teal-strong">{labels.staff}</p>}
+          <p className="mt-1 inline-block rounded-full bg-teal/15 px-2 py-0.5 text-xs text-teal-strong">{role === "admin" ? labels.admin : role === "staff" ? labels.staff : labels.citizen}</p>
           <button
             type="button"
             role="menuitem"

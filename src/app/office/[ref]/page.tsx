@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import AiPanel from "@/components/office/AiPanel";
 import AuditList from "@/components/office/AuditList";
 import OfficeActions from "@/components/office/OfficeActions";
@@ -9,15 +9,14 @@ import { AGENCIES } from "@/lib/demo-data";
 import { dict, fmtDate, getLang } from "@/lib/i18n";
 import { auditFromTimeline } from "@/lib/office-actions";
 import { getCase } from "@/lib/store";
-import { currentUser } from "@/lib/supabase/server";
+import { guardStaff } from "@/lib/guard";
 
 export default async function Case({ params }: PageProps<"/office/[ref]">) {
   const { ref } = await params;
-  const { sb, user, isStaff } = await currentUser();
-  if (!user) redirect("/login?expired=1");
+  const { sb, denied } = await guardStaff(`/office/${ref}`);
   const lang = await getLang();
   const t = dict[lang];
-  if (!isStaff) return <NoAccess t={t} />;
+  if (denied) return <NoAccess t={t} email={denied.email} role={denied.role} next={`/office/${ref}`} />;
   const c = await getCase(sb, ref);
   if (!c) notFound();
   const agency = AGENCIES.find((a) => a.id === c.ai.agencyId);
