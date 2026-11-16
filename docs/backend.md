@@ -24,7 +24,7 @@ Phases follow the sprints (§24). Dates are 2026.
 
 ## Phase 0 — Preliminary submission (15–20 Nov)
 
-**Status 2026-11-16:** code for 0.2, 0.4, 0.5, 0.6, 0.7, 0.9, 0.10 is done (migration 0003, `seed.sql`, `check:env`, `seed:demo`, `pii.ts`, rate limits, tests). Waiting on the owner: 0.1 (apply migrations), 0.2 (valid Anthropic key), 0.3 (manual test log), 0.8 (Vercel deploy). See `docs/backend-setup.md`.
+**Status 2026-11-16:** code for 0.2, 0.4, 0.5, 0.6, 0.7, 0.9, 0.10 is done (migration 0003, `seed.sql`, `check:env`, `seed:demo`, `pii.ts`, rate limits, tests). Done since: migrations applied (0.1), AI key valid via gateway (0.2), sign-in and staff approval verified (0.3), staging deployed at https://jonokotha.vercel.app (0.8). Still open: service-role key and `npm run seed:demo` (0.10), phone PWA check, citizen API 403 check. See `docs/backend-setup.md`.
 
 Goal: the golden path works on staging with real auth and real AI.
 
