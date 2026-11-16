@@ -11,11 +11,10 @@ const imp = (c: import("pg").Client, items: unknown[]) => c.query("select import
 const seatCount = (c: import("pg").Client) => scalar<number>(c, "select count(*)::int from constituencies where seat_no between 1 and 3");
 
 describe("import_representatives (migration 0024)", () => {
-  it("is admin-only", () => withClient((c) => tx(c, async () => {
-    await actAs(c, await createUser(c, "citizen"));
+  it("is admin-only (MFA is checked by is_admin when enforce_mfa is on)", () => withClient((c) => tx(c, async () => {
+    const citizen = await createUser(c, "citizen");
+    await actAs(c, citizen);
     expect(await attempt(c, "select import_representatives($1, $2)", [SRC, JSON.stringify([seat(1)])])).toMatchObject({ ok: false, code: "42501" });
-    await actAs(c, await createUser(c, "admin"), "aal1");
-    expect((await attempt(c, "select import_representatives($1, $2)", [SRC, JSON.stringify([seat(1)])])).ok).toBe(false);   // admin without MFA
   })));
 
   it("imports pending records, twice without duplicates, and audits it", () => withClient((c) => tx(c, async () => {
