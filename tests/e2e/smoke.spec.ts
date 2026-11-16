@@ -57,7 +57,7 @@ test.describe("phase 2 public pages", () => {
   test("ideas: sample banner, tabs switch, support needs sign-in, new idea needs sign-in", async ({ page }) => {
     await page.goto("/ideas");
     await expect(page.getByText("নমুনা: এখানকার আইডিয়া").first()).toBeVisible();
-    await expect(page.getByRole("link", { name: /সমর্থন জানাতে সাইন ইন/ }).first()).toBeVisible();
+    await expect(page.getByRole("link", { name: /আমিও চাই.{0,3} জানাতে সাইন ইন/ }).first()).toBeVisible();
     await page.getByRole("tab", { name: "বিবেচনায়" }).click();
     await expect(page.getByRole("tabpanel").filter({ hasText: "বিবেচনায় আছে" }).first()).toBeVisible();
     await page.getByLabel("আইডিয়া খুঁজুন").fill("zzzz");

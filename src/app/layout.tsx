@@ -20,10 +20,11 @@ import { dict, getLang } from "@/lib/i18n";
 const head = Anek_Bangla({ variable: "--font-head", subsets: ["bengali", "latin"], weight: ["600"], preload: false });
 const body = Hind_Siliguri({ variable: "--font-body", subsets: ["bengali", "latin"], weight: ["400", "500", "600"], preload: false });
 
-export const metadata: Metadata = {
-  title: "জনকথা — Jonokotha",
-  description: "আপনার এলাকার সমস্যা, সরাসরি জনপ্রতিনিধির কাছে",
-};
+/** Title and description follow the page language (the Bangla default, or English when chosen). */
+export async function generateMetadata(): Promise<Metadata> {
+  const t = dict[await getLang()];
+  return { title: `${t.appName} — Jonokotha`, description: t.tagline };
+}
 export const viewport: Viewport = {
   themeColor: "#1d5fa8",
   width: "device-width",
@@ -46,7 +47,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang={lang} className={`${head.variable} ${body.variable}`}>
       <body className="min-h-screen">
-        <I18nProvider dicts={{ [lang]: t }}>
+        <I18nProvider lang={lang} dicts={{ [lang]: t }}>
         <TopNav
           isStaff={isStaff}
           picker={

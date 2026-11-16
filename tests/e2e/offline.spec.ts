@@ -21,7 +21,7 @@ test.describe("offline and resilience", () => {
 
     await context.setOffline(true);
     await page.locator('button[type="submit"]').click();
-    await expect(page.getByRole("heading", { name: "রিপোর্ট জমা রাখা হয়েছে" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "সমস্যাটি ফোনে রাখা হয়েছে" })).toBeVisible();
     const queued = await page.evaluate(() => JSON.parse(localStorage.getItem("jonokotha:report-queue:v1") ?? "[]"));
     expect(queued).toHaveLength(1);
     expect(queued[0]).toMatchObject({ title: "রাস্তায় বড় গর্ত", state: "queued" });
@@ -34,7 +34,7 @@ test.describe("offline and resilience", () => {
     });
     await context.setOffline(false);
     await page.evaluate(() => window.dispatchEvent(new Event("online")));
-    await expect(page.getByText("জমা রাখা রিপোর্ট পাঠানো হয়েছে। রেফারেন্স: JK-TEST-1")).toBeVisible();
+    await expect(page.getByText("ফোনে রাখা সমস্যা পাঠানো হয়েছে। সমস্যা নম্বর: JK-TEST-1")).toBeVisible();
     expect(posted).toEqual({ key: queued[0].id, title: "রাস্তায় বড় গর্ত" });
     expect(await page.evaluate(() => JSON.parse(localStorage.getItem("jonokotha:report-queue:v1") ?? "[]"))).toEqual([]);
   });

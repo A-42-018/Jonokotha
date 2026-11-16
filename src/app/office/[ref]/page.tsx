@@ -24,7 +24,7 @@ export default async function Case({ params }: PageProps<"/office/[ref]">) {
   return (
     <div className="space-y-4">
       <Link href="/office" className="inline-flex min-h-11 items-center text-civic underline focus-visible:outline-2 focus-visible:outline-civic">← {t.back}</Link>
-      <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:gap-6">
+      <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:gap-6">
       <div className="space-y-4">
       <header className="space-y-2">
         <h1 className="text-2xl font-semibold text-civic">{c.title}</h1>
@@ -32,7 +32,7 @@ export default async function Case({ params }: PageProps<"/office/[ref]">) {
           <span>{c.ref}</span>
           <StatusChip status={c.status} label={t.statuses[c.status]} />
           <span className="text-teal-strong">{t.cats[c.category]}</span>
-          <span>{c.area || t.ofNoArea}</span>
+          <span className="min-w-0 max-w-full break-words">{c.area || t.ofNoArea}</span>
           <span>{fmtDate(c.createdAt, lang)}</span>
         </div>
       </header>

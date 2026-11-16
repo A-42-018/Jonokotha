@@ -27,6 +27,6 @@ export function validateAsk(v: { kind: string; topic: string; subject: string; m
 
 /** SAMPLE FAQ (নমুনা): in production only verified office answers appear here. */
 export const SAMPLE_FAQ = [
-  { id: "f1", qBn: "নমুনা: অফিসে অভিযোগ জানানোর পর কত দিনে উত্তর পাওয়া যায়?", qEn: "Sample: how long until I get a reply after reporting to the office?", aBn: "সাধারণত কয়েক দিনের মধ্যে প্রথম সাড়া দেওয়ার চেষ্টা করা হয়। নির্দিষ্ট সময়ের প্রতিশ্রুতি নয়। (নমুনা উত্তর)", aEn: "The office usually tries to respond within a few days. This is not a fixed promise. (sample answer)" },
+  { id: "f1", qBn: "নমুনা: অফিসে সমস্যা জানানোর পর কত দিনে উত্তর পাওয়া যায়?", qEn: "Sample: how long until I get a reply after reporting to the office?", aBn: "সাধারণত কয়েক দিনের মধ্যে প্রথম সাড়া দেওয়ার চেষ্টা করা হয়। নির্দিষ্ট সময়ের প্রতিশ্রুতি নয়। (নমুনা উত্তর)", aEn: "The office usually tries to respond within a few days. This is not a fixed promise. (sample answer)" },
   { id: "f2", qBn: "নমুনা: জরুরি বিপদে কী করব?", qEn: "Sample: what do I do in an emergency?", aBn: "জরুরি বিপদে ৯৯৯-এ ফোন করুন। এই প্ল্যাটফর্ম জরুরি সেবা নয়। (নমুনা উত্তর)", aEn: "In an emergency call 999. This platform is not an emergency service. (sample answer)" },
 ];

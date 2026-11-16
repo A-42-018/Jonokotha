@@ -34,6 +34,16 @@ for (const lang of ["bn", "en"] as const) {
       });
     }
 
+    for (const path of [...PUBLIC, "/login", "/me", "/welcome", "/settings", "/privacy", "/notifications"]) {
+      test(`renders in ${lang} without an error page: ${path}`, async ({ page }) => {
+        const res = await page.goto(path);
+        expect(res?.status()).toBeLessThan(400);
+        await expect(page.locator("html")).toHaveAttribute("lang", lang);
+        await expect(page.locator("#__next_error__")).toHaveCount(0);
+        await expect(page.locator("main h1, main h2").first()).toBeVisible();
+      });
+    }
+
     for (const path of PUBLIC) {
       test(`reflow at 200% zoom: no horizontal scroll on ${path}`, async ({ page, isMobile }) => {
         test.skip(isMobile, "zoom is simulated by a narrower viewport; run on desktop");
@@ -80,3 +90,17 @@ test("keyboard only: every stop in the report wizard shows a focus ring", async 
   }
   expect(seen.size).toBeGreaterThan(8);
 });
+
+for (const name of ["issue-long", "case-long", "office"]) {
+  test(`long unbroken text wraps: no horizontal scroll on ${name}`, async ({ page }) => {
+    const res = await page.goto(`/dev/screens/${name}`);
+    test.skip(res?.status() !== 200, "demo screens are off (start the server with JK_AUDIT=1)");
+    await page.waitForLoadState("networkidle");
+    const over = await page.evaluate(() => {
+      const doc = document.documentElement;
+      // Table scrolls inside its own wrapper are fine; the page itself must not.
+      return { page: doc.scrollWidth - doc.clientWidth, wide: [...document.querySelectorAll("main *")].filter((e) => !e.closest("[data-scroll-x], .overflow-x-auto") && e.getBoundingClientRect().right > doc.clientWidth + 1 && getComputedStyle(e).position !== "fixed").slice(0, 3).map((e) => e.tagName + "." + String(e.className).slice(0, 60)) };
+    });
+    expect(over.page, `page is wider than the screen: ${over.wide.join(", ")}`).toBeLessThanOrEqual(0);
+  });
+}

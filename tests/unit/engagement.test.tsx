@@ -49,7 +49,7 @@ describe("IdeaCard support", () => {
     render(<ToastProvider><IdeaCard idea={idea} signedIn /></ToastProvider>);
     await user.click(screen.getByRole("button", { name: t.idSupport }));
     expect(JSON.parse(localStorage.getItem(SUPPORT_KEY)!)).toEqual([idea.id]);
-    expect(screen.getByText("৪৯ জন সমর্থন করেছেন")).toBeInTheDocument();
+    expect(screen.getByText("৪৯ জন চান")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: t.idSupported }));
     expect(JSON.parse(localStorage.getItem(SUPPORT_KEY)!)).toEqual([]);
   });
