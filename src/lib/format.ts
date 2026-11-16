@@ -1,9 +1,10 @@
 // Number and date formatting. Separate from i18n.ts so client components can use it without bundling the dictionaries.
+import { country } from "./country";
 import type { Lang } from "./i18n";
 
 /** Formats a number with Bangla digits in bn (e.g. 12 -> ১২). */
 export function fmtNum(n: number, lang: Lang) {
-  return n.toLocaleString(lang === "bn" ? "bn-BD" : "en-GB", { useGrouping: false });
+  return n.toLocaleString(country().locale[lang], { useGrouping: false });
 }
 
 /** Fills `{name}` placeholders; numeric values are formatted for the language. */
@@ -13,8 +14,6 @@ export function fillNum(template: string, values: Record<string, string | number
     return typeof v === "number" ? fmtNum(v, lang) : String(v ?? "");
   });
 }
-
-const DHAKA = "Asia/Dhaka";
 
 /** Everyday Bangla day parts (ভোর, সকাল, দুপুর, বিকেল, সন্ধ্যা, রাত) for a 24-hour clock hour. */
 export function bnDayPart(h: number) {
@@ -28,14 +27,14 @@ export function bnDayPart(h: number) {
 }
 
 function dhakaParts(iso: string, lang: Lang) {
-  const loc = lang === "bn" ? "bn-BD" : "en-GB";
+  const loc = country().locale[lang];
   const date = new Date(iso);
-  const day = date.toLocaleDateString(loc, { timeZone: DHAKA, day: "numeric", month: lang === "bn" ? "long" : "short", year: "numeric" });
-  const [h, m] = date.toLocaleTimeString("en-GB", { timeZone: DHAKA, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).split(":").map(Number);
+  const day = date.toLocaleDateString(loc, { timeZone: country().timezone, day: "numeric", month: lang === "bn" ? "long" : "short", year: "numeric" });
+  const [h, m] = date.toLocaleTimeString("en-GB", { timeZone: country().timezone, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).split(":").map(Number);
   return { day, h, m };
 }
 
-/** Date and time in Asia/Dhaka. bn: "১৬ নভেম্বর ২০২৬, রাত ২:৩০" (Bangla digits and day part); en: "16 Nov 2026, 02:30". */
+/** Date and time in the country time zone (Asia/Dhaka for Bangladesh). bn: "১৬ নভেম্বর ২০২৬, রাত ২:৩০" (Bangla digits and day part); en: "16 Nov 2026, 02:30". */
 export function fmtDate(iso: string, lang: Lang) {
   const { day, h, m } = dhakaParts(iso, lang);
   if (lang === "en") return `${day}, ${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
@@ -49,10 +48,10 @@ export function fmtDay(iso: string, lang: Lang) {
 
 /**
  * Relative time for lists: today, yesterday, "N days ago" (up to 30 days), then the plain date. `now` is passed in (never read
- * here) so server and browser render the same text. Calendar days are counted in Asia/Dhaka.
+ * here) so server and browser render the same text. Calendar days are counted in the country time zone (Asia/Dhaka for Bangladesh).
  */
 export function fmtAgo(iso: string, now: number, lang: Lang) {
-  const key = (ms: number) => new Date(ms).toLocaleDateString("en-CA", { timeZone: DHAKA });
+  const key = (ms: number) => new Date(ms).toLocaleDateString("en-CA", { timeZone: country().timezone });
   const days = Math.round((Date.parse(key(now)) - Date.parse(key(Date.parse(iso)))) / 86_400_000);
   if (days <= 0) return lang === "bn" ? "আজ" : "Today";
   if (days === 1) return lang === "bn" ? "গতকাল" : "Yesterday";

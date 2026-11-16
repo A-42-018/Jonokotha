@@ -34,6 +34,7 @@ import { useSpeech } from "./report/useSpeech";
 import LocationPicker from "./report/LocationPicker";
 import type { Pin } from "@/lib/places";
 import EmergencyGuidance from "@/components/EmergencyGuidance";
+import { country } from "@/lib/country";
 import type { Emergency } from "@/lib/types";
 import { useToast } from "./ui/Toast";
 import { useKeyboardInset } from "./ui/useKeyboardInset";
@@ -93,7 +94,7 @@ function ReportFormInner({ t, lang, constituencyId }: { t: Dict; lang: Lang; con
   // One Idempotency-Key per report: a second tap or a retry after a lost answer is replayed, not duplicated.
   const reportKey = useRef(newId());
   const [quickDone, setQuickDone] = useState(false);
-  const speech = useSpeech(lang === "bn" ? "bn-BD" : "en-US", (text) => setQuick((q) => appendTranscript(q, text)));
+  const speech = useSpeech(country().speechLocale[lang], (text) => setQuick((q) => appendTranscript(q, text)));
   const loaded = useRef(false);
   const heading = useRef<HTMLHeadingElement>(null);
   const stepMounted = useRef(false);

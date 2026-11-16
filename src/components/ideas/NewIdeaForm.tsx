@@ -14,6 +14,7 @@ import { useToast } from "@/components/ui/Toast";
 import { useLang } from "@/components/ui/useLang";
 import { useT } from "@/components/ui/useT";
 import { ApiError } from "@/lib/api-client";
+import { costLabel } from "@/lib/country";
 import { fillNum } from "@/lib/format";
 import { fetchSimilar, ideaBody, postIdea } from "@/lib/ideas-api";
 import { newId } from "@/lib/offline-queue";
@@ -61,7 +62,7 @@ function NewIdeaInner({ constituency, signedIn }: { constituency: string; signed
 
   const post = useMutation({
     mutationFn: () => {
-      const cost = { s: t.idCostS, m: t.idCostM, l: t.idCostL }[f.cost as "s" | "m" | "l"] ?? "";
+      const cost = costLabel(f.cost, lang);
       const body = ideaBody(f, { problem: t.idFProblem, solution: t.idFSolution, benefit: t.idFBenefit, area: t.idFArea, cost: t.idCostBody }, cost);
       return postIdea(constituency, f, body, key.current);
     },
@@ -118,7 +119,7 @@ function NewIdeaInner({ constituency, signedIn }: { constituency: string; signed
       <Input label={t.idFArea} optional maxLength={120} value={f.area} onChange={(e) => set("area", e.target.value)} />
       <Select label={t.idFCategory} placeholder={t.idChoose} required value={f.category} error={errors.category} onChange={(e) => set("category", e.target.value)} options={CATEGORIES.map((c) => ({ value: c, label: t.cats[c] }))} />
       <Select label={t.idFCost} optional hint={t.idFCostHint} value={f.cost} onChange={(e) => set("cost", e.target.value)}
-        options={[{ value: "", label: t.idCostNone }, { value: "s", label: t.idCostS }, { value: "m", label: t.idCostM }, { value: "l", label: t.idCostL }]} />
+        options={[{ value: "", label: t.idCostNone }, { value: "s", label: costLabel("s", lang) }, { value: "m", label: costLabel("m", lang) }, { value: "l", label: costLabel("l", lang) }]} />
       <PlannedPanel as="h2" title={t.idAttachTitle} body={t.idAttachBody} />
       <Checkbox label={t.idFAck} checked={f.ack} error={errors.ack} onChange={(e) => set("ack", e.target.checked)} />
       <PublicNotice kind="idea" />

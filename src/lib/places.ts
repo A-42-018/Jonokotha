@@ -1,3 +1,4 @@
+import { inCountryBox } from "./country";
 import type { Lang } from "./i18n";
 
 /** SAMPLE places (নমুনা) for area search until a real gazetteer/geocoder is chosen (Nominatim terms need review). */
@@ -20,5 +21,7 @@ export function searchPlaces(q: string, lang: Lang, list: Place[] = SAMPLE_PLACE
 }
 
 export interface Pin { lat: number; lng: number }
-/** Coordinates inside Bangladesh's bounding box only (rejects 0,0 and out-of-country taps). */
-export const inBangladesh = (p: Pin) => p.lat >= 20.5 && p.lat <= 26.7 && p.lng >= 88 && p.lng <= 92.8;
+/** Coordinates inside the active country's bounding box only (rejects 0,0 and out-of-country taps). */
+export const inCountry = (p: Pin) => inCountryBox(p.lat, p.lng);
+/** @deprecated kept for older imports; same as `inCountry`. */
+export const inBangladesh = inCountry;

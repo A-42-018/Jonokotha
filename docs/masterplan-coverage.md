@@ -26,7 +26,7 @@ Status: **Done**, **Partial**, **Open**, as of 2026-11-16.
 | 2.4 | Submission package docs | M.1–M.5 | F.12 | Open |
 | 2.5–2.6 | Video, Congress demo, Q&A | Phase 4 | F.9, F.12 | Partial |
 | 2.8.3 | Business model, pilot, cost per constituency | M.5, B6.1 | — | Open |
-| 2.8.4 | Country adapters, configurable hierarchy, locale, currency, categories, channels | B5.12 | F5.12 | Open |
+| 2.8.4 | Country adapters, configurable hierarchy, locale, currency, categories, channels | B5.12 | F5.12 | Partial |
 | 2.8.5 | Responsible AI rules | existing, M.3, M.8 | F.5 | Partial |
 | 2.9 | Evidence: implemented vs prototype vs planned labels | B5.13 | F5.13 | Partial |
 | 2.10 | Benchmark features | covered by §7 rows | | |

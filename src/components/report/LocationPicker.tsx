@@ -6,7 +6,8 @@ import Input from "@/components/ui/Input";
 import { useLang } from "@/components/ui/useLang";
 import { useT } from "@/components/ui/useT";
 import { fillNum } from "@/lib/format";
-import { inBangladesh, searchPlaces, type Pin } from "@/lib/places";
+import { countryName } from "@/lib/country";
+import { inCountry, searchPlaces, type Pin } from "@/lib/places";
 
 const PinMap = dynamic(() => import("./PinMap"), { ssr: false });
 
@@ -25,7 +26,7 @@ export default function LocationPicker({ pin, onPin, onArea }: { pin?: Pin; onPi
   const results = searchPlaces(q, lang);
 
   function place(p: Pin) {
-    if (!inBangladesh(p)) { setMsg(t.lpOutside); return; }
+    if (!inCountry(p)) { setMsg(t.lpOutside.replace("{country}", countryName(lang))); return; }
     setMsg("");
     onPin(p);
   }

@@ -1,3 +1,4 @@
+import { levelName } from "@/lib/country";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -81,7 +82,7 @@ describe("AreaPicker", () => {
       return json(200, { data: { needs_manual_choice: false, matches: [{ constituency: area("a"), representatives: [rep("r1")] }] } });
     }));
     mount("choose", onConfirm);
-    await user.selectOptions(await screen.findByLabelText(t.arDistrictLabel), "d1");
+    await user.selectOptions(await screen.findByLabelText(levelName(0, "bn")!), "d1");
     await user.click(await screen.findByRole("button", { name: t.arMine }));
     expect(onConfirm).toHaveBeenCalledTimes(1);
     expect(screen.queryByText("নাম r1")).toBeNull();

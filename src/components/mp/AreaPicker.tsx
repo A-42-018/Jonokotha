@@ -10,6 +10,7 @@ import Select from "@/components/ui/Select";
 import { useLang } from "@/components/ui/useLang";
 import { useT } from "@/components/ui/useT";
 import { deepest, fetchAreaConstituencies, fetchAreas, isNotSwitchedOn, needsConfirm, trimChain } from "@/lib/areas-api";
+import { levelName } from "@/lib/country";
 import { fillNum } from "@/lib/format";
 import { lookupByArea, lookupByPoint, repView, type LookupMatch, type RepView } from "@/lib/mp-api";
 import RepCard from "./RepCard";
@@ -33,7 +34,7 @@ function Level({ index, chain, onPick, onOff }: { index: number; chain: string[]
     </div>
   );
   if (!q.data.areas.length) return null;
-  const label = (lang === "bn" ? q.data.label_bn : q.data.label_en) || (index === 0 ? t.arDistrictLabel : t.arLevelFallback);
+  const label = (lang === "bn" ? q.data.label_bn : q.data.label_en) || levelName(index, lang) || t.arLevelFallback;
   return (
     <Select label={label} placeholder={t.arChoose} value={chain[index] ?? ""} onChange={(e) => onPick(index, e.target.value)}
       options={q.data.areas.map((a) => ({ value: a.id, label: lang === "bn" ? a.name_bn : a.name_en }))} />
