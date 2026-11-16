@@ -64,6 +64,8 @@ export default async function DevScreen({ params }: PageProps<"/dev/screens/[nam
       return <AdminShell t={t} title={t.adVerifyTitle} lead={t.adVerifyLead} current="/admin/verification"><ReviewQueue kind="verification" items={SAMPLE_REVIEW} /></AdminShell>;
     case "admin-moderation":
       return <AdminShell t={t} title={t.adModTitle} lead={t.adModLead} current="/admin/moderation"><ReviewQueue kind="moderation" items={SAMPLE_REVIEW} /></AdminShell>;
+    case "boom":
+      throw new Error("Demo error for the error-boundary test");
     default:
       notFound();
   }

@@ -13,6 +13,9 @@ import CategoryPicker from "./report/CategoryPicker";
 import EvidenceStep, { type Photo } from "./report/EvidenceStep";
 import PrivacyWarning from "./report/PrivacyWarning";
 import ReportSuccess from "./ReportSuccess";
+import ReportQueued from "./offline/ReportQueued";
+import { readQueue, writeQueue } from "./offline/queue-store";
+import { enqueue, newId, sendReport } from "@/lib/offline-queue";
 import Badge from "./ui/Badge";
 import Button from "./ui/Button";
 import Card from "./ui/Card";
@@ -65,6 +68,7 @@ export default function ReportForm({ t, lang, constituencyId }: { t: Dict; lang:
   const [pin, setPin] = useState<Pin>();
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [sentRef, setSentRef] = useState("");
+  const [queued, setQueued] = useState(false);
   const [restored, setRestored] = useState(false);
   const [confirmDiscard, setConfirmDiscard] = useState(false);
   const [busy, setBusy] = useState<"" | "draft" | "submit">("");
@@ -102,13 +106,13 @@ export default function ReportForm({ t, lang, constituencyId }: { t: Dict; lang:
   }, [reset]);
 
   useEffect(() => {
-    if (!loaded.current || sentRef) return;
+    if (!loaded.current || sentRef || queued) return;
     try {
       const empty = !quick && !values.title && !values.description && !values.area && !values.category;
       if (empty) localStorage.removeItem(DRAFT_KEY);
       else localStorage.setItem(DRAFT_KEY, JSON.stringify({ quick, values, ai, edited, step, pin } satisfies Saved));
     } catch { /* ignore */ }
-  }, [quick, values, ai, edited, step, pin, sentRef]);
+  }, [quick, values, ai, edited, step, pin, sentRef, queued]);
 
   // Move focus to the new step's heading (not on first load).
   useEffect(() => {
@@ -182,14 +186,18 @@ export default function ReportForm({ t, lang, constituencyId }: { t: Dict; lang:
 
   async function submit(data: ReportData) {
     setBusy("submit");
-    try {
-      const res = await fetch("/api/cases", { method: "POST", body: JSON.stringify({ ...data, constituencyId, ...(pin ? { lat: pin.lat, lng: pin.lng } : {}) }) });
-      if (!res.ok) throw new Error("submit failed");
-      const { ref } = (await res.json()) as { ref: string };
+    const item = { id: newId(), body: { ...data, constituencyId, ...(pin ? { lat: pin.lat, lng: pin.lng } : {}) } };
+    const result = navigator.onLine === false ? ({ kind: "network" } as const) : await sendReport(item);
+    if (result.kind === "sent") {
       try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
-      setSentRef(ref);
-    } catch {
-      toast("error", t.submitFail);
+      setSentRef(result.ref);
+    } else if (result.kind === "network") {
+      // No signal: keep the report on the phone; QueueSync sends it when the connection returns.
+      writeQueue(enqueue(readQueue(), item.body, new Date(), item.id));
+      try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
+      setQueued(true);
+    } else {
+      toast("error", result.kind === "unauth" ? t.qSignInToSend : t.submitFail);
     }
     setBusy("");
   }
@@ -205,6 +213,7 @@ export default function ReportForm({ t, lang, constituencyId }: { t: Dict; lang:
   const steps = [t.wizSteps.category, t.wizSteps.describe, t.wizSteps.location, t.wizSteps.evidence, t.wizSteps.review];
   const titles = [t.stCategory, t.stDescribe, t.stLocation, t.stEvidence, t.stReview];
 
+  if (queued) return <ReportQueued t={t} onAnother={() => { setQueued(false); clearDraft(); }} />;
   if (sentRef) return <ReportSuccess t={t} refId={sentRef} onAnother={() => { setSentRef(""); clearDraft(); }} />;
 
   const isLast = step === LAST;

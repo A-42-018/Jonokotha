@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Badge from "@/components/ui/Badge";
 import { buttonClass } from "@/components/ui/Button";
+import QueuedReports from "@/components/offline/QueuedReports";
 import MyReports from "@/components/me/MyReports";
 import Card from "@/components/ui/Card";
 import State from "@/components/ui/State";
@@ -47,6 +48,7 @@ export default async function Me({ searchParams }: PageProps<"/me">) {
           </div>
         )}
       </Card>
+      <QueuedReports />
       <Link href="/settings" className="inline-flex min-h-11 items-center text-civic underline">{t.stTitle}</Link>
       <Card title={t.meMyReports}>
         {!email ? (
