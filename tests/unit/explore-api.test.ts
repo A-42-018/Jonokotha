@@ -60,6 +60,10 @@ describe("ideas api mapping", () => {
     const f = { title: "t", problem: "P", solution: "S", benefit: "", area: "", category: "roads", cost: "" };
     expect(ideaBody(f, { problem: "সমস্যা", solution: "সমাধান", benefit: "উপকার", area: "এলাকা", cost: "খরচ" }, "")).toBe("সমস্যা: P\n\nসমাধান: S");
   });
+  it("labels the citizen cost as their own estimate, not official", () => {
+    const f = { title: "t", problem: "P", solution: "S", benefit: "", area: "", category: "roads", cost: "m" };
+    expect(ideaBody(f, { problem: "সমস্যা", solution: "সমাধান", benefit: "উপকার", area: "এলাকা", cost: "নিজের অনুমান, সরকারি হিসাব নয়" }, "মাঝারি")).toContain("নিজের অনুমান, সরকারি হিসাব নয়: মাঝারি");
+  });
 });
 
 import { answeredPercent, medianLabel, repView, sourceHost } from "@/lib/mp-api";

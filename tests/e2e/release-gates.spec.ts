@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 /** F.8 probes: what a signed-out visitor receives from the public pages, in both languages. */
-const PUBLIC = ["/", "/area", "/ideas", "/ask", "/mp", "/mp/method", "/help", "/privacy", "/terms", "/metrics", "/projects", "/polls", "/accessibility", "/challenge", "/welcome", "/offline", "/login"];
+const PUBLIC = ["/", "/area", "/ideas", "/ask", "/mp", "/mp/method", "/help", "/privacy", "/terms", "/metrics", "/projects", "/projects/PR-DEMO", "/ideas/ID-DEMO", "/polls", "/accessibility", "/challenge", "/welcome", "/offline", "/login"];
 
 // Things that must never be in HTML a stranger can fetch.
 const PRIVATE: [string, RegExp][] = [

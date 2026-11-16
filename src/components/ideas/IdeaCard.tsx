@@ -40,7 +40,7 @@ export default function IdeaCard({ idea, signedIn, heading: H = "h2" }: { idea: 
   const [mine, setMine] = useLocalValue<string[]>(SUPPORT_KEY, NONE);
   const [count, setCount] = useState(idea.supports);
   const supported = mine.includes(idea.id);
-  const { share } = useShare(t, `/ideas#${idea.id}`, idea.title);
+  const { share } = useShare(t, `/ideas/${encodeURIComponent(idea.id)}`, idea.title);
 
   const support = useMutation({
     mutationFn: (on: boolean) => setSupport(idea.id, on),
@@ -69,6 +69,7 @@ export default function IdeaCard({ idea, signedIn, heading: H = "h2" }: { idea: 
         {idea.sample && <CapabilityLabel status="sample" />}
         <span className="text-sm text-muted">{fillNum(t.idSupportCount, { n: count }, lang)}</span>
       </div>
+      <p className="text-sm text-muted">{t[`idHelp_${idea.status}` as keyof Dict] as string}</p>
       {idea.reason && <p className="rounded-xl bg-slate-100 p-3 text-sm"><span className="font-medium">{t.idReason}: </span>{idea.reason}</p>}
       <div className="flex flex-wrap items-center gap-2">
         {signedIn ? (
