@@ -21,7 +21,9 @@
     "eval:gate": "node scripts/eval-gate.mjs",
     "check:release": "node scripts/check-release.mjs",
     "drill:restore": "bash scripts/restore-drill.sh",
-    "backup:local": "bash scripts/backup-local.sh"
+    "backup:local": "bash scripts/backup-local.sh",
+    "lint:migrations": "node scripts/migration-lint.mjs",
+    "check:environment": "node scripts/check-environment.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.8.0",
