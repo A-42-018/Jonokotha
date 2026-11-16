@@ -47,6 +47,8 @@ Exit: golden path on staging; keys safe; nothing public leaks personal data.
 
 ## Phase 1 — Foundation hardening (21 Nov – 1 Dec)
 
+**Status 2026-11-16:** items 1–7 and 12 are done (migrations 0004–0011, merged from `phase1/backend-schema`; SLA in 0011 applied locally only). Open: 8 (Duplicate Agent, needs an embedding model decision), 9 AI plumbing, 10 eval set, 11 CI additions (RLS tests against local Supabase, secret scan, audit).
+
 Goal: secure core with tested permissions and first AI metrics (§24).
 
 1. **Schema completion** (§12): add `representatives`, `representative_constituencies`, `office_members`, `issue_categories`, `issue_media`, `issue_assignments`, `issue_agency_referrals`, `notifications`, `audit_logs`, `consents`, `user_preferences`, `knowledge_sources`, `knowledge_chunks`, `issue_embeddings`, `graph_edges`, `ai_runs`, `ai_suggestions`. Rename working tables toward masterplan names (`cases` → `issues`, `case_events` → `issue_events`) in one migration with data preserved. UUID PKs, UTC timestamps, indexes, FKs, retention columns.

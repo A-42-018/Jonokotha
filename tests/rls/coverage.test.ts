@@ -10,7 +10,7 @@ const COVERED = [
   "agencies", "ai_runs", "ai_suggestions", "app_settings", "audit_logs", "consents", "constituencies", "graph_edges", "idempotency_keys", "issue_feedback", "rate_limits",
   "issue_agency_referrals", "issue_assignments", "issue_categories", "issue_embeddings", "issue_events", "issue_media", "issue_transitions", "issues",
   "knowledge_chunks", "knowledge_sources", "notifications", "office_members", "office_permissions", "profiles",
-  "representative_constituencies", "representatives", "user_preferences",
+  "representative_constituencies", "representatives", "user_preferences", "sla_policies", "issue_sla", "issue_sla_pauses",
 ];
 const ANON_READABLE = ["agencies", "constituencies", "issue_categories", "issue_transitions", "knowledge_sources", "office_permissions", "representative_constituencies", "representatives"];
 
