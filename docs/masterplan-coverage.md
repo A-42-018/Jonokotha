@@ -1,6 +1,6 @@
 # Masterplan coverage matrix
 
-Source of truth: `masterplan_JONOKOTHA.md` v1.7 (team Google Drive, not in this repo). This file maps **every section** of the masterplan to the plan phase that delivers it, for **the whole product**: MVP, Release 1.1 and Release 2. The competition dates are reference points only; the plans are complete when every row below is Done.
+Source of truth: [`docs/masterplan_JONOKOTHA.md`](masterplan_JONOKOTHA.md) v1.7 (copy of the team Google Drive original; update both together). This file maps **every section** of the masterplan to the plan phase that delivers it, for **the whole product**: MVP, Release 1.1 and Release 2. The competition dates are reference points only; the plans are complete when every row below is Done.
 
 Plan phases (same numbering in `docs/backend.md` and `docs/frontend.md`):
 
