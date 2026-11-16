@@ -2,10 +2,10 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import type { Dict } from "@/lib/i18n";
 
-const LINKS = [["/admin", "adNavHome"], ["/admin/verification", "adNavVerify"], ["/admin/moderation", "adNavMod"], ["/admin/ai-runs", "adNavAi"], ["/admin/stats", "adNavStats"]] as const;
+const LINKS = [["/admin", "adNavHome"], ["/admin/verification", "adNavVerify"], ["/admin/moderation", "adNavMod"], ["/admin/ai-runs", "adNavAi"], ["/admin/stats", "adNavStats"], ["/admin/audit", "adNavAudit"]] as const;
 
-/** Admin page frame: heading, sub-navigation and the sample-data notice. Role is checked by each page (guardAdmin). */
-export default function AdminShell({ t, title, lead, sample = true, current, children }: { t: Dict; title: string; lead?: string; sample?: boolean; current: string; children: ReactNode }) {
+/** Admin page frame: heading and sub-navigation. Role is checked by each page (guardAdmin). */
+export default function AdminShell({ t, title, lead, current, children }: { t: Dict; title: string; lead?: string; current: string; children: ReactNode }) {
   return (
     <div className="space-y-4">
       <nav aria-label={t.adNavAria}>
@@ -22,7 +22,6 @@ export default function AdminShell({ t, title, lead, sample = true, current, chi
       </nav>
       <h1 className="text-2xl font-semibold text-civic">{title}</h1>
       {lead && <p className="text-muted">{lead}</p>}
-      {sample && <p className="rounded-xl border border-amber/60 bg-amber/10 p-3 text-sm">{t.adSampleBanner}</p>}
       {children}
     </div>
   );

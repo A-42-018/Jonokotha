@@ -19,8 +19,9 @@ export default defineConfig({
   webServer: {
     command: ci ? `npm run build && npm run start -- -p ${port}` : `npm run dev -- -p ${port}`,
     url: `http://localhost:${port}`,
-    env: { JK_AUDIT: "1" },
-    reuseExistingServer: !ci,
+    env: { JK_AUDIT: "1", ...(process.env.E2E_REAL === "1" ? { NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL ?? "", NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "", SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY ?? "" } : {}) },
+    // The real-stack run must start its own server so it talks to the local Supabase, not whatever was running.
+    reuseExistingServer: !ci && process.env.PW_REUSE_SERVER !== "0",
     timeout: 180_000,
   },
 });

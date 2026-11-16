@@ -49,8 +49,7 @@ export default async function Case({ params }: PageProps<"/office/[ref]">) {
         <section aria-labelledby="act-h" className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
           <h2 id="act-h" className="font-medium">{t.ofActions}</h2>
           <p className="text-xs text-amber-800">{t.humanOnly}</p>
-          {/* Only acknowledge and refer exist in the backend today; request_info and resolve need it (see task notes). */}
-          <OfficeActions cref={c.ref} status={c.status} enabled={["acknowledge", "refer"]} />
+          <OfficeActions cref={c.ref} status={c.status} />
         </section>
       </div>
       </div>
