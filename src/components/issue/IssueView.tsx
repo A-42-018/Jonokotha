@@ -1,4 +1,5 @@
 import Link from "next/link";
+import ResolutionFeedback from "@/components/issue/ResolutionFeedback";
 import IssueActions from "@/components/issue/IssueActions";
 import OfficialResponse from "@/components/issue/OfficialResponse";
 import StatusTimeline from "@/components/issue/StatusTimeline";
@@ -9,7 +10,7 @@ import { fmtDate, type Dict, type Lang } from "@/lib/i18n";
 import type { CaseRecord } from "@/lib/types";
 
 /** Public issue page body. Reads public fields only; ai.* and timeline notes are never rendered. */
-export default function IssueView({ c, t, lang }: { c: CaseRecord; t: Dict; lang: Lang }) {
+export default function IssueView({ c, t, lang, signedIn = false }: { c: CaseRecord; t: Dict; lang: Lang; signedIn?: boolean }) {
   const steps = c.timeline.map((e) => ({ status: e.status, at: e.at }));
   return (
     <div className="space-y-4">
@@ -30,12 +31,13 @@ export default function IssueView({ c, t, lang }: { c: CaseRecord; t: Dict; lang
             <p className="whitespace-pre-wrap break-words">{c.description}</p>
           </Card>
           <OfficialResponse t={t} lang={lang} />
+          {c.status === "resolved" && signedIn && <ResolutionFeedback refId={c.ref} />}
         </div>
         <div className="space-y-4">
           <Card title={t.timeline}>
             <StatusTimeline steps={steps} t={t} lang={lang} />
           </Card>
-          <IssueActions refId={c.ref} title={c.title} />
+          <IssueActions refId={c.ref} title={c.title} signedIn={signedIn} />
         </div>
       </div>
     </div>

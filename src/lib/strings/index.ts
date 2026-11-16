@@ -1,10 +1,11 @@
 import { explore } from "./explore";
 import { location } from "./location";
+import { engage } from "./engage";
 import { ideas } from "./ideas";
 import { mp } from "./mp";
 import { voice } from "./voice";
 
-const parts = [explore, location, voice, ideas, mp];
+const parts = [explore, location, voice, ideas, mp, engage];
 
 type UnionToIntersection<U> = (U extends unknown ? (x: U) => void : never) extends (x: infer I) => void ? I : never;
 type Bn = UnionToIntersection<(typeof parts)[number]["bn"]>;

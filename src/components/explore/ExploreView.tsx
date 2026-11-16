@@ -11,6 +11,8 @@ import Select from "@/components/ui/Select";
 import StatusChip from "@/components/ui/StatusChip";
 import Tabs from "@/components/ui/Tabs";
 import { useLang } from "@/components/ui/useLang";
+import { useLocalValue } from "@/components/ui/useLocalValue";
+import { FOLLOWS_KEY, isFollowing, NO_FOLLOWS, toggleFollow } from "@/lib/follows";
 import { useT } from "@/components/ui/useT";
 import { filterIssues, lastUpdated, NO_FILTERS, sortIssues, type DateRange, type ExploreIssue, type Filters, type SortKey } from "@/lib/explore";
 import { fillNum, fmtDate } from "@/lib/i18n";
@@ -29,6 +31,9 @@ export default function ExploreView({ issues, loadFailed, now }: { issues: Explo
   const [origin, setOrigin] = useState<{ lat: number; lng: number }>();
   const [geo, setGeo] = useState<"idle" | "busy" | "denied">("idle");
   const [selected, setSelected] = useState<string>();
+  const [follows, setFollows] = useLocalValue(FOLLOWS_KEY, NO_FOLLOWS);
+  const AREA = "demo-1";
+  const followingArea = isFollowing(follows, "areas", AREA);
 
   const shown = useMemo(
     () => sortIssues(filterIssues(issues, filters, now, (c) => t.cats[c], (s) => t.statuses[s]), sort, origin),
@@ -98,6 +103,12 @@ export default function ExploreView({ issues, loadFailed, now }: { issues: Explo
     <div className="space-y-4">
       <h1 className="text-2xl font-semibold text-civic">{t.exTitle}</h1>
       <p className="rounded-xl border border-amber/60 bg-amber/10 p-3 text-sm">{t.exSampleBanner}</p>
+      <div className="flex flex-wrap items-center gap-3">
+        <Button variant={followingArea ? "success" : "secondary"} aria-pressed={followingArea} onClick={() => setFollows(toggleFollow(follows, "areas", AREA))}>
+          {followingArea ? t.enFollowingArea : t.enFollowArea}
+        </Button>
+        <span className="text-sm text-muted">{followingArea ? t.enFollowAreaOn : t.enFollowLocal}</span>
+      </div>
       {loadFailed && <p role="alert" className="rounded-xl border border-amber/60 bg-amber/10 p-3 text-sm">{t.exLoadError}</p>}
 
       <form role="search" onSubmit={(e) => e.preventDefault()} className="space-y-3">
