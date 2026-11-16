@@ -58,6 +58,21 @@ Playwright at 375 and 1280 px: smoke, axe, audit, golden path (describe, AI draf
 
 See `security-ui.md`: bundle secret scan (clean, runs in CI), safe rendering, safe links, photo limits, CSP proven violation-free and proposed to the backend.
 
+## F.8 Frontend release gates (2026-11-16)
+
+Run all of these before a release: `npm test`, `npm run build && npm run check:bundle`, `npx playwright test release-gates a11y`.
+
+| Gate (§21.6, §29 UX) | Result | How |
+|---|---|---|
+| No private data in public pages | **Ticked** | `tests/e2e/release-gates.spec.ts` fetches 13 public pages as a signed-out visitor, bn and en: no email (except example addresses and the configured support mailbox), no Bangladesh mobile number, no service-role name, no internal-note or user-id field, no JWT. Office and admin pages send a signed-out visitor to sign-in. |
+| No keys in the browser bundle | **Ticked** | `npm run check:bundle` (in CI) plus `tests/unit/release-gates.test.ts`: no client component reads a server-only environment variable. |
+| Bangla and English both tested | **Ticked** | `tests/unit/language.test.ts` and `i18n.test.ts` (matching keys, glossary, status labels), pages render in both languages, axe in both. Native-speaker review still **open** (3.4). |
+| Empty, error and offline states on every screen | **Ticked** | `tests/unit/release-gates.test.ts`: app-wide error boundary, not-found, loading, `/offline` and service worker exist; every component that loads from the API has an error state and an empty or no-result state (the check lists the few that are exempt by name). Per-route offline behaviour is the service-worker cache plus the report queue. |
+| Axe on every public page | **Ticked** | `tests/e2e/a11y.spec.ts` (`/terms`, `/challenge`, `/metrics` and `/privacy` clean at 375 and 1280). Pages that call the API need the API running to reach network-idle; run with the local Supabase. |
+| Keyboard and screen-reader pass | **Open** | Needs a person with TalkBack and VoiceOver: `screen-reader-checklist.md`. |
+| Signed-in axe and the real-stack scenarios | **Open** | `npm run test:e2e:real` has not been executed: Docker was not found on the author's machine. |
+| Device and network matrix (F.3) | **Open** | `device-matrix.md` not started. |
+
 ## Evidence
 
 - `phase3/screenshots/`: 14 screens, Bangla and English, 375 and 1280 px.

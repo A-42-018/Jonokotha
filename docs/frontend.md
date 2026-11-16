@@ -338,3 +338,7 @@ Notes: scenario 12's "appeal" is the moderator reversing a hide with a reason, b
 - **Office indicators** `/office/kpis` (`OfficeKpis`, `GET /office/kpis?constituency=&days=30`): all eight M.11 metrics, each with the server's definition, hidden when the group is under the minimum size, copilot comparison labelled as an association. A 403 or 404 says the person may not see it (office managers and the MP only). Linked from the office overview.
 - Gaps: the server's KPI definitions are English only (shown with `lang="en"`, as on the admin page); `/area` "updated" is the fetch time because the list has no `updated_at`; the responsiveness card's `note` and `method_url` from the API are not shown.
 - Tests: `tests/unit/metrics.test.tsx`. `/terms`, `/challenge`, `/metrics` were added to `tests/e2e/a11y.spec.ts`; Playwright could not be run here (no Supabase env or Docker), so those axe checks have not run.
+
+### F.8 progress (release gates)
+
+`tests/unit/release-gates.test.ts` (fallback screens exist, every data component has error and empty states, no server-only env var in client code, bundle scan in CI) and `tests/e2e/release-gates.spec.ts` (private-data probe on 13 public pages in bn and en, guarded pages redirect). Checklist with open items (screen reader, device matrix, real-stack run): `docs/aibc/phase3-audit.md`.
