@@ -49,6 +49,12 @@ The sprint lists below are the summary. The full requirement-by-requirement map,
 - Sprint 3: security and RLS review, backup and restore drill, monitoring, published AI evaluation results.
 - Sprint 4: demo seed and reset script, freeze fixes.
 
+### Beyond the sprints (both sides, full masterplan)
+- Phase 5, MVP completion: every §31 required citizen, office and admin feature (MP approvals, agency liaison, full office and admin consoles, polls, idea comments, projects, admin hierarchy picker, country adapters, personalization modes, Banglish search, translation, Insight and Idea agents).
+- Phase 6, pilot: one verified office, real data ingestion with lineage, legal and governance review, separate environments, field testing with citizens, pen test.
+- Phase 7, Release 1.1: consultations, WhatsApp/SMS, check-ins, for/against points, support thresholds, polls for citizens, commitment tracker, priority ranking, insight briefs, exports, heatmaps, read-aloud, dark mode.
+- Phase 8, Release 2: budgets, agency integrations, assisted reporting, open data, regional admin, participatory budgeting, RTI helper, MP activity, Open311, second country.
+
 ## Working rules
 - Never commit `.env.local` or any key. Each person uses their own keys.
 - Every AI output needs human approval before it changes anything.

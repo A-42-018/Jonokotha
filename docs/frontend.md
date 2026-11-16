@@ -2,7 +2,7 @@
 
 Owner: `frontend` branch. Source of truth: `masterplan_JONOKOTHA.md` (§6 navigation, §7 UX, §19 language and accessibility, §20 performance). Backend contract: see `docs/WORK_SPLIT.md`.
 
-Phases follow the sprints (§24). Dates are 2026.
+Phases 0–4 follow the sprints (§24); phases 5–8 complete the whole masterplan (MVP completion, pilot, Release 1.1, Release 2). Dates are reference points, not the scope boundary. Every masterplan section is mapped in `docs/masterplan-coverage.md`.
 
 ## Stack and conventions
 
@@ -111,9 +111,78 @@ Exit: audit report with zero serious a11y issues and performance budget met.
 
 ---
 
-## After the Congress (Release 1.1, §4.3)
+## Phase 5 — MVP completion
 
-Consultations with consensus map, WhatsApp/SMS entry points, citizen project check-ins, for/against points on ideas, support thresholds, P3 illustrations (4, not generated yet).
+Goal: every screen and control the masterplan requires of the MVP (§4.2, §5, §6, §7, §17.4, §19, §31). Every control works or is hidden from production navigation (§31 UI bar). Each item: bn and en, 375 and 1280, all §7.12 states, axe clean, e2e test, wired to the backend item named.
+
+| # | Task | Masterplan | Backend |
+|---|---|---|---|
+| F5.1 | **Citizen navigation complete**: desktop top nav adds Projects, Ask Your MP, Find your MP, About/Help; additional pages Project Tracker and Polls & Surveys; Consultations entry hidden behind a flag until Release 1.1. | §6.1, §6.2 | B5.5 |
+| F5.2 | **Home v3**: constituency snapshot (reported, in progress, resolved with date range), popular community ideas, verified representative card, active polls, footer with accessibility link and official-channel disclaimer. | §7.3 | B5.5 |
+| F5.3 | **Report and issue detail completion**: report fields "how long" and "who is affected"; video upload with progress and retry; issue detail shows forwarding destination and reference when publishable, progress evidence, "এখনও হচ্ছে / আরও তথ্য আছে" action, received / forwarded / officially registered label; abuse report on every public item. | §7.4, §7.5, §1 | B5.4, B5.6 |
+| F5.4 | **Office dashboard complete** (§6.3 sidebar): My Assigned Cases, All Constituency Issues, Ideas & Proposals review with decision and public reason, Questions & Messages inbox with assign and reply, Projects & Commitments (create, milestones, delay notes, budget source), Polls & Surveys (create, publish, close), Analytics & Reports (KPIs from M.11 with definitions), Staff & Roles (invite, role, suspend), Audit Log, Office Settings (SLA targets, categories in use); MP approval step for official statements; evidence attachments on updates and resolution; appeal queue; affected counts on cases. | §5.2, §6.3, §7.10, §31 office | B5.1, B5.5, M.11 |
+| F5.5 | **Agency liaison workspace**: list of referred cases only, acknowledge, update, add external reference or link, close with evidence; banner that this is not an official integration unless confirmed. | §5.5 | B5.2 |
+| F5.6 | **Status language for referrals**: "received by office", "forwarded to authority", "officially registered" shown everywhere a referral appears, never implied. | §1, §28 | B5.4 |
+| F5.7 | **Admin console complete** (§6.4): Platform Overview, Constituencies & Boundaries, Representatives (verify with source and date), Office Verification, Users (role, suspend), Categories & SLA Configuration, Content Moderation, Abuse Reports, Appeals, System Health, Audit & Security (alerts), Integrations, Feature Flags, Knowledge Sources, AI evaluation results, Demo data (staging only). | §5.6, §6.4, §31 admin | B5.3 |
+| F5.8 | **Ideas complete**: full submit form (problem, solution, benefit, area, citizen cost estimate labelled not official, attachments, conduct acknowledgement); every idea workflow status with public reason; comments list with moderation states; share and report actions. | §7.7, §8.4 | B5.5 |
+| F5.9 | **Find your MP picker**: district → upazila/city → ward/union cascade from real data, or location once; shows all possible constituencies when the boundary is uncertain and lets the citizen confirm; same picker in onboarding and profile, with "request correction". | §7.13, §8.1 | B5.7 |
+| F5.10 | **Projects**: `/projects` and `/projects/[id]` with milestones, budget source and verification date, delay explanations, completion evidence, follow, post-completion feedback; never show citizen estimates as official. | §6.1, §8.5 | B5.5 |
+| F5.11 | **Realtime and polls**: live status and inbox counts via Realtime for own items only; polls list and vote (one per user), results per office setting; notification preferences per event type with unsubscribe; status page link. | §10.1, §15, §20 | B5.5, B5.8, B5.9 |
+| F5.12 | **Country-ready UI**: admin hierarchy labels, currency, date format and categories come from configuration, not hard-coded Bangladesh names in components. | §2.8.4 | B5.12 |
+| F5.13 | **Capability labels**: render `data_status` (live, sample, demo, planned) consistently; planned features never look functional. | §2.9, §31 #20 | B5.13 |
+| F5.14 | **Translation and AI helpers**: "অনুবাদ দেখুন" on public text (labelled, original one tap away); Idea Assistant clarity suggestions in the idea form; Insight brief view in office analytics with review step. | §17.2 | B5.10 |
+| F5.15 | **Personalization controls**: simple-language mode (shorter copy, more icons), voice-first mode (mic first on report and ask), view why an item is in my feed, reset, switch off. | §17.4 | B5.11 |
+| F5.16 | **Language completeness**: setting for Bangla or Latin numerals; money as ৳ with lakh and crore grouping; Banglish search in every search box; phone and OTP fields accept both digit sets; conjunct, reph and ya-phala rendering checked on low-end Android and in exports. | §19.1, §19.7 | B5.11 |
+| F5.17 | **Terms and About** pages; accessibility statement; emergency and official-channel disclaimers in footer. | §6.2, §21.6, §29 | M.9 |
+
+Exit: every §31 required citizen, office and admin feature is reachable, functional and tested; no decorative control remains.
+
+---
+
+## Phase 6 — Pilot readiness
+
+| # | Task | Masterplan |
+|---|---|---|
+| F6.1 | Office onboarding and training screens for the pilot office (first-run tour of queue, copilot, approvals); in-app help for staff. | §2.8.3, §24 |
+| F6.2 | Citizen help and support contact flow; feedback form for testers. | §29 Operations |
+| F6.3 | **Field testing**: first-glance test with citizens of basic reading skills from different districts, ages and education levels, including older and first-time smartphone users; accessibility task-completion rate measured; fixes logged in `docs/aibc/language/`. | §19.9, §3.3 |
+| F6.4 | Native-speaker plain-language sign-off on every string (part of Definition of Done from here on). | §19.1, §19.9 |
+| F6.5 | Real-device pass of the whole product on the §21.4 matrix with production data volumes. | §21.4 |
+
+---
+
+## Phase 7 — Release 1.1
+
+| # | Task | Masterplan | Backend |
+|---|---|---|---|
+| F7.1 | **Consultations**: list and detail; one statement at a time with একমত / একমত নই / জানি না; add a short statement (moderated); no reply threads; aggregate agreement view in plain Bangla with minimum group size; "আপনারা বললেন, যা করা হলো" report page; office composer with MP approval, open and close. | §7.14, §8.10 | B7.1 |
+| F7.2 | **WhatsApp and SMS entry points**: "WhatsApp-এ জানান" links and number display; reports from channels appear in My Reports with the same timeline; area alert preferences. | §7.15 | B7.2, B7.4 |
+| F7.3 | **Project check-ins**: follow a project; add dated photo check-in ("আজ গিয়ে দেখলাম…") labelled citizen-submitted; office response shown. | §7.16 | B7.3 |
+| F7.4 | **For / against points** on ideas (পক্ষে, বিপক্ষে, helpful marks) replacing open comment threads where enabled. | §7.7 | B7.5 |
+| F7.5 | **Support threshold**: progress toward the office threshold, "উত্তরের অপেক্ষায়" with due date, public overdue label, office setting screen. | §7.7, §8.11 | B7.5 |
+| F7.6 | Public polls and surveys for citizens; satisfaction surveys after closure. | §4.3 | B7.6 |
+| F7.7 | Project and commitment tracker pages. | §4.3 | B7.7 |
+| F7.8 | Community priority ranking (non-binding label) and weekly insight brief view for offices; exportable office reports (CSV, PDF). | §4.3 | B7.8–B7.10 |
+| F7.9 | **Read-aloud** button on key screens and office replies. | §19.6 | B7.12 |
+| F7.10 | Better map clustering and heatmaps; **dark mode**. | §4.3, §7.2 | B7.11 |
+| F7.11 | P3 illustrations (4, not generated yet) for consultations, check-ins and channels. | §31 UI bar | — |
+| F7.12 | E2E scenarios 16–17 (§21.3) and Release 1.1 KPIs in office analytics. | §21.3, §3.3 | B7.13 |
+
+---
+
+## Phase 8 — Release 2
+
+| # | Task | Masterplan | Backend |
+|---|---|---|---|
+| F8.1 | Budget and expenditure transparency pages, each figure with its source document. | §4.4 | B8.1 |
+| F8.2 | "Officially registered" referral display with external tracking link where an agency integration exists. | §4.4 | B8.2 |
+| F8.3 | Assisted reporting mode for volunteers and kiosks (shared device, on-behalf-of consent, auto sign-out). | §4.4 | B8.3 |
+| F8.4 | Open-data portal pages with download and licence. | §4.4 | B8.4 |
+| F8.5 | Regional administration views. | §4.4 | B8.5 |
+| F8.6 | Participatory budgeting flow where an office controls a real budget. | §4.4 | B8.6 |
+| F8.7 | Right to Information helper (draft, then link to the official channel). | §4.4 | B8.7 |
+| F8.8 | MP activity pages from official records with plain-Bangla summaries, never a score. | §4.4 | B8.8 |
+| F8.9 | Second-locale UI pass for the next country adapter. | §2.8.4 | B8.10 |
 
 ## Illustration map
 
