@@ -20,3 +20,11 @@ export async function guardStaff(path: string) {
   const denied = cu.isStaff ? null : { email: cu.user.email ?? "", role: cu.role as Role };
   return { ...cu, user: cu.user, denied };
 }
+
+/** Route guard for admin pages: signed out goes to sign-in; staff or citizens get `denied` (render NoAccess). */
+export async function guardAdmin(path: string) {
+  const cu = await currentUser();
+  if (!cu.user) redirect(loginUrl(path));
+  const denied = cu.role === "admin" ? null : { email: cu.user.email ?? "", role: cu.role as Role };
+  return { ...cu, user: cu.user, denied };
+}

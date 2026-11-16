@@ -105,4 +105,11 @@ test.describe("phase 2 public pages", () => {
     await page.getByRole("button", { name: "হ্যাঁ, মুছুন" }).click();
     await expect(page.getByText("এই ডিভাইসের তথ্য মুছে ফেলা হয়েছে।")).toBeVisible();
   });
+
+  test("admin and office announcements are guarded for signed-out visitors", async ({ page }) => {
+    for (const path of ["/admin", "/admin/moderation", "/office/announcements"]) {
+      await page.goto(path);
+      await expect(page).toHaveURL(new RegExp(`/login\\?need=1&next=${encodeURIComponent(path).replace(/%/g, "%")}`));
+    }
+  });
 });
