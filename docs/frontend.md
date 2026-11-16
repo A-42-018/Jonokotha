@@ -122,3 +122,9 @@ Home hero: `hero-mobile` / `hero-desktop`. Categories: `cat-*` (12). Report step
 ## Definition of done (every task)
 
 Works at 375px and 1280px, Bangla and English, all relevant states, keyboard and screen-reader usable, no hard-coded strings, no private data in public views, unit test where logic exists, screenshot checked in the browser.
+
+## Phase 1 status (16 Nov)
+
+All nine Phase 1 tasks are built. Checks: `npm run lint`, `npm run typecheck`, `npm test` (Vitest + Testing Library: StatusChip, LoginForm, ReportForm, guard, colour contrast), `npm run test:e2e` (Playwright at 375px and 1280px: smoke, axe serious/critical on public pages, keyboard focus). CI runs all of them (`.github/workflows/ci.yml`).
+
+Not covered yet: screen-reader pass (TalkBack/VoiceOver) and axe on signed-in pages (`/report`, `/office`) — need a test Supabase session; planned for Phase 3.

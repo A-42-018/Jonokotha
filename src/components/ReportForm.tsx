@@ -254,6 +254,7 @@ export default function ReportForm({ t, lang, constituencyId }: { t: Dict; lang:
                 {busy === "draft" ? t.drafting : t.draft}
               </Button>
             </div>
+            <p role="status" className="sr-only">{busy === "draft" ? t.drafting : ""}</p>
             {quickDone && <p role="status" className="text-sm font-medium text-leaf-strong">✓ {t.quickDone}</p>}
             {ai.length > 0 && <p className="text-sm text-muted">{t.aiNote}</p>}
           </Card>
