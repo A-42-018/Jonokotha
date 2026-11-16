@@ -5,6 +5,7 @@ import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import Input from "@/components/ui/Input";
 import { useT } from "@/components/ui/useT";
+import { cleanDigits } from "@/lib/numerals";
 import { classifyMfaError, type MfaFailure } from "@/lib/mfa";
 import { supabaseBrowser } from "@/lib/supabase/client";
 
@@ -57,7 +58,7 @@ export default function MfaPanel({ next, email }: { next: string; email: string 
   }
 
   async function verify() {
-    const clean = code.replace(/\s/g, "");
+    const clean = cleanDigits(code);
     if (!/^\d{6}$/.test(clean)) { setErr(t.mfaCodeShort); return; }
     setBusy(true); setErr("");
     const { error } = await supabaseBrowser().auth.mfa.challengeAndVerify({ factorId, code: clean });
@@ -97,8 +98,8 @@ export default function MfaPanel({ next, email }: { next: string; email: string 
               <p className="text-sm"><span className="text-muted">{t.mfaSecretLabel}</span><br /><code className="break-all select-all rounded bg-slate-100 px-1" dir="ltr">{enrol.secret}</code></p>
             </div>
           )}
-          <Input label={t.mfaCode} hint={t.mfaCodeHint} inputMode="numeric" autoComplete="one-time-code" maxLength={7} value={code} onChange={(e) => setCode(e.target.value)} error={err} dir="ltr" />
-          <Button type="submit" variant="success" full loading={busy} disabled={code.replace(/\s/g, "").length < 6 || done}>{busy ? t.mfaVerifying : t.mfaVerify}</Button>
+          <Input label={t.mfaCode} hint={t.mfaCodeHint} inputMode="numeric" autoComplete="one-time-code" maxLength={14} value={code} onChange={(e) => setCode(e.target.value)} error={err} dir="ltr" />
+          <Button type="submit" variant="success" full loading={busy} disabled={cleanDigits(code).length < 6 || done}>{busy ? t.mfaVerifying : t.mfaVerify}</Button>
           {done && <p role="status">{t.mfaDone}</p>}
         </form>
       )}

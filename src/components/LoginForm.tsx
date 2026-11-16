@@ -5,6 +5,7 @@ import { supabaseBrowser } from "@/lib/supabase/client";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import { useT } from "@/components/ui/useT";
+import { cleanDigits } from "@/lib/numerals";
 
 export default function LoginForm({ next = "/report" }: { next?: string }) {
   const t = useT();
@@ -25,7 +26,7 @@ export default function LoginForm({ next = "/report" }: { next?: string }) {
   }
   async function verify() {
     setBusy(true); setCodeErr("");
-    const { error } = await supabaseBrowser().auth.verifyOtp({ email, token: code.trim(), type: "email" });
+    const { error } = await supabaseBrowser().auth.verifyOtp({ email, token: cleanDigits(code), type: "email" });
     setBusy(false);
     if (error) setCodeErr(t.loginVerifyFail); else { router.push(next); router.refresh(); }
   }
@@ -39,8 +40,8 @@ export default function LoginForm({ next = "/report" }: { next?: string }) {
         <Button type="submit" full loading={busy} disabled={!email}>{busy ? t.loginSending : t.loginSend}</Button>
       ) : (
         <>
-          <Input label={t.loginCode} hint={t.loginCodeHint} inputMode="numeric" autoComplete="one-time-code" value={code} onChange={(e) => setCode(e.target.value)} error={codeErr} />
-          <Button type="submit" variant="success" full loading={busy} disabled={code.trim().length < 6}>{busy ? t.loginVerifying : t.loginVerify}</Button>
+          <Input label={t.loginCode} hint={t.loginCodeHint} inputMode="numeric" autoComplete="one-time-code" dir="ltr" value={code} onChange={(e) => setCode(e.target.value)} error={codeErr} />
+          <Button type="submit" variant="success" full loading={busy} disabled={cleanDigits(code).length < 6}>{busy ? t.loginVerifying : t.loginVerify}</Button>
         </>
       )}
     </form>

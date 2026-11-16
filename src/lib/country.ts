@@ -7,6 +7,7 @@
  * `NEXT_PUBLIC_COUNTRY` (an ISO code present in ADAPTERS) picks the adapter, and the default is "BD".
  */
 import type { Lang } from "./i18n";
+import { digitSet } from "./numerals";
 
 type Pair = { bn: string; en: string };
 
@@ -20,6 +21,8 @@ export interface CountryConfig {
   /** Locale tag handed to browser speech recognition, per UI language. */
   speechLocale: Record<Lang, string>;
   currency: { code: string; symbol: string };
+  /** How the integer part of an amount is grouped: "indian" is 12,34,567 (lakh and crore), "western" is 1,234,567. */
+  grouping: "indian" | "western";
   /** Outer box of the country; a cheap check before the server judges real boundaries. */
   bbox: { minLat: number; maxLat: number; minLng: number; maxLng: number };
   /** Names of the administrative levels, top first. The server's area hierarchy labels win when present. */
@@ -35,6 +38,7 @@ const BANGLADESH: CountryConfig = {
   locale: { bn: "bn-BD", en: "en-GB" },
   speechLocale: { bn: "bn-BD", en: "en-US" },
   currency: { code: "BDT", symbol: "৳" },
+  grouping: "indian",
   bbox: { minLat: 20.5, maxLat: 26.8, minLng: 88.0, maxLng: 92.8 },
   hierarchy: [
     { bn: "জেলা", en: "District" },
@@ -74,9 +78,18 @@ export const countryName = (lang: Lang) => active.name[lang];
 /** Name of administrative level `index` (0 = top), or undefined past the configured depth. */
 export const levelName = (index: number, lang: Lang): string | undefined => active.hierarchy[index]?.[lang];
 
-/** An amount with the currency symbol, digits in the UI language. */
+/** Groups the digits of a whole number: lakh and crore style (12,34,567) or thousands (1,234,567), per the country. */
+export function groupDigits(whole: string, grouping: "indian" | "western" = active.grouping): string {
+  if (whole.length <= 3) return whole;
+  if (grouping === "western") return whole.replace(/\B(?=(\d{3})+$)/g, ",");
+  return `${whole.slice(0, -3).replace(/\B(?=(\d{2})+$)/g, ",")},${whole.slice(-3)}`;
+}
+
+/** An amount with the currency symbol, grouped the local way (৳১২,৩৪,৫৬৭ in bn, ৳12,34,567 with Latin digits). */
 export function fmtMoney(amount: number, lang: Lang): string {
-  return `${active.currency.symbol}${amount.toLocaleString(active.locale[lang], { useGrouping: true, maximumFractionDigits: 0 })}`;
+  const rounded = Math.round(Math.abs(amount));
+  const text = `${amount < 0 ? "-" : ""}${active.currency.symbol}${groupDigits(String(rounded))}`;
+  return digitSet(lang) === "bn" ? text.replace(/[0-9]/g, (d) => "০১২৩৪৫৬৭৮৯"[Number(d)]) : text;
 }
 
 /** Label of an idea cost band ("s", "m" or "l"); empty for anything else. */

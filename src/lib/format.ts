@@ -1,10 +1,11 @@
 // Number and date formatting. Separate from i18n.ts so client components can use it without bundling the dictionaries.
 import { country } from "./country";
 import type { Lang } from "./i18n";
+import { digitSet, withDigits } from "./numerals";
 
-/** Formats a number with Bangla digits in bn (e.g. 12 -> ১২). */
+/** Formats a number with the digits the page shows: Bangla in bn (12 -> ১২) and Latin in en, unless Settings chose one set. */
 export function fmtNum(n: number, lang: Lang) {
-  return n.toLocaleString(country().locale[lang], { useGrouping: false });
+  return n.toLocaleString(country().locale[lang], { useGrouping: false, numberingSystem: digitSet(lang) === "bn" ? "beng" : "latn" } as Intl.NumberFormatOptions);
 }
 
 /** Fills `{name}` placeholders; numeric values are formatted for the language. */
@@ -37,13 +38,14 @@ function dhakaParts(iso: string, lang: Lang) {
 /** Date and time in the country time zone (Asia/Dhaka for Bangladesh). bn: "১৬ নভেম্বর ২০২৬, রাত ২:৩০" (Bangla digits and day part); en: "16 Nov 2026, 02:30". */
 export function fmtDate(iso: string, lang: Lang) {
   const { day, h, m } = dhakaParts(iso, lang);
-  if (lang === "en") return `${day}, ${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
-  return `${day.replace(/,/g, "")}, ${bnDayPart(h)} ${fmtNum(h % 12 || 12, "bn")}:${fmtNum(m, "bn").padStart(2, "০")}`;
+  const two = (n: number) => String(n).padStart(2, "0");
+  if (lang === "en") return withDigits(`${day}, ${two(h)}:${two(m)}`, lang);
+  return withDigits(`${day.replace(/,/g, "")}, ${bnDayPart(h)} ${h % 12 || 12}:${two(m)}`, lang);
 }
 
 /** Date without time (Asia/Dhaka), Bangla digits in bn: "১৬ নভেম্বর ২০২৬". */
 export function fmtDay(iso: string, lang: Lang) {
-  return dhakaParts(iso, lang).day.replace(/,/g, "");
+  return withDigits(dhakaParts(iso, lang).day.replace(/,/g, ""), lang);
 }
 
 /**

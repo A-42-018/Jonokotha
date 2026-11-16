@@ -108,7 +108,7 @@ export default function AreaPicker({ mode, onConfirm, intro }: { mode: "find" | 
         )}
       </section>
       <form role="search" onSubmit={(e) => { e.preventDefault(); setChain([]); setTyped(q.trim().length >= 2 ? q.trim() : ""); }} className="space-y-3">
-        <Input label={t.mpSearch} type="search" hint={t.mpSearchHint} value={q} onChange={(e) => { setQ(e.target.value); setPoint(undefined); setChain([]); }} />
+        <Input label={t.mpSearch} type="search" hint={`${t.mpSearchHint} ${t.srBanglish}`} value={q} onChange={(e) => { setQ(e.target.value); setPoint(undefined); setChain([]); }} />
         <div className="flex flex-wrap items-center gap-3">
           <Button variant="secondary" loading={geo === "busy"} onClick={locate}>{geo === "busy" ? t.exLocating : t.exUseLocation}</Button>
           {geo === "denied" && <p role="status" className="text-sm text-muted">{t.exLocationDenied}</p>}

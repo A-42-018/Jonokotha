@@ -45,7 +45,7 @@ export default function LocationPicker({ pin, onPin, onArea }: { pin?: Pin; onPi
   return (
     <div className="space-y-3">
       <p className="text-sm text-muted">{t.lpNote}</p>
-      <Input label={t.lpSearch} type="search" hint={t.lpSearchHint} value={q} onChange={(e) => setQ(e.target.value)} />
+      <Input label={t.lpSearch} type="search" hint={`${t.lpSearchHint} ${t.srBanglish}`} value={q} onChange={(e) => setQ(e.target.value)} />
       {q.trim() && (
         <div aria-live="polite">
           {results.length === 0 ? (

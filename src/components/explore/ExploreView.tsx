@@ -144,7 +144,7 @@ function ExploreInner() {
       )}
 
       <form role="search" onSubmit={(e) => e.preventDefault()} className="space-y-3">
-        <Input label={t.exSearch} type="search" hint={t.exSearchHint} value={filters.q} onChange={(e) => setFilters({ ...filters, q: e.target.value })} />
+        <Input label={t.exSearch} type="search" hint={`${t.exSearchHint} ${t.srBanglish}`} value={filters.q} onChange={(e) => setFilters({ ...filters, q: e.target.value })} />
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           <Select label={t.exCategory} value={filters.category} onChange={(e) => setFilters({ ...filters, category: e.target.value as Filters["category"] })}
             options={[{ value: "all", label: t.exAll }, ...CATEGORIES.map((c) => ({ value: c, label: t.cats[c] }))]} />

@@ -5,14 +5,15 @@ import { useState } from "react";
 import QueryProvider from "@/components/QueryProvider";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
-import { Checkbox } from "@/components/ui/Choice";
+import { Checkbox, RadioGroup } from "@/components/ui/Choice";
 import Dialog from "@/components/ui/Dialog";
 import { useToast } from "@/components/ui/Toast";
 import { useLocalValue } from "@/components/ui/useLocalValue";
-import { usePersonalModes } from "@/components/ui/usePersonalization";
+import { useNumerals, usePersonalModes } from "@/components/ui/usePersonalization";
 import { useT } from "@/components/ui/useT";
 import { CATEGORIES } from "@/lib/categories";
 import { fetchFollows, removeFollow, type FollowRow } from "@/lib/engagement-api";
+import { cleanNumerals } from "@/lib/numerals";
 import { DEFAULT_MODES, FEED_PERSONAL_KEY } from "@/lib/personalize";
 import { fetchPrefs, savePrefs, type Prefs } from "@/lib/push";
 
@@ -26,6 +27,7 @@ function Inner({ signedIn }: { signedIn: boolean }) {
   const toast = useToast();
   const qc = useQueryClient();
   const [modes, setModes] = usePersonalModes();
+  const [numerals, setNumeralsPref] = useNumerals();
   const [, setFeedLocal] = useLocalValue<boolean>(FEED_PERSONAL_KEY, true);
   const [confirm, setConfirm] = useState(false);
   const prefs = useQuery({ queryKey: ["me-prefs-types"], queryFn: fetchPrefs, enabled: signedIn });
@@ -56,6 +58,7 @@ function Inner({ signedIn }: { signedIn: boolean }) {
       setConfirm(false);
       if (failed > 0) { toast("error", t.pzResetPartial); return; }
       setModes(DEFAULT_MODES);
+      setNumeralsPref("auto");
       setFeedLocal(true);
       toast("success", t.pzResetDone);
     },
@@ -74,6 +77,13 @@ function Inner({ signedIn }: { signedIn: boolean }) {
         <Checkbox label={t.pzVoice} hint={t.pzVoiceHint} checked={modes.voiceFirst} onChange={(e) => setModes({ ...modes, voiceFirst: e.target.checked })} />
         <p className="mt-1 text-sm text-muted">{t.pzDeviceNote}</p>
       </fieldset>
+
+      <div className="mt-4 space-y-2 border-t border-line/40 pt-3">
+        <h3 className="font-semibold">{t.pzNumHead}</h3>
+        <RadioGroup legend={t.pzNumLegend} name="numerals" value={numerals} onChange={(v) => setNumeralsPref(cleanNumerals(v))}
+          options={[{ value: "auto", label: t.pzNumAuto }, { value: "bn", label: t.pzNumBn }, { value: "latin", label: t.pzNumLatin }]} />
+        <p className="text-sm text-muted">{t.pzNumNote}</p>
+      </div>
 
       <div className="mt-4 space-y-2 border-t border-line/40 pt-3">
         <h3 className="font-semibold">{t.pzFeedHead}</h3>

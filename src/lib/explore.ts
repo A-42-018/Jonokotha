@@ -1,4 +1,5 @@
 import type { Category, Status } from "./types";
+import { matchesQuery } from "./translit";
 
 /** One row in Explore. Public fields only. `lat`/`lng` are already approximate (see `approxCoord`). */
 export interface ExploreIssue {
@@ -46,7 +47,7 @@ export function filterIssues(list: ExploreIssue[], f: Filters, now: number, catL
     if (f.status !== "all" && i.status !== f.status) return false;
     if (since && new Date(i.createdAt).getTime() < since) return false;
     if (!q) return true;
-    return `${i.title} ${i.area} ${catLabel(i.category)} ${statusLabel(i.status)}`.toLowerCase().includes(q);
+    return matchesQuery(`${i.title} ${i.area} ${catLabel(i.category)} ${statusLabel(i.status)}`, q);
   });
 }
 
