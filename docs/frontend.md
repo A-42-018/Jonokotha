@@ -274,3 +274,13 @@ Full requirement map: `docs/masterplan-coverage.md`. The backend finished its Ph
 ### Definition of done additions
 
 Every screen that shows data states whether it is live, sample or demo; no screen ships with a device-local stub after F.1 except the audit screens. Every public number has its definition. Every outward action keeps a confirm step and a note where the masterplan requires one.
+
+### F.1 progress (wired to /api/v1)
+
+| Screen | Status |
+|---|---|
+| Report (`ReportForm`) | **Live.** `POST /api/v1/issues` with `Idempotency-Key` (one key per report, reused by the offline queue), `lat`/`lng`/`locationSource`, TanStack Query mutation, photos uploaded after submit (`POST /issues/{ref}/media`, multipart: the backend takes the file itself, not a signed upload URL; signed URLs are for reading), `emergency` guidance shown on the success screen. "Photos are not sent" note removed. |
+| `/area` and map | **Live.** `GET /api/v1/issues` with cursor paging ("show more"), server-side category and date filters, approximate `location`, `affected_count`. Sample banner shows only if the API returns `is_sample` rows. |
+| Everything else (`/ideas`, `/mp`, engagement, `/ask`, feed, notifications, office, admin) | Still device-local stubs, next in F.1. |
+
+Known gaps: offline-queued reports keep the text only (photos live in memory, not in storage); the full emergency screen is F.5; "data last updated" on `/area` is the fetch time because the list has no `updated_at`; status filter and text search work on the loaded pages only. Playwright could not be run here (no Supabase env); unit tests, typecheck, lint and `next build` + `check:bundle` pass.

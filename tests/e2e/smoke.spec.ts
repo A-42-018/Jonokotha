@@ -43,9 +43,12 @@ test.describe("golden path smoke", () => {
 });
 
 test.describe("phase 2 public pages", () => {
-  test("explore: sample banner, search narrows the list, map tab opens", async ({ page }) => {
+  test("explore: loads the public list from the API, sample banner, search narrows the list, map tab opens", async ({ page }) => {
+    const item = (ref: string, title: string, lat: number) => ({ ref, title, category: "drainage", description: "d", area: "ওয়ার্ড ২", status: "submitted", legacy_status: "received", created_at: "2026-11-10T06:00:00Z", summary: null, similar_refs: [], constituency: "demo-1", is_sample: true, affected_count: 3, location: { lat, lng: 90.4, approximate: true } });
+    await page.route("**/api/v1/issues?**", (r) => r.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ data: [item("JK-S-1", "ড্রেন বন্ধ হয়ে আছে", 23.8), item("JK-S-2", "রাস্তায় গর্ত", 23.81)], page: { next_cursor: null, limit: 50 }, request_id: "t" }) }));
     await page.goto("/area");
     await expect(page.getByText("নমুনা: এখানকার").first()).toBeVisible();
+    await expect(page.getByText("২টি সমস্যা পাওয়া গেছে")).toBeVisible();
     await page.getByLabel("খুঁজুন").fill("ড্রেন");
     await expect(page.getByText("১টি সমস্যা পাওয়া গেছে")).toBeVisible();
     await page.getByLabel("খুঁজুন").fill("zzzz");
