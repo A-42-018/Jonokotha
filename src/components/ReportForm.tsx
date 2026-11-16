@@ -1,5 +1,6 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { fillNum } from "@/lib/format";
@@ -16,6 +17,8 @@ import ReportSuccess from "./ReportSuccess";
 import ReportQueued from "./offline/ReportQueued";
 import { readQueue, writeQueue } from "./offline/queue-store";
 import { enqueue, newId, sendReport } from "@/lib/offline-queue";
+import { uploadPhotos } from "@/lib/report-api";
+import QueryProvider from "./QueryProvider";
 import Badge from "./ui/Badge";
 import Button from "./ui/Button";
 import Card from "./ui/Card";
@@ -27,6 +30,7 @@ import { appendTranscript } from "@/lib/speech";
 import { useSpeech } from "./report/useSpeech";
 import LocationPicker from "./report/LocationPicker";
 import type { Pin } from "@/lib/places";
+import type { Emergency } from "@/lib/types";
 import { useToast } from "./ui/Toast";
 import { useKeyboardInset } from "./ui/useKeyboardInset";
 
@@ -51,7 +55,11 @@ function readSaved(): Saved | null {
   return null;
 }
 
-export default function ReportForm({ t, lang, constituencyId }: { t: Dict; lang: Lang; constituencyId: string }) {
+export default function ReportForm(props: { t: Dict; lang: Lang; constituencyId: string }) {
+  return <QueryProvider><ReportFormInner {...props} /></QueryProvider>;
+}
+
+function ReportFormInner({ t, lang, constituencyId }: { t: Dict; lang: Lang; constituencyId: string }) {
   const toast = useToast();
   const schema = useMemo(() => reportSchema(t), [t]);
   const { register, control, setValue, reset, trigger, handleSubmit, getValues, formState: { errors } } = useForm<ReportValues, unknown, ReportData>({
@@ -71,7 +79,11 @@ export default function ReportForm({ t, lang, constituencyId }: { t: Dict; lang:
   const [queued, setQueued] = useState(false);
   const [restored, setRestored] = useState(false);
   const [confirmDiscard, setConfirmDiscard] = useState(false);
-  const [busy, setBusy] = useState<"" | "draft" | "submit">("");
+  const [busy, setBusy] = useState<"" | "draft">("");
+  const [photosFailed, setPhotosFailed] = useState(0);
+  const [emergency, setEmergency] = useState<Emergency>();
+  // One Idempotency-Key per report: a second tap or a retry after a lost answer is replayed, not duplicated.
+  const reportKey = useRef(newId());
   const [quickDone, setQuickDone] = useState(false);
   const speech = useSpeech(lang === "bn" ? "bn-BD" : "en-US", (text) => setQuick((q) => appendTranscript(q, text)));
   const loaded = useRef(false);
@@ -184,23 +196,35 @@ export default function ReportForm({ t, lang, constituencyId }: { t: Dict; lang:
     setStep((s) => Math.min(s + 1, LAST));
   }
 
-  async function submit(data: ReportData) {
-    setBusy("submit");
-    const item = { id: newId(), body: { ...data, constituencyId, ...(pin ? { lat: pin.lat, lng: pin.lng } : {}) } };
-    const result = navigator.onLine === false ? ({ kind: "network" } as const) : await sendReport(item);
-    if (result.kind === "sent") {
-      try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
-      setSentRef(result.ref);
-    } else if (result.kind === "network") {
-      // No signal: keep the report on the phone; QueueSync sends it when the connection returns.
-      writeQueue(enqueue(readQueue(), item.body, new Date(), item.id));
-      try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
-      setQueued(true);
-    } else {
-      toast("error", result.kind === "unauth" ? t.qSignInToSend : t.submitFail);
-    }
-    setBusy("");
-  }
+  const send = useMutation({
+    mutationFn: async (data: ReportData) => {
+      const body = {
+        ...data, constituencyId,
+        ...(pin ? { lat: pin.lat, lng: pin.lng, locationSource: "map" } : {}),
+      };
+      const item = { id: reportKey.current, body };
+      const result = navigator.onLine === false ? ({ kind: "network" } as const) : await sendReport(item);
+      return { result, item };
+    },
+    onSuccess: async ({ result, item }) => {
+      if (result.kind === "sent") {
+        try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
+        setPhotosFailed(await uploadPhotos(result.ref, photos));
+        setEmergency(result.emergency);
+        setSentRef(result.ref);
+      } else if (result.kind === "network" || result.kind === "server") {
+        // No signal or the server is busy: keep the report on the phone; QueueSync sends it with the same key later.
+        writeQueue(enqueue(readQueue(), item.body, new Date(), item.id));
+        try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
+        setQueued(true);
+      } else {
+        toast("error", result.kind === "unauth" ? t.qSignInToSend : t.submitFail);
+      }
+    },
+    onError: () => toast("error", t.submitFail),
+  });
+  const submit = (data: ReportData) => send.mutateAsync(data).then(() => undefined, () => undefined);
+  const submitting = send.isPending;
 
   // If something invalid slipped through (e.g. a restored draft), go to the first step with an error.
   function jumpToError(errs: Record<string, unknown>) {
@@ -213,8 +237,8 @@ export default function ReportForm({ t, lang, constituencyId }: { t: Dict; lang:
   const steps = [t.wizSteps.category, t.wizSteps.describe, t.wizSteps.location, t.wizSteps.evidence, t.wizSteps.review];
   const titles = [t.stCategory, t.stDescribe, t.stLocation, t.stEvidence, t.stReview];
 
-  if (queued) return <ReportQueued t={t} onAnother={() => { setQueued(false); clearDraft(); }} />;
-  if (sentRef) return <ReportSuccess t={t} refId={sentRef} onAnother={() => { setSentRef(""); clearDraft(); }} />;
+  if (queued) return <ReportQueued t={t} onAnother={() => { setQueued(false); reportKey.current = newId(); clearDraft(); }} />;
+  if (sentRef) return <ReportSuccess t={t} lang={lang} refId={sentRef} photosFailed={photosFailed} emergency={emergency} onAnother={() => { setSentRef(""); setPhotosFailed(0); setEmergency(undefined); reportKey.current = newId(); clearDraft(); }} />;
 
   const isLast = step === LAST;
   return (
@@ -328,7 +352,6 @@ export default function ReportForm({ t, lang, constituencyId }: { t: Dict; lang:
                     </li>
                   ))}
                 </ul>
-                <p className="text-sm text-muted">{t.evSoon}</p>
               </div>
             )}
           </ReviewRow>
@@ -341,10 +364,10 @@ export default function ReportForm({ t, lang, constituencyId }: { t: Dict; lang:
         className="fixed inset-x-0 z-30 border-t border-line/40 bg-white/95 backdrop-blur"
       >
         <div className="mx-auto flex max-w-3xl items-center gap-3 px-4 py-3">
-          {step > 0 && <Button variant="secondary" onClick={() => setStep((s) => s - 1)} disabled={busy === "submit"}>{t.wizBack}</Button>}
+          {step > 0 && <Button variant="secondary" onClick={() => setStep((s) => s - 1)} disabled={submitting}>{t.wizBack}</Button>}
           {isLast ? (
-            <Button type="submit" variant="success" size="lg" className="flex-1" loading={busy === "submit"} disabled={busy !== ""}>
-              {busy === "submit" ? t.submitting : t.submit}
+            <Button type="submit" variant="success" size="lg" className="flex-1" loading={submitting} disabled={busy !== "" || submitting}>
+              {submitting ? t.submitting : t.submit}
             </Button>
           ) : (
             <Button type="submit" className="flex-1" disabled={busy === "draft"}>{t.wizNext}</Button>

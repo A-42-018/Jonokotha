@@ -15,7 +15,7 @@ test.describe("citizen golden path", () => {
   test("describe in words, AI drafts (labelled), review in five steps, send, get a reference number", async ({ page }) => {
     await page.route("**/api/intake", (r) => r.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ source: "ai", draft: { title: "রাস্তায় বড় গর্ত", category: "roads", description: "বাজারের সামনে রাস্তায় বড় গর্ত, রাতে দুর্ঘটনা হচ্ছে।", area: "ওয়ার্ড ৩" } }) }));
     let sent: Record<string, unknown> | undefined;
-    await page.route("**/api/cases", async (r) => { sent = r.request().postDataJSON(); await r.fulfill({ status: 201, contentType: "application/json", body: JSON.stringify({ ref: "JK-GOLD-1" }) }); });
+    await page.route("**/api/v1/issues", async (r) => { sent = r.request().postDataJSON(); await r.fulfill({ status: 201, contentType: "application/json", body: JSON.stringify({ data: { ref: "JK-GOLD-1", status: "submitted" } }) }); });
     await demo(page, "report");
 
     await page.getByLabel("বলুন বা লিখুন").fill("পাড়ার রাস্তায় বড় গর্ত, রাতে দুর্ঘটনা হচ্ছে");
@@ -75,7 +75,7 @@ test.describe("staff approval", () => {
 
   test("the AI copilot offers suggestions but changes nothing by itself", async ({ page }) => {
     let calls = 0;
-    await page.route("**/api/cases/**", async (r) => { calls++; await r.abort(); });
+    await page.route("**/api/v1/issues**", async (r) => { calls++; await r.abort(); });
     await demo(page, "case");
     await expect(page.getByText(/শুধু কর্মীদের|কর্মীদের জন্য/).first()).toBeVisible();
     await page.getByRole("button", { name: "বাদ দিন" }).first().click(); // dismissing a suggestion is local

@@ -19,15 +19,19 @@ describe("sendReport", () => {
   const reply = (status: number, json: unknown = {}) => vi.fn().mockResolvedValue(new Response(JSON.stringify(json), { status })) as unknown as typeof fetch;
 
   it("returns the reference on success and sends the id as Idempotency-Key", async () => {
-    const f = reply(201, { ref: "JK-1" });
+    const f = reply(201, { data: { ref: "JK-1", status: "submitted" } });
     expect(await sendReport(item, f)).toEqual({ kind: "sent", ref: "JK-1" });
-    const init = (f as unknown as ReturnType<typeof vi.fn>).mock.calls[0][1] as RequestInit;
+    const call = (f as unknown as ReturnType<typeof vi.fn>).mock.calls[0];
+    expect(call[0]).toBe("/api/v1/issues");
+    const init = call[1] as RequestInit;
     expect((init.headers as Record<string, string>)["Idempotency-Key"]).toBe("k1");
   });
   it("classifies failures: 401 sign-in, other 4xx rejected, 5xx server, thrown error network", async () => {
     expect((await sendReport(item, reply(401))).kind).toBe("unauth");
     expect((await sendReport(item, reply(400))).kind).toBe("rejected");
     expect((await sendReport(item, reply(500))).kind).toBe("server");
+    expect((await sendReport(item, reply(429, { code: "rate_limited" }))).kind).toBe("server");
+    expect((await sendReport(item, reply(409, { code: "idempotency_in_progress" }))).kind).toBe("server");
     expect((await sendReport(item, vi.fn().mockRejectedValue(new TypeError("Failed to fetch")) as unknown as typeof fetch)).kind).toBe("network");
   });
 });

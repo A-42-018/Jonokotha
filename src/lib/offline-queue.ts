@@ -1,18 +1,21 @@
 // Report queue for when the phone has no signal (task 3.3). Pure logic: storage and fetch are passed in, so it is unit-tested.
-// The backend has no offline endpoint: a queued report is sent later with the same POST /api/cases as a live one.
+// A queued report is sent later with the same POST /api/v1/issues as a live one, with the same Idempotency-Key, so a
+// retry after a lost response is replayed by the server instead of creating a second report.
+import { api, ApiError } from "@/lib/api-client";
+import type { Emergency } from "@/lib/types";
 
 export const QUEUE_KEY = "jonokotha:report-queue:v1";
 
 export type QueueState = "queued" | "needs-signin" | "rejected";
 export interface QueuedReport {
-  /** Also sent as the Idempotency-Key header, so a backend that supports it can drop a duplicate if the first try got through. */
+  /** Also sent as the Idempotency-Key header, so the server drops a duplicate if the first try got through. */
   id: string;
   title: string;
   body: Record<string, unknown>;
   queuedAt: string;
   state: QueueState;
 }
-export type SendResult = { kind: "sent"; ref: string } | { kind: "network" } | { kind: "unauth" } | { kind: "rejected" } | { kind: "server" };
+export type SendResult = { kind: "sent"; ref: string; emergency?: Emergency } | { kind: "network" } | { kind: "unauth" } | { kind: "rejected" } | { kind: "server" };
 
 export const newId = () => (typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `q-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`);
 
@@ -23,13 +26,15 @@ export function enqueue(list: QueuedReport[], body: Record<string, unknown>, now
 /** POSTs one report and says what happened, without throwing. */
 export async function sendReport(item: Pick<QueuedReport, "id" | "body">, doFetch: typeof fetch = fetch): Promise<SendResult> {
   try {
-    const res = await doFetch("/api/cases", { method: "POST", headers: { "Idempotency-Key": item.id }, body: JSON.stringify(item.body) });
-    if (res.ok) return { kind: "sent", ref: ((await res.json()) as { ref: string }).ref };
-    if (res.status === 401) return { kind: "unauth" };
-    if (res.status >= 400 && res.status < 500) return { kind: "rejected" };
+    const { data } = await api<{ ref: string; emergency?: Emergency }>("/issues", { body: item.body, idempotencyKey: item.id }, doFetch);
+    return { kind: "sent", ref: data.ref, ...(data.emergency ? { emergency: data.emergency } : {}) };
+  } catch (e) {
+    if (!(e instanceof ApiError) || e.isNetwork) return { kind: "network" };
+    if (e.status === 401) return { kind: "unauth" };
+    // Busy or throttled: the same report is fine, try again later (do not mark it rejected).
+    if (e.status === 429 || e.code === "idempotency_in_progress") return { kind: "server" };
+    if (e.status >= 400 && e.status < 500) return { kind: "rejected" };
     return { kind: "server" };
-  } catch {
-    return { kind: "network" };
   }
 }
 

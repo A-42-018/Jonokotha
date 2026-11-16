@@ -9,7 +9,7 @@ import Card from "../ui/Card";
 import Input from "../ui/Input";
 import { useToast } from "../ui/Toast";
 
-export type Photo = { id: string; url: string; kb: number; caption: string };
+export type Photo = { id: string; url: string; kb: number; caption: string; blob: Blob };
 
 export default function EvidenceStep({ t, lang, photos, onChange }: {
   t: Dict;
@@ -32,7 +32,7 @@ export default function EvidenceStep({ t, lang, photos, onChange }: {
       if (problem) { toast("error", problem === "size" ? fillNum(t.errPhotoSize, { mb: MAX_PHOTO_BYTES / 1024 / 1024 }, lang) : t.errPhotoType); continue; }
       try {
         const blob = await compressImage(f);
-        const p: Photo = { id: crypto.randomUUID(), url: URL.createObjectURL(blob), kb: Math.max(1, Math.round(blob.size / 1024)), caption: "" };
+        const p: Photo = { id: crypto.randomUUID(), url: URL.createObjectURL(blob), kb: Math.max(1, Math.round(blob.size / 1024)), caption: "", blob };
         onChange((prev) => [...prev, p]);
       } catch {
         toast("error", t.errPhotoFail);
@@ -59,7 +59,6 @@ export default function EvidenceStep({ t, lang, photos, onChange }: {
         <p className="font-semibold text-amber-900">⚠ {t.evWarnTitle}</p>
         <p>{t.evWarnBody}</p>
       </Card>
-      <Card tone="info" className="text-sm">{t.evSoon}</Card>
 
       <input ref={input} type="file" accept={PHOTO_TYPES.join(",")} multiple hidden onChange={(e) => void add(e.target.files)} />
       <Button variant="secondary" icon={<span aria-hidden>📷</span>} loading={busy} disabled={photos.length >= MAX_PHOTOS} onClick={() => input.current?.click()}>
