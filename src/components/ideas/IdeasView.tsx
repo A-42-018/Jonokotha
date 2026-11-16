@@ -29,7 +29,7 @@ export default function IdeasView({ ideas, signedIn }: { ideas: Idea[]; signedIn
     return (
       <div className="space-y-3">
         <p className="text-sm text-muted" aria-live="polite">{fillNum(t.idCount, { n: rows.length }, lang)}</p>
-        <ul className="space-y-3">{rows.map((i) => <li key={i.id}><IdeaCard idea={i} signedIn={signedIn} /></li>)}</ul>
+        <ul className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">{rows.map((i) => <li key={i.id}><IdeaCard idea={i} signedIn={signedIn} /></li>)}</ul>
       </div>
     );
   };

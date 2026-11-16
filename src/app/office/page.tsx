@@ -1,4 +1,5 @@
 import CaseTable from "@/components/office/CaseTable";
+import OfficeCharts from "@/components/office/OfficeCharts";
 import Overview from "@/components/office/Overview";
 import NoAccess from "@/components/ui/NoAccess";
 import State from "@/components/ui/State";
@@ -18,6 +19,7 @@ export default async function Office() {
     <div className="space-y-4">
       <h1 className="text-2xl font-semibold text-civic">{t.odOverview}</h1>
       <Overview o={overviewStats(cases, nowMs())} t={t} lang={lang} />
+      <OfficeCharts cases={cases} t={t} lang={lang} />
       {cases.length === 0 ? <State kind="officeEmpty" title={t.emptyQueue} as="h2" /> : <CaseTable cases={cases} />}
     </div>
   );

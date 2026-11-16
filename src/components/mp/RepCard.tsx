@@ -12,7 +12,7 @@ export default function RepCard({ rep, t, lang, showProfile = true, confirm }: {
     <Card as="article" className="space-y-3">
       <div className="flex items-start gap-3">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img loading="lazy" decoding="async" src="/illustrations/spot-find-mp.svg" alt="" className="size-20 shrink-0 rounded-xl bg-slate-50 p-1" />
+        <img loading="lazy" decoding="async" src="/illustrations/mp-portrait.svg" alt="" className="size-20 shrink-0 rounded-xl bg-slate-50" />
         <div className="min-w-0 space-y-1">
           <h3 className="text-lg font-semibold text-foreground">{b ? rep.nameBn : rep.nameEn}</h3>
           <p className="text-sm text-muted">{b ? rep.roleBn : rep.roleEn} · {b ? rep.constituencyBn : rep.constituencyEn}</p>

@@ -58,7 +58,7 @@ export default function ExploreView({ issues, loadFailed, now }: { issues: Explo
   const list = shown.length === 0 ? (
     <EmptyState variant="noResults" title={t.exNoResultsTitle} body={t.exNoResultsBody} action={active ? <Button variant="secondary" onClick={() => setFilters(NO_FILTERS)}>{t.exClear}</Button> : undefined} />
   ) : (
-    <ul className="space-y-2">
+    <ul className="grid gap-2 xl:grid-cols-2">
       {shown.map((i) => (
         <li key={i.ref}>
           <Card as="article" padded={false} className={`p-3 ${i.ref === selected ? "ring-2 ring-civic" : ""}`}>

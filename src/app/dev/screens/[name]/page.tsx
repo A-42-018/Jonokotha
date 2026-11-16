@@ -9,6 +9,7 @@ import Copilot from "@/components/office/Copilot";
 import NotesAndAssign from "@/components/office/NotesAndAssign";
 import NoAccess from "@/components/ui/NoAccess";
 import OfficeActions from "@/components/office/OfficeActions";
+import OfficeCharts from "@/components/office/OfficeCharts";
 import Overview from "@/components/office/Overview";
 import ReportForm from "@/components/ReportForm";
 import { SAMPLE_REVIEW } from "@/lib/admin";
@@ -66,6 +67,7 @@ export default async function DevScreen({ params }: PageProps<"/dev/screens/[nam
         <div className="space-y-4">
           <h1 className="text-2xl font-semibold text-civic">{t.odOverview}</h1>
           <Overview o={overviewStats(DEMO_CASES, Date.UTC(2026, 10, 16))} t={t} lang={lang} />
+          <OfficeCharts cases={DEMO_CASES} t={t} lang={lang} />
           <CaseTable cases={[...DEMO_CASES, LONG_CASE]} />
         </div>
       );

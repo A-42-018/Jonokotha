@@ -22,7 +22,7 @@ export default function AccountMenu({ email, role, labels }: { email: string | n
 
   if (!email) {
     return (
-      <Link href="/login" className="inline-flex min-h-11 items-center rounded-lg bg-civic px-3 font-medium text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-civic">
+      <Link href="/login" className="inline-flex min-h-11 items-center rounded-lg border-2 border-civic bg-white px-3 font-medium text-civic hover:bg-civic/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-civic">
         {labels.signIn}
       </Link>
     );

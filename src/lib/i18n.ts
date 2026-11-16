@@ -699,4 +699,4 @@ export const dict = {
 type Widen<T> = T extends string ? string : { [K in keyof T]: Widen<T[K]> };
 export type Dict = Widen<(typeof dict)["en"]>;
 
-export { fmtNum, fillNum, fmtDate, fmtDay } from "./format";
+export { fmtNum, fillNum, fmtDate, fmtDay, fmtAgo } from "./format";
