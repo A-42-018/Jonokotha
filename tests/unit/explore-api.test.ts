@@ -61,3 +61,26 @@ describe("ideas api mapping", () => {
     expect(ideaBody(f, { problem: "সমস্যা", solution: "সমাধান", benefit: "উপকার", area: "এলাকা", cost: "খরচ" }, "")).toBe("সমস্যা: P\n\nসমাধান: S");
   });
 });
+
+import { answeredPercent, medianLabel, repView, sourceHost } from "@/lib/mp-api";
+
+describe("mp api helpers", () => {
+  const area = { key: "demo-1", name_bn: "এলাকা ১", name_en: "Area 1", district: null, is_demo: true };
+  const rep = { id: "r1", full_name: "নাম", office_title: null, official_contact: null, source_url: "https://example.org/a/b?x=1", verified_at: "2026-11-16", is_sample: true };
+  it("builds the card view with a role fallback and the area name in the chosen language", () => {
+    expect(repView(rep, area, "en", "Representative")).toMatchObject({ role: "Representative", constituency: "Area 1", sample: true });
+    expect(repView({ ...rep, office_title: "এমপি" }, area, "bn", "x")).toMatchObject({ role: "এমপি", constituency: "এলাকা ১" });
+  });
+  it("shows only the host of a source link and tolerates a bad one", () => {
+    expect(sourceHost(rep.source_url)).toBe("example.org");
+    expect(sourceHost("not a url")).toBeNull();
+    expect(sourceHost(null)).toBeNull();
+  });
+  it("answered percent has no divide by zero; median switches to days from 24 hours", () => {
+    expect(answeredPercent({ received: 10, answered: 7 })).toBe(70);
+    expect(answeredPercent({ received: 0, answered: 0 })).toBe(0);
+    expect(medianLabel(null)).toBeNull();
+    expect(medianLabel(0.2)).toEqual({ unit: "hours", n: 1 });
+    expect(medianLabel(52)).toEqual({ unit: "days", n: 2 });
+  });
+});

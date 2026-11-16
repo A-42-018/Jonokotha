@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Dict } from "@/lib/i18n";
 
-// Sample card only: no real person, no statistics. Replaced by verified profiles in Phase 2.
+// Sample card only: no real person, no statistics. The verified profile is reached through /mp (find your MP); wiring this card to the area lookup is part of F5.2.
 export default function RepresentativeCard({ t, areaName }: { t: Dict; areaName: string }) {
   return (
     <section aria-labelledby="home-rep" className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4">
@@ -12,7 +12,7 @@ export default function RepresentativeCard({ t, areaName }: { t: Dict; areaName:
         <p className="font-medium">{t.homeRepName} <span className="rounded-full bg-amber/20 px-2 py-0.5 text-xs text-amber-900">{t.cpSample}</span></p>
         <p className="text-sm text-slate-600">{areaName}</p>
         <p className="text-sm text-slate-600">{t.homeRepNote}</p>
-        <Link href="/mp/rep-demo-1" className="inline-flex min-h-11 items-center text-civic underline">{t.mpProfile}</Link> <Link href="/mp" className="inline-flex min-h-11 items-center ps-3 text-civic underline">{t.mpFindTitle}</Link>
+        <Link href="/mp" className="inline-flex min-h-11 items-center text-civic underline">{t.mpFindTitle}</Link>
       </div>
     </section>
   );

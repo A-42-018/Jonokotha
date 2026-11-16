@@ -71,19 +71,32 @@ test.describe("phase 2 public pages", () => {
     await expect(page.getByRole("link", { name: "সাইন ইন" }).first()).toBeVisible();
   });
 
-  test("find your MP: area search shows a labelled card; border ward asks to confirm; profile shows period and no ranking", async ({ page }) => {
+  test("find your MP: lookup from the API shows a labelled card; two areas ask to confirm; profile shows period and no ranking; unknown id is not found", async ({ page }) => {
+    const area = (key: string, bn: string) => ({ key, name_bn: bn, name_en: bn, district: null, is_demo: true });
+    const rep = (id: string, name: string) => ({ id, full_name: name, office_title: "সংসদ সদস্য", party_name: null, official_contact: null, source_url: "https://example.org/x", verified_at: "2026-11-16", is_sample: true });
+    const ok = (data: unknown) => ({ status: 200, contentType: "application/json", body: JSON.stringify({ data, request_id: "t" }) });
+    const ID = "11111111-1111-4111-8111-111111111111";
+    await page.route("**/api/v1/representatives/lookup?**", (r) => {
+      const q = new URL(r.request().url()).searchParams.get("area") ?? "";
+      return r.fulfill(ok(q.includes("৫")
+        ? { matches: [{ constituency: area("demo-1", "এলাকা ১"), representatives: [rep(ID, "নমুনা জনপ্রতিনিধি ১")] }, { constituency: area("demo-2", "এলাকা ২"), representatives: [rep("22222222-2222-4222-8222-222222222222", "নমুনা জনপ্রতিনিধি ২")] }], needs_manual_choice: false }
+        : { matches: [{ constituency: area("demo-1", "এলাকা ১"), representatives: [rep(ID, "নমুনা জনপ্রতিনিধি ১")] }], needs_manual_choice: false }));
+    });
+    await page.route(`**/api/v1/representatives/${ID}`, (r) => r.fulfill(ok({ ...rep(ID, "নমুনা জনপ্রতিনিধি ১"), constituencies: [{ ...area("demo-1", "এলাকা ১"), valid_from: "2026-01-01", valid_to: null }], fields: [], announcements: [] })));
+    await page.route("**/api/v1/constituencies/demo-1/responsiveness", (r) => r.fulfill(ok({ constituency: "demo-1", is_sample: true, from: "2026-10-01", to: "2026-10-31", received: 10, answered: 7, pending: 3, median_hours_to_first_response: 52, method_url: "/mp/method", note: "" })));
+    await page.route("**/api/v1/representatives/unknown", (r) => r.fulfill({ status: 404, contentType: "application/json", body: JSON.stringify({ code: "not_found", message: "x", field_errors: {}, request_id: "t" }) }));
     await page.goto("/mp");
     await page.getByLabel("আপনার এলাকা বা ওয়ার্ডের নাম লিখুন").fill("ওয়ার্ড ৩");
     await expect(page.getByRole("heading", { name: "নমুনা জনপ্রতিনিধি ১" })).toBeVisible();
     await page.getByLabel("আপনার এলাকা বা ওয়ার্ডের নাম লিখুন").fill("ওয়ার্ড ৫");
     await expect(page.getByText("দুটি নির্বাচনী এলাকার সীমানায়")).toBeVisible();
-    await page.goto("/mp/rep-demo-1");
+    await page.goto(`/mp/${ID}`);
     await expect(page.getByText("সময়কাল:")).toBeVisible();
     await expect(page.getByText("র‍্যাঙ্কিং করা হয় না")).toBeVisible();
     await page.getByRole("link", { name: "এই সংখ্যা কীভাবে হিসাব করা হয়" }).click();
     await expect(page).toHaveURL(/\/mp\/method/);
     await page.goto("/mp/unknown");
-    await expect(page.getByRole("heading", { name: "পাতাটি পাওয়া যায়নি" })).toBeVisible();
+    await expect(page.getByText("এই প্রোফাইল পাওয়া যায়নি")).toBeVisible();
   });
 
   test("onboarding walks three screens and can be skipped; help and privacy are reachable from the footer", async ({ page }) => {
