@@ -1,5 +1,6 @@
 import Link from "next/link";
 import AskForm from "@/components/ask/AskForm";
+import EmergencyNote from "@/components/EmergencyNote";
 import Card from "@/components/ui/Card";
 import { getConstituencyId } from "@/lib/constituency-server";
 import { DEMO_CONSTITUENCY } from "@/lib/demo-data";
@@ -25,6 +26,7 @@ export default async function Ask() {
           <Link href="/ask/inbox" className="inline-flex min-h-11 items-center text-civic underline">{t.askInbox}</Link>
         </div>
       </div>
+      <EmergencyNote t={t} />
       <AskForm signedIn={signedIn} constituency={(await getConstituencyId()) ?? DEMO_CONSTITUENCY.id} />
       <section aria-labelledby="faq" className="space-y-2">
         <h2 id="faq" className="text-xl font-semibold text-foreground">{t.askFaqTitle}</h2>

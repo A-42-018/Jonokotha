@@ -31,6 +31,7 @@ export default function IssueView({ c, t, lang, signedIn = false }: { c: CaseRec
             <p className="whitespace-pre-wrap break-words">{c.description}</p>
           </Card>
           <OfficialResponse t={t} lang={lang} />
+          {c.status === "referred" && <p role="note" className="rounded-xl border border-amber/60 bg-amber/10 p-3 text-sm">{t.isReferredNote}</p>}
           {c.status === "resolved" && signedIn && <ResolutionFeedback refId={c.ref} />}
         </div>
         <div className="space-y-4">
@@ -38,6 +39,7 @@ export default function IssueView({ c, t, lang, signedIn = false }: { c: CaseRec
             <StatusTimeline steps={steps} t={t} lang={lang} />
           </Card>
           <IssueActions refId={c.ref} title={c.title} signedIn={signedIn} />
+          <p className="text-sm text-muted">{t.isOfficialNote}</p>
         </div>
       </div>
     </div>

@@ -11,8 +11,9 @@ const TONE: Record<CardTone, string> = {
 };
 
 /** Surface with optional title. `as` picks the element (section, li, article…); `title` renders in `headingAs`. */
-export default function Card({ as, title, headingAs: Heading = "h2", tone = "default", padded = true, className, children }: {
+export default function Card({ as, id, title, headingAs: Heading = "h2", tone = "default", padded = true, className, children }: {
   as?: ElementType;
+  id?: string;
   title?: ReactNode;
   headingAs?: "h2" | "h3" | "h4";
   tone?: CardTone;
@@ -22,7 +23,7 @@ export default function Card({ as, title, headingAs: Heading = "h2", tone = "def
 }) {
   const Tag = as ?? "div";
   return (
-    <Tag className={cx("rounded-2xl border shadow-sm", TONE[tone], padded && "p-4 sm:p-5", className)}>
+    <Tag id={id} className={cx("rounded-2xl border shadow-sm", TONE[tone], padded && "p-4 sm:p-5", className)}>
       {title && <Heading className="mb-2 text-lg font-semibold text-civic">{title}</Heading>}
       {children}
     </Tag>

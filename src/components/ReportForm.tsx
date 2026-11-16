@@ -30,6 +30,7 @@ import { appendTranscript } from "@/lib/speech";
 import { useSpeech } from "./report/useSpeech";
 import LocationPicker from "./report/LocationPicker";
 import type { Pin } from "@/lib/places";
+import EmergencyGuidance from "@/components/EmergencyGuidance";
 import type { Emergency } from "@/lib/types";
 import { useToast } from "./ui/Toast";
 import { useKeyboardInset } from "./ui/useKeyboardInset";
@@ -82,6 +83,7 @@ function ReportFormInner({ t, lang, constituencyId }: { t: Dict; lang: Lang; con
   const [busy, setBusy] = useState<"" | "draft">("");
   const [photosFailed, setPhotosFailed] = useState(0);
   const [emergency, setEmergency] = useState<Emergency>();
+  const [emergencySeen, setEmergencySeen] = useState(false);
   // One Idempotency-Key per report: a second tap or a retry after a lost answer is replayed, not duplicated.
   const reportKey = useRef(newId());
   const [quickDone, setQuickDone] = useState(false);
@@ -238,7 +240,15 @@ function ReportFormInner({ t, lang, constituencyId }: { t: Dict; lang: Lang; con
   const titles = [t.stCategory, t.stDescribe, t.stLocation, t.stEvidence, t.stReview];
 
   if (queued) return <ReportQueued t={t} onAnother={() => { setQueued(false); reportKey.current = newId(); clearDraft(); }} />;
-  if (sentRef) return <ReportSuccess t={t} lang={lang} refId={sentRef} photosFailed={photosFailed} emergency={emergency} onAnother={() => { setSentRef(""); setPhotosFailed(0); setEmergency(undefined); reportKey.current = newId(); clearDraft(); }} />;
+  // Imminent harm flagged by the server: guidance first, instead of the normal success screen, until the person chooses to go on.
+  if (sentRef && emergency && !emergencySeen) {
+    return (
+      <EmergencyGuidance emergency={emergency} lang={lang} refId={sentRef}>
+        <Button full onClick={() => setEmergencySeen(true)}>{t.emContinueReport}</Button>
+      </EmergencyGuidance>
+    );
+  }
+  if (sentRef) return <ReportSuccess t={t} lang={lang} refId={sentRef} photosFailed={photosFailed} emergency={emergency} onAnother={() => { setSentRef(""); setPhotosFailed(0); setEmergency(undefined); setEmergencySeen(false); reportKey.current = newId(); clearDraft(); }} />;
 
   const isLast = step === LAST;
   return (

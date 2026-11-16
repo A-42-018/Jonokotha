@@ -2,6 +2,7 @@
 import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRef, useState } from "react";
+import EmergencyGuidance from "@/components/EmergencyGuidance";
 import QueryProvider from "@/components/QueryProvider";
 import { ApiError } from "@/lib/api-client";
 import { askBody, askQuestion, type Asked } from "@/lib/ask-api";
@@ -45,6 +46,16 @@ function AskInner({ signedIn, constituency }: { signedIn: boolean; constituency:
     },
     onError: (e) => toast("error", e instanceof ApiError && e.status === 429 ? t.askLimit : e instanceof ApiError && e.status === 401 ? t.askNeedsSignIn : t.askSendFail),
   });
+
+  // Imminent harm flagged by the server: the guidance replaces the form (the question itself is already saved).
+  if (sent?.emergency) {
+    return (
+      <EmergencyGuidance emergency={sent.emergency} lang={lang}>
+        <Link href="/ask/inbox" className={buttonClass({ full: true })}>{t.emContinueAsk}</Link>
+        <Button full variant="ghost" onClick={() => setSent(undefined)}>{t.emAskAnother}</Button>
+      </EmergencyGuidance>
+    );
+  }
 
   if (!signedIn) {
     return (
