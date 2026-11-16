@@ -10,7 +10,7 @@ import { useLang } from "@/components/ui/useLang";
 import { useLocalValue } from "@/components/ui/useLocalValue";
 import { useT } from "@/components/ui/useT";
 import { FEEDBACK_KEY, isRating, NO_FEEDBACK } from "@/lib/follows";
-import { fillNum } from "@/lib/i18n";
+import { fillNum } from "@/lib/format";
 
 /** After resolution: 1–5 satisfaction, and reopen / appeal (reason required). Device-local until the API exists. */
 export default function ResolutionFeedback({ refId }: { refId: string }) {

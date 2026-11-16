@@ -8,9 +8,9 @@ import Select from "@/components/ui/Select";
 import Tabs from "@/components/ui/Tabs";
 import { useLang } from "@/components/ui/useLang";
 import { useT } from "@/components/ui/useT";
-import { fillNum } from "@/lib/i18n";
+import { fillNum } from "@/lib/format";
 import { ideasFor, type Idea, type IdeaTab } from "@/lib/ideas";
-import { CATEGORIES, type Category } from "@/lib/types";
+import { CATEGORIES, type Category } from "@/lib/categories";
 import IdeaCard from "./IdeaCard";
 
 export default function IdeasView({ ideas, signedIn }: { ideas: Idea[]; signedIn: boolean }) {

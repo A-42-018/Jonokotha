@@ -1,7 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { dict } from "@/lib/i18n";
-import { useLang } from "./ui/useLang";
+import { useT } from "./ui/useT";
 
 type InstallEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: "accepted" | "dismissed" }> };
 
@@ -13,7 +12,7 @@ function isDismissed() {
 
 /** Dismissible install banner driven by `beforeinstallprompt`. Hidden once installed or dismissed. */
 export default function InstallPrompt() {
-  const t = dict[useLang()];
+  const t = useT();
   const [evt, setEvt] = useState<InstallEvent | null>(null);
 
   useEffect(() => {

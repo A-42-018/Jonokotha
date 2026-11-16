@@ -9,7 +9,7 @@ import { useToast } from "@/components/ui/Toast";
 import { useLang } from "@/components/ui/useLang";
 import { useLocalValue } from "@/components/ui/useLocalValue";
 import { useT } from "@/components/ui/useT";
-import { fmtDate } from "@/lib/i18n";
+import { fmtDate } from "@/lib/format";
 
 const KEY = "jonokotha:office-announcements:v1";
 const NONE: { title: string; body: string; at: string }[] = [];

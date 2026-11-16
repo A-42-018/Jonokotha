@@ -1,11 +1,10 @@
 "use client";
 import { useEffect, useState } from "react";
-import { dict } from "@/lib/i18n";
-import { useLang } from "./useLang";
+import { useT } from "./useT";
 
 /** Sticky banner shown while the browser is offline; briefly confirms when back online. */
 export default function OfflineBanner() {
-  const t = dict[useLang()];
+  const t = useT();
   const [state, setState] = useState<"online" | "offline" | "back">("online");
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout>;

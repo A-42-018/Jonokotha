@@ -5,7 +5,7 @@ import Button from "@/components/ui/Button";
 import { useLang } from "@/components/ui/useLang";
 import { useLocalValue } from "@/components/ui/useLocalValue";
 import { useT } from "@/components/ui/useT";
-import { fillNum } from "@/lib/i18n";
+import { fillNum } from "@/lib/format";
 
 export const ONBOARDED_KEY = "jonokotha:onboarded:v1";
 const ART = ["onboard-1-report", "onboard-2-track", "onboard-3-together"];

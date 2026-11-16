@@ -11,7 +11,7 @@ export default function ReportSuccess({ t, refId, onAnother }: { t: Dict; refId:
   return (
     <div className="mx-auto max-w-md space-y-4 text-center">
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/illustrations/spot-report-sent.svg" alt="" className="mx-auto h-40 w-auto" />
+      <img loading="lazy" decoding="async" src="/illustrations/spot-report-sent.svg" alt="" className="mx-auto h-40 w-auto" />
       <h1 className="text-2xl font-semibold text-civic">{t.sentTitle}</h1>
       <p className="text-muted">{t.successBody}</p>
       <Card>

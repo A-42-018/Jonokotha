@@ -1,7 +1,8 @@
 import { z } from "zod";
+import { CATEGORIES, type Category } from "./categories";
 
-export const CATEGORIES = ["roads","drainage","water","electricity","waste","flooding","health","education","safety","environment","facilities","other"] as const;
-export type Category = (typeof CATEGORIES)[number];
+export { CATEGORIES };
+export type { Category };
 
 export const IntakeDraft = z.object({
   title: z.string().min(3).max(120),

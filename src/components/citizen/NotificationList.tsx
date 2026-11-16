@@ -7,7 +7,7 @@ import EmptyState from "@/components/ui/EmptyState";
 import { useLang } from "@/components/ui/useLang";
 import { useLocalValue } from "@/components/ui/useLocalValue";
 import { useT } from "@/components/ui/useT";
-import { fmtDate } from "@/lib/i18n";
+import { fmtDate } from "@/lib/format";
 import type { Notice } from "@/lib/sample";
 
 export const READ_KEY = "jonokotha:notice-read:v1";

@@ -11,9 +11,10 @@ import { useToast } from "@/components/ui/Toast";
 import { useLang } from "@/components/ui/useLang";
 import { useLocalValue } from "@/components/ui/useLocalValue";
 import { useT } from "@/components/ui/useT";
-import { fillNum, fmtDate } from "@/lib/i18n";
+import { fillNum, fmtDate } from "@/lib/format";
 import { casesToCsv, filterCases, NO_CASE_FILTER, SAMPLE_STAFF, type CaseFilter } from "@/lib/office";
-import { CATEGORIES, type CaseRecord, type Status } from "@/lib/types";
+import { CATEGORIES } from "@/lib/categories";
+import { type CaseRecord, type Status } from "@/lib/types";
 
 const STATUSES: Status[] = ["received", "acknowledged", "referred", "resolved"];
 const FILTERS_KEY = "jonokotha:office-filters:v1";

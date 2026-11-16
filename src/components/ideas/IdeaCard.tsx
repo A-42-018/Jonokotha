@@ -8,7 +8,8 @@ import { useLang } from "@/components/ui/useLang";
 import { useShare } from "@/components/ui/useShare";
 import { useT } from "@/components/ui/useT";
 import { useToast } from "@/components/ui/Toast";
-import { fillNum, fmtDate, type Dict } from "@/lib/i18n";
+import { fillNum, fmtDate } from "@/lib/format";
+import { type Dict } from "@/lib/i18n";
 import { shownSupports, type Idea, type IdeaStatus } from "@/lib/ideas";
 
 const NONE: string[] = [];
@@ -24,7 +25,8 @@ const ICON: Record<IdeaStatus, string> = {
 export const ideaStatusLabel = (t: Dict, s: IdeaStatus) => t[`idSub_${s}` as keyof Dict] as string;
 
 /** One idea. One support per idea per account: tracked on this device until the API exists (see idSupportLocalNote). */
-export default function IdeaCard({ idea, signedIn }: { idea: Idea; signedIn: boolean }) {
+/** `heading` is the level of the card title: h2 under the page title, h3 when the list sits inside an h2 section. */
+export default function IdeaCard({ idea, signedIn, heading: H = "h2" }: { idea: Idea; signedIn: boolean; heading?: "h2" | "h3" }) {
   const t = useT();
   const lang = useLang();
   const toast = useToast();
@@ -41,9 +43,9 @@ export default function IdeaCard({ idea, signedIn }: { idea: Idea; signedIn: boo
     <Card as="article" padded={false} className="space-y-3 p-4">
       <div id={idea.id} className="flex items-start gap-3">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={`/illustrations/cat-${idea.category}.svg`} alt="" className="size-12 shrink-0" />
+        <img loading="lazy" decoding="async" src={`/illustrations/cat-${idea.category}.svg`} alt="" className="size-12 shrink-0" />
         <div className="min-w-0 flex-1 space-y-1">
-          <h3 className="text-lg font-semibold text-foreground">{idea.title}</h3>
+          <H className="text-lg font-semibold text-foreground">{idea.title}</H>
           <p className="text-sm text-muted">{t.cats[idea.category]} · {idea.area} · {fmtDate(idea.createdAt, lang)}</p>
         </div>
       </div>

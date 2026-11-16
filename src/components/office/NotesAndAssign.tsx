@@ -9,7 +9,7 @@ import { useToast } from "@/components/ui/Toast";
 import { useLang } from "@/components/ui/useLang";
 import { useLocalValue } from "@/components/ui/useLocalValue";
 import { useT } from "@/components/ui/useT";
-import { fillNum, fmtDate } from "@/lib/i18n";
+import { fillNum, fmtDate } from "@/lib/format";
 import { SAMPLE_STAFF } from "@/lib/office";
 import { ASSIGN_KEY } from "./CaseTable";
 

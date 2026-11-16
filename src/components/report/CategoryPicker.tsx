@@ -1,7 +1,7 @@
 "use client";
 import { useId, type ReactNode } from "react";
 import type { Dict } from "@/lib/i18n";
-import { CATEGORIES, type Category } from "@/lib/types";
+import { CATEGORIES, type Category } from "@/lib/categories";
 import { FieldError } from "../ui/Field";
 import { cx } from "../ui/cx";
 
@@ -41,7 +41,7 @@ export default function CategoryPicker({ t, value, onChange, error, badge }: {
               className="sr-only"
             />
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={`/illustrations/cat-${c}.svg`} alt="" width={56} height={56} className="size-14" />
+            <img loading="lazy" decoding="async" src={`/illustrations/cat-${c}.svg`} alt="" width={56} height={56} className="size-14" />
             <span className={cx("font-medium", value === c ? "text-civic" : "text-foreground")}>{t.cats[c]}</span>
             <span
               aria-hidden

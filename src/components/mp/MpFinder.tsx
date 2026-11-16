@@ -6,7 +6,7 @@ import EmptyState from "@/components/ui/EmptyState";
 import Input from "@/components/ui/Input";
 import { useLang } from "@/components/ui/useLang";
 import { useT } from "@/components/ui/useT";
-import { fillNum } from "@/lib/i18n";
+import { fillNum } from "@/lib/format";
 import { findRepsByArea, type Rep } from "@/lib/mp";
 import RepCard from "./RepCard";
 
@@ -22,7 +22,7 @@ export default function MpFinder() {
     <div className="space-y-4">
       <div className="flex items-center gap-4">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/illustrations/spot-find-mp.svg" alt="" className="hidden size-24 sm:block" />
+        <img loading="lazy" decoding="async" src="/illustrations/spot-find-mp.svg" alt="" className="hidden size-24 sm:block" />
         <div>
           <h1 className="text-2xl font-semibold text-civic">{t.mpFindTitle}</h1>
           <p className="text-muted">{t.mpFindLead}</p>

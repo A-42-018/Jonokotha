@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabaseBrowser } from "@/lib/supabase/client";
 import Button from "./Button";
 import { useT } from "./useT";
 
@@ -16,6 +15,7 @@ export default function SwitchAccount({ next }: { next: string }) {
       loading={busy}
       onClick={async () => {
         setBusy(true);
+        const { supabaseBrowser } = await import("@/lib/supabase/client"); // on demand: keeps ~70 KB off office pages
         await supabaseBrowser().auth.signOut();
         router.push(`/login?next=${encodeURIComponent(next)}`);
         router.refresh();

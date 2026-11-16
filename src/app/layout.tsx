@@ -5,6 +5,7 @@ import AccountMenu from "@/components/AccountMenu";
 import ConstituencyPicker from "@/components/ConstituencyPicker";
 import RegisterSW from "@/components/RegisterSW";
 import BottomTabBar from "@/components/ui/BottomTabBar";
+import I18nProvider from "@/components/ui/I18nProvider";
 import MainShell from "@/components/ui/MainShell";
 import OfflineBanner from "@/components/ui/OfflineBanner";
 import TopNav from "@/components/ui/TopNav";
@@ -13,8 +14,10 @@ import { getConstituencyId } from "@/lib/constituency-server";
 import { currentUser } from "@/lib/supabase/server";
 import { dict, getLang } from "@/lib/i18n";
 
-const head = Anek_Bangla({ variable: "--font-head", subsets: ["bengali", "latin"] });
-const body = Hind_Siliguri({ variable: "--font-body", subsets: ["bengali", "latin"], weight: ["400", "500", "600"] });
+// preload: false keeps ~190 KB of font files from competing with the page on slow links; text shows in the system font first, then swaps.
+// Headings use one static weight: the variable Anek Bangla file (all weights and widths) is 156 KB, a single weight is far smaller.
+const head = Anek_Bangla({ variable: "--font-head", subsets: ["bengali", "latin"], weight: ["600"], preload: false });
+const body = Hind_Siliguri({ variable: "--font-body", subsets: ["bengali", "latin"], weight: ["400", "500", "600"], preload: false });
 
 export const metadata: Metadata = {
   title: "জনকথা — Jonokotha",
@@ -42,6 +45,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang={lang} className={`${head.variable} ${body.variable}`}>
       <body className="min-h-screen">
+        <I18nProvider dicts={{ [lang]: t }}>
         <TopNav
           isStaff={isStaff}
           picker={
@@ -60,12 +64,13 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             />
           }
         />
-        <OfflineBanner />
-        <RegisterSW />
-        <ToastProvider>
-          <MainShell>{children}</MainShell>
-        </ToastProvider>
-        <BottomTabBar />
+          <OfflineBanner />
+          <RegisterSW />
+          <ToastProvider>
+            <MainShell>{children}</MainShell>
+          </ToastProvider>
+          <BottomTabBar />
+        </I18nProvider>
       </body>
     </html>
   );

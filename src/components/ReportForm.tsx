@@ -2,12 +2,13 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
-import { fillNum, type Dict, type Lang } from "@/lib/i18n";
+import { fillNum } from "@/lib/format";
+import { type Dict, type Lang } from "@/lib/i18n";
 import {
   DRAFT_KEY, FIELDS, LEGACY_DRAFT_KEY, STEP_FIELDS, hasPersonalNumber, reportSchema,
   type ReportData, type ReportField, type ReportValues,
 } from "@/lib/report";
-import { CATEGORIES, type Category } from "@/lib/types";
+import { CATEGORIES, type Category } from "@/lib/categories";
 import CategoryPicker from "./report/CategoryPicker";
 import EvidenceStep, { type Photo } from "./report/EvidenceStep";
 import PrivacyWarning from "./report/PrivacyWarning";
@@ -299,7 +300,7 @@ export default function ReportForm({ t, lang, constituencyId }: { t: Dict; lang:
             {category ? (
               <span className="flex items-center gap-3">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={`/illustrations/cat-${category}.svg`} alt="" width={40} height={40} className="size-10" />
+                <img loading="lazy" decoding="async" src={`/illustrations/cat-${category}.svg`} alt="" width={40} height={40} className="size-10" />
                 {t.cats[category]}
               </span>
             ) : "—"}

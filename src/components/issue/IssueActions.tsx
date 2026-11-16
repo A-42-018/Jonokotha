@@ -10,7 +10,7 @@ import { useShare } from "@/components/ui/useShare";
 import { useT } from "@/components/ui/useT";
 import { useLang } from "@/components/ui/useLang";
 import { useLocalValue } from "@/components/ui/useLocalValue";
-import { fillNum } from "@/lib/i18n";
+import { fillNum } from "@/lib/format";
 import { FOLLOWS_KEY, isFollowing, NO_FOLLOWS, toggleFollow } from "@/lib/follows";
 import Link from "next/link";
 import ShareButtons from "@/components/ui/ShareButtons";

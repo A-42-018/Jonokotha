@@ -12,7 +12,7 @@ import { useLang } from "@/components/ui/useLang";
 import { useLocalValue } from "@/components/ui/useLocalValue";
 import { useT } from "@/components/ui/useT";
 import { ASK_KEY, NO_ASKS, remainingToday, TOPICS, validateAsk, type AskKind } from "@/lib/ask";
-import { fillNum } from "@/lib/i18n";
+import { fillNum } from "@/lib/format";
 
 /** Ask Your MP form. Sign-in required. No messages API yet: stored on this device (see askSampleBanner). */
 export default function AskForm({ signedIn }: { signedIn: boolean }) {

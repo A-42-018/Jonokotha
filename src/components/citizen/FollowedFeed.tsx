@@ -9,8 +9,8 @@ import { useLocalValue } from "@/components/ui/useLocalValue";
 import { useT } from "@/components/ui/useT";
 import type { ExploreIssue } from "@/lib/explore";
 import { feedFor, FOLLOWS_KEY, isFollowing, NO_FOLLOWS, toggleFollow } from "@/lib/follows";
-import { fmtDate } from "@/lib/i18n";
-import { CATEGORIES } from "@/lib/types";
+import { fmtDate } from "@/lib/format";
+import { CATEGORIES } from "@/lib/categories";
 
 /** Personalised home feed from followed areas, categories and issues. Sample issues until the feed API exists. */
 export default function FollowedFeed({ issues }: { issues: ExploreIssue[] }) {

@@ -15,8 +15,9 @@ import { useLocalValue } from "@/components/ui/useLocalValue";
 import { FOLLOWS_KEY, isFollowing, NO_FOLLOWS, toggleFollow } from "@/lib/follows";
 import { useT } from "@/components/ui/useT";
 import { filterIssues, lastUpdated, NO_FILTERS, sortIssues, type DateRange, type ExploreIssue, type Filters, type SortKey } from "@/lib/explore";
-import { fillNum, fmtDate } from "@/lib/i18n";
-import { CATEGORIES, type Status } from "@/lib/types";
+import { fillNum, fmtDate } from "@/lib/format";
+import { CATEGORIES } from "@/lib/categories";
+import { type Status } from "@/lib/types";
 
 // The map (MapLibre, ~200 KB) loads only when the map view is opened.
 const ExploreMap = dynamic(() => import("./ExploreMap"), { ssr: false });
@@ -63,11 +64,11 @@ export default function ExploreView({ issues, loadFailed, now }: { issues: Explo
           <Card as="article" padded={false} className={`p-3 ${i.ref === selected ? "ring-2 ring-civic" : ""}`}>
             <div className="flex items-start gap-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={`/illustrations/cat-${i.category}.svg`} alt="" className="size-12 shrink-0" />
+              <img loading="lazy" decoding="async" src={`/illustrations/cat-${i.category}.svg`} alt="" className="size-12 shrink-0" />
               <div className="min-w-0 flex-1 space-y-1">
-                <h3 className="font-medium text-foreground">
+                <h2 className="font-medium text-foreground">
                   {i.sample ? i.title : <Link href={`/issue/${i.ref}`} className="underline-offset-2 hover:underline">{i.title}</Link>}
-                </h3>
+                </h2>
                 <p className="text-sm text-muted">{t.cats[i.category]}{i.area && ` · ${i.area}`} · {fmtDate(i.createdAt, lang)}</p>
                 <div className="flex flex-wrap items-center gap-2">
                   <StatusChip status={i.status} label={t.statuses[i.status]} />

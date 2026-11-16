@@ -1,8 +1,10 @@
 "use client";
 import { useState, type ReactNode } from "react";
-import { dict, fillNum, type Lang } from "@/lib/i18n";
+import { fillNum } from "@/lib/format";
+import type { Lang } from "@/lib/i18n";
 import type { Status } from "@/lib/types";
 import Badge from "./Badge";
+import { useT } from "./useT";
 import Button from "./Button";
 import Card from "./Card";
 import { Checkbox, RadioGroup } from "./Choice";
@@ -33,7 +35,7 @@ const row = "flex flex-wrap items-center gap-3";
 type Row = { ref: string; title: string; status: Status };
 
 function Panel({ lang }: { lang: Lang }) {
-  const t = dict[lang];
+  const t = useT(lang);
   const d = t.dev;
   const [dialog, setDialog] = useState(false);
   const [busy, setBusy] = useState(false);

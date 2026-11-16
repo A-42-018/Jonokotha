@@ -16,7 +16,7 @@ export default async function Ask() {
     <div className="space-y-5">
       <div className="flex items-start gap-4">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/illustrations/spot-ask-mp.svg" alt="" className="hidden size-24 sm:block" />
+        <img loading="lazy" decoding="async" src="/illustrations/spot-ask-mp.svg" alt="" className="hidden size-24 sm:block" />
         <div className="space-y-1">
           <h1 className="text-2xl font-semibold text-civic">{t.askTitle}</h1>
           <p className="text-muted">{t.askLead}</p>

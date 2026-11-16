@@ -8,7 +8,7 @@ import { useLang } from "@/components/ui/useLang";
 import { useLocalValue } from "@/components/ui/useLocalValue";
 import { useT } from "@/components/ui/useT";
 import { ASK_KEY, NO_ASKS, type Topic } from "@/lib/ask";
-import { fmtDate } from "@/lib/i18n";
+import { fmtDate } from "@/lib/format";
 
 /** Private inbox: this device's sent messages (no replies API yet) plus one labelled sample reply. */
 export default function AskInbox() {

@@ -1,6 +1,7 @@
 "use client";
 import { useRef, useState } from "react";
-import { fillNum, type Dict, type Lang } from "@/lib/i18n";
+import { fillNum } from "@/lib/format";
+import { type Dict, type Lang } from "@/lib/i18n";
 import { compressImage, PHOTO_TYPES } from "@/lib/image";
 import { MAX_CAPTION, MAX_PHOTOS } from "@/lib/report";
 import Button from "../ui/Button";

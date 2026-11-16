@@ -2,7 +2,6 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { supabaseBrowser } from "@/lib/supabase/client";
 
 type Labels = { account: string; signIn: string; signOut: string; signingOut: string; staff: string; admin: string; citizen: string };
 
@@ -31,6 +30,8 @@ export default function AccountMenu({ email, role, labels }: { email: string | n
 
   async function signOut() {
     setBusy(true);
+    // Loaded on demand: the Supabase client is ~70 KB and only signing out needs it here.
+    const { supabaseBrowser } = await import("@/lib/supabase/client");
     await supabaseBrowser().auth.signOut();
     setBusy(false);
     setOpen(false);

@@ -6,7 +6,7 @@ export default function ComingSoon({ art, soonLabel, title, body, children }: { 
   return (
     <section className="mx-auto flex max-w-md flex-col items-center gap-3 py-6 text-center">
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={`/illustrations/${art}.svg`} alt="" className="w-48 sm:w-56" />
+      <img loading="lazy" decoding="async" src={`/illustrations/${art}.svg`} alt="" className="w-48 sm:w-56" />
       <Badge tone="info">{soonLabel}</Badge>
       <h1 className="text-2xl font-semibold text-civic">{title}</h1>
       <p className="text-muted">{body}</p>

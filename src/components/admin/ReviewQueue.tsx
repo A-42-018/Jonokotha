@@ -11,7 +11,7 @@ import { useLang } from "@/components/ui/useLang";
 import { useLocalValue } from "@/components/ui/useLocalValue";
 import { useT } from "@/components/ui/useT";
 import { decide, type AuditRow, type ReviewItem, type ReviewKind } from "@/lib/admin";
-import { fillNum, fmtDate } from "@/lib/i18n";
+import { fillNum, fmtDate } from "@/lib/format";
 
 const AUDIT_KEY = "jonokotha:admin-audit:v1";
 const NO_AUDIT: AuditRow[] = [];

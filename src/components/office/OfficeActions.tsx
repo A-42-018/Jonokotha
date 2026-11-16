@@ -7,7 +7,7 @@ import Textarea from "@/components/ui/Textarea";
 import { useToast } from "@/components/ui/Toast";
 import { useT } from "@/components/ui/useT";
 import { useLang } from "@/components/ui/useLang";
-import { fillNum } from "@/lib/i18n";
+import { fillNum } from "@/lib/format";
 import { canDo, NOTE_MAX, NOTE_MIN, OFFICE_ACTIONS, submitToApproveRoute, validateNote, type OfficeAction, type SubmitAction } from "@/lib/office-actions";
 import type { Status } from "@/lib/types";
 

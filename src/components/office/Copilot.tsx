@@ -10,7 +10,7 @@ import { useToast } from "@/components/ui/Toast";
 import { useLang } from "@/components/ui/useLang";
 import { useLocalValue } from "@/components/ui/useLocalValue";
 import { useT } from "@/components/ui/useT";
-import { fmtDate } from "@/lib/i18n";
+import { fmtDate } from "@/lib/format";
 import { missingInfo, templateReply, type CopilotItem, type CopilotLog, type Decision } from "@/lib/office";
 import type { Agency, CaseRecord } from "@/lib/types";
 

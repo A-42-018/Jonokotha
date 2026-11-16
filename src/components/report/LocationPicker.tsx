@@ -5,7 +5,7 @@ import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import { useLang } from "@/components/ui/useLang";
 import { useT } from "@/components/ui/useT";
-import { fillNum } from "@/lib/i18n";
+import { fillNum } from "@/lib/format";
 import { inBangladesh, searchPlaces, type Pin } from "@/lib/places";
 
 const PinMap = dynamic(() => import("./PinMap"), { ssr: false });

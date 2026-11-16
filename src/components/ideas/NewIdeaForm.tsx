@@ -10,7 +10,7 @@ import Textarea from "@/components/ui/Textarea";
 import { useLocalValue } from "@/components/ui/useLocalValue";
 import { useT } from "@/components/ui/useT";
 import { similarIdeas, type Idea } from "@/lib/ideas";
-import { CATEGORIES } from "@/lib/types";
+import { CATEGORIES } from "@/lib/categories";
 import IdeaCard from "./IdeaCard";
 
 type Form = { title: string; problem: string; solution: string; benefit: string; area: string; category: string; cost: string; ack: boolean };
@@ -46,7 +46,7 @@ export default function NewIdeaForm({ existing, signedIn }: { existing: Idea[]; 
     return (
       <div className="mx-auto max-w-md space-y-3 text-center">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/illustrations/spot-idea.svg" alt="" className="mx-auto w-44" />
+        <img loading="lazy" decoding="async" src="/illustrations/spot-idea.svg" alt="" className="mx-auto w-44" />
         <h1 role="status" className="text-2xl font-semibold text-civic">{t.idDoneTitle}</h1>
         <p>{t.idDoneBody}</p>
         <p className="rounded-xl border border-amber/60 bg-amber/10 p-3 text-sm">{t.idDoneLocal}</p>
@@ -79,7 +79,7 @@ export default function NewIdeaForm({ existing, signedIn }: { existing: Idea[]; 
         <section aria-live="polite" className="space-y-2 rounded-2xl border border-amber/60 bg-amber/10 p-3">
           <h2 className="font-semibold">{t.idSimilarTitle}</h2>
           <p className="text-sm">{t.idSimilarBody}</p>
-          <ul className="space-y-2">{similar.map((i) => <li key={i.id}><IdeaCard idea={i} signedIn={signedIn} /></li>)}</ul>
+          <ul className="space-y-2">{similar.map((i) => <li key={i.id}><IdeaCard idea={i} signedIn={signedIn} heading="h3" /></li>)}</ul>
         </section>
       )}
       <Textarea label={t.idFProblem} rows={4} maxLength={1000} value={f.problem} error={errors.problem} onChange={(e) => set("problem", e.target.value)} />
