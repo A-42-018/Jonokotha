@@ -135,6 +135,12 @@ describe("RLS write rules", () => {
 
   it("the legacy compatibility view enforces the same rules", () => withClient((c) => tx(c, async () => {
     const w = await buildWorld(c);
+    // The deployed app inserts through the view as the signed-in citizen (as itself only).
+    const legacyInsert = (who: Who, reporter: string) => as(c, w, who, () => attempt(c,
+      "insert into cases (reporter_id,title,category,description,area,constituency_key,ai_summary,ai_agency,ai_confidence,ai_similar) values ($1,'t','roads','d','x','demo-1','s','ag-lged',0.7,'{}') returning ref", [reporter]));
+    expect(await legacyInsert("citizenA", w.citizenA)).toMatchObject({ ok: true, rowCount: 1 });
+    expect(await legacyInsert("citizenA", w.citizenB)).toMatchObject({ ok: false });
+    expect(await legacyInsert("anon", w.citizenA)).toMatchObject({ ok: false });
     const upd = (who: Who) => as(c, w, who, () => attempt(c, "update cases set status='acknowledged' where ref=$1", [w.issueA.ref]));
     for (const who of ["anon", "citizenA", "citizenB", "officeB", "moderator"] as Who[]) {
       const r = await upd(who);
