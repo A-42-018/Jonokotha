@@ -1,8 +1,9 @@
 "use client";
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import Link from "next/link";
 import QueryProvider from "@/components/QueryProvider";
-import Badge from "@/components/ui/Badge";
+import CapabilityLabel from "@/components/ui/CapabilityLabel";
 import Button, { buttonClass } from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import StatusChip from "@/components/ui/StatusChip";
@@ -14,7 +15,7 @@ import { useToast } from "@/components/ui/Toast";
 import { useLocalValue } from "@/components/ui/useLocalValue";
 import { CATEGORIES } from "@/lib/categories";
 import { fetchFeed } from "@/lib/feed-api";
-import { fmtDate } from "@/lib/format";
+import { fmtAgo } from "@/lib/format";
 
 const PERSONAL_KEY = "jonokotha:feed-personalized:v1";
 
@@ -27,6 +28,7 @@ function FeedInner({ signedIn }: { signedIn: boolean }) {
   const t = useT();
   const lang = useLang();
   const toast = useToast();
+  const [now] = useState(() => Date.now());
   const [personalized, setPersonalized] = useLocalValue<boolean>(PERSONAL_KEY, true);
   const { isFollowing, toggle } = useFollows(signedIn);
   const feed = useQuery({ queryKey: ["feed", personalized], queryFn: () => fetchFeed(personalized), enabled: signedIn });
@@ -52,7 +54,7 @@ function FeedInner({ signedIn }: { signedIn: boolean }) {
             return (
               <button key={c} type="button" aria-pressed={on} disabled={toggle.isPending}
                 onClick={() => toggle.mutate({ type: "category", target: c }, { onError: () => toast("error", t.enActionFail) })}
-                className={cx("min-h-11 rounded-full border px-4 text-sm font-medium", on ? "border-civic bg-civic text-white" : "border-line bg-white text-civic", focusRing)}>
+                className={cx("min-h-11 rounded-full border px-4 text-sm font-medium", on ? "border-civic bg-civic/10 text-civic ring-1 ring-civic" : "border-line bg-white text-foreground hover:bg-slate-50", focusRing)}>
                 {on ? "✓ " : ""}{t.cats[c]}
               </button>
             );
@@ -75,13 +77,17 @@ function FeedInner({ signedIn }: { signedIn: boolean }) {
         <ul className="space-y-2">
           {rows.map((i) => (
             <li key={i.ref}>
-              <Card as="article" padded={false} className="space-y-1 p-3">
-                <h3 className="font-medium"><Link href={`/issue/${i.ref}`} className="underline-offset-2 hover:underline">{i.title}</Link></h3>
-                <p className="text-sm text-muted">{t.cats[i.category]}{i.area && ` · ${i.area}`} · {fmtDate(i.createdAt, lang)}</p>
-                <div className="flex flex-wrap items-center gap-2">
-                  <StatusChip status={i.status} label={t.statuses[i.status]} />
-                  {i.sample && <Badge tone="warning">{t.exSample}</Badge>}
-                  <span className="text-xs text-muted">{why(i.why)}</span>
+              <Card as="article" padded={false} className="flex items-center gap-3 p-3">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img loading="lazy" decoding="async" src={`/illustrations/cat-${i.category}.svg`} alt="" className="size-12 shrink-0" />
+                <div className="min-w-0 flex-1 space-y-1">
+                  <h3 className="font-medium"><Link href={`/issue/${i.ref}`} className="underline-offset-2 hover:underline">{i.title}</Link></h3>
+                  <p className="text-sm text-muted">{t.cats[i.category]}{i.area && ` · ${i.area}`} · {fmtAgo(i.createdAt, now, lang)}</p>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <StatusChip status={i.status} label={t.statuses[i.status]} />
+                    {i.sample && <CapabilityLabel status="sample" />}
+                    <span className="text-xs text-muted">{why(i.why)}</span>
+                  </div>
                 </div>
               </Card>
             </li>

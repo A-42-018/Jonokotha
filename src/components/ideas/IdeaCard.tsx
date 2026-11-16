@@ -3,6 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
 import { useState } from "react";
 import Badge, { type BadgeTone } from "@/components/ui/Badge";
+import CapabilityLabel from "@/components/ui/CapabilityLabel";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import IdeaComments from "@/components/ideas/IdeaComments";
@@ -65,7 +66,7 @@ export default function IdeaCard({ idea, signedIn, heading: H = "h2" }: { idea: 
       <p>{idea.summary}</p>
       <div className="flex flex-wrap items-center gap-2">
         <Badge tone={TONE[idea.status]} icon={ICON[idea.status]}>{ideaStatusLabel(t, idea.status)}</Badge>
-        {idea.sample && <Badge tone="warning">{t.exSample}</Badge>}
+        {idea.sample && <CapabilityLabel status="sample" />}
         <span className="text-sm text-muted">{fillNum(t.idSupportCount, { n: count }, lang)}</span>
       </div>
       {idea.reason && <p className="rounded-xl bg-slate-100 p-3 text-sm"><span className="font-medium">{t.idReason}: </span>{idea.reason}</p>}

@@ -13,7 +13,7 @@ import { ApiError } from "@/lib/api-client";
 import { reportContent, type ReportReason } from "@/lib/engagement-api";
 
 const REASONS = ["Spam", "Abuse", "Private", "False", "Other"] as const;
-export type ReportType = "issue" | "idea" | "question";
+export type ReportType = "issue" | "idea" | "question" | "media";
 
 /** "Report this" for public content, sent to moderation through `POST /api/v1/reports`. Signed-out visitors get a sign-in link. */
 export default function ReportContent(props: { type: ReportType; refId: string; signedIn: boolean; next: string }) {

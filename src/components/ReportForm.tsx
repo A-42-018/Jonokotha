@@ -18,13 +18,15 @@ import ReportSuccess from "./ReportSuccess";
 import ReportQueued from "./offline/ReportQueued";
 import { readQueue, writeQueue } from "./offline/queue-store";
 import { enqueue, newId, sendReport } from "@/lib/offline-queue";
-import { uploadPhotos } from "@/lib/report-api";
+import { uploadPhotosTracked } from "@/lib/report-api";
+import { AFFECTED, DURATIONS, REPORT_DESC_MAX, affectedLabel, durationLabel, isAffected, isDuration, withExtras } from "@/lib/report-extras";
 import QueryProvider from "./QueryProvider";
 import Badge from "./ui/Badge";
 import Button from "./ui/Button";
 import Card from "./ui/Card";
 import Dialog from "./ui/Dialog";
 import Input from "./ui/Input";
+import Select from "./ui/Select";
 import Stepper from "./ui/Stepper";
 import Textarea from "./ui/Textarea";
 import { appendTranscript } from "@/lib/speech";
@@ -38,7 +40,7 @@ import { useKeyboardInset } from "./ui/useKeyboardInset";
 
 export { hasPersonalNumber };
 
-type Saved = { quick?: string; values?: Partial<ReportValues>; ai?: ReportField[]; edited?: ReportField[]; step?: number; pin?: Pin };
+type Saved = { quick?: string; values?: Partial<ReportValues>; ai?: ReportField[]; edited?: ReportField[]; step?: number; pin?: Pin; duration?: string; who?: string };
 
 const LAST = 4;
 const isCategory = (v: unknown): v is Category => typeof v === "string" && (CATEGORIES as readonly string[]).includes(v);
@@ -82,7 +84,10 @@ function ReportFormInner({ t, lang, constituencyId }: { t: Dict; lang: Lang; con
   const [restored, setRestored] = useState(false);
   const [confirmDiscard, setConfirmDiscard] = useState(false);
   const [busy, setBusy] = useState<"" | "draft">("");
-  const [photosFailed, setPhotosFailed] = useState(0);
+  const [failedPhotos, setFailedPhotos] = useState<Photo[]>([]);
+  const [upload, setUpload] = useState<{ n: number; total: number } | null>(null);
+  const [duration, setDuration] = useState("");
+  const [who, setWho] = useState("");
   const [emergency, setEmergency] = useState<Emergency>();
   const [emergencySeen, setEmergencySeen] = useState(false);
   // One Idempotency-Key per report: a second tap or a retry after a lost answer is replayed, not duplicated.
@@ -111,6 +116,8 @@ function ReportFormInner({ t, lang, constituencyId }: { t: Dict; lang: Lang; con
           setAi(d.ai ?? []);
           setEdited(d.edited ?? []);
           setPin(d.pin);
+          setDuration(isDuration(d.duration) ? d.duration : "");
+          setWho(isAffected(d.who) ? d.who : "");
           setStep(Math.min(Math.max(d.step ?? 0, 0), LAST));
           setRestored(true);
         }
@@ -125,9 +132,9 @@ function ReportFormInner({ t, lang, constituencyId }: { t: Dict; lang: Lang; con
     try {
       const empty = !quick && !values.title && !values.description && !values.area && !values.category;
       if (empty) localStorage.removeItem(DRAFT_KEY);
-      else localStorage.setItem(DRAFT_KEY, JSON.stringify({ quick, values, ai, edited, step, pin } satisfies Saved));
+      else localStorage.setItem(DRAFT_KEY, JSON.stringify({ quick, values, ai, edited, step, pin, duration, who } satisfies Saved));
     } catch { /* ignore */ }
-  }, [quick, values, ai, edited, step, pin, sentRef, queued]);
+  }, [quick, values, ai, edited, step, pin, duration, who, sentRef, queued]);
 
   // Move focus to the new step's heading (not on first load).
   useEffect(() => {
@@ -168,7 +175,7 @@ function ReportFormInner({ t, lang, constituencyId }: { t: Dict; lang: Lang; con
   function clearDraft() {
     photos.forEach((p) => URL.revokeObjectURL(p.url));
     reset({ title: "", description: "", area: "" });
-    setQuick(""); setAi([]); setEdited([]); setPhotos([]); setPin(undefined); setStep(0); setRestored(false); setQuickDone(false);
+    setQuick(""); setAi([]); setEdited([]); setPhotos([]); setPin(undefined); setDuration(""); setWho(""); setStep(0); setRestored(false); setQuickDone(false);
   }
 
   async function makeDraft() {
@@ -202,7 +209,7 @@ function ReportFormInner({ t, lang, constituencyId }: { t: Dict; lang: Lang; con
   const send = useMutation({
     mutationFn: async (data: ReportData) => {
       const body = {
-        ...data, constituencyId,
+        ...data, description: withExtras(data.description, { duration, who }, t), constituencyId,
         ...(pin ? { lat: pin.lat, lng: pin.lng, locationSource: "map" } : {}),
       };
       const item = { id: reportKey.current, body };
@@ -212,7 +219,9 @@ function ReportFormInner({ t, lang, constituencyId }: { t: Dict; lang: Lang; con
     onSuccess: async ({ result, item }) => {
       if (result.kind === "sent") {
         try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
-        setPhotosFailed(await uploadPhotos(result.ref, photos));
+        setUpload(photos.length ? { n: 0, total: photos.length } : null);
+        setFailedPhotos(await uploadPhotosTracked(result.ref, photos, undefined, (n, total) => setUpload({ n, total })));
+        setUpload(null);
         setEmergency(result.emergency);
         setSentRef(result.ref);
       } else if (result.kind === "network" || result.kind === "server") {
@@ -249,7 +258,7 @@ function ReportFormInner({ t, lang, constituencyId }: { t: Dict; lang: Lang; con
       </EmergencyGuidance>
     );
   }
-  if (sentRef) return <ReportSuccess t={t} lang={lang} refId={sentRef} photosFailed={photosFailed} emergency={emergency} onAnother={() => { setSentRef(""); setPhotosFailed(0); setEmergency(undefined); setEmergencySeen(false); reportKey.current = newId(); clearDraft(); }} />;
+  if (sentRef) return <ReportSuccess t={t} lang={lang} refId={sentRef} failedPhotos={failedPhotos} emergency={emergency} onAnother={() => { setSentRef(""); setFailedPhotos([]); setEmergency(undefined); setEmergencySeen(false); reportKey.current = newId(); clearDraft(); }} />;
 
   const isLast = step === LAST;
   return (
@@ -321,8 +330,14 @@ function ReportFormInner({ t, lang, constituencyId }: { t: Dict; lang: Lang; con
       {step === 1 && (
         <div className="space-y-4">
           {withBadge("title", <Input label={t.fTitle} hint={t.fTitleHint} maxLength={130} error={errors.title?.message} {...field("title")} />)}
-          {withBadge("description", <Textarea label={t.fDescription} hint={t.fDescHint} rows={7} maxLength={2100} error={errors.description?.message} {...field("description")} />)}
+          {withBadge("description", <Textarea label={t.fDescription} hint={t.fDescHint} rows={7} maxLength={REPORT_DESC_MAX + 50} error={errors.description?.message} {...field("description")} />)}
           {warn && <PrivacyWarning t={t} />}
+          <fieldset className="space-y-3 rounded-xl border border-line p-3">
+            <legend className="px-1 text-sm text-muted">{t.rxHint}</legend>
+            <Select lang={lang} label={t.rxDuration} optional placeholder={t.rxChoose} value={duration} onChange={(e) => setDuration(e.target.value)} options={DURATIONS.map((v) => ({ value: v, label: durationLabel(t, v) }))} />
+            <Select lang={lang} label={t.rxWho} optional placeholder={t.rxChoose} value={who} onChange={(e) => setWho(e.target.value)} options={AFFECTED.map((v) => ({ value: v, label: affectedLabel(t, v) }))} />
+            <p className="text-xs text-muted">{t.rxNote}</p>
+          </fieldset>
         </div>
       )}
 
@@ -352,6 +367,7 @@ function ReportFormInner({ t, lang, constituencyId }: { t: Dict; lang: Lang; con
           </ReviewRow>
           <ReviewRow t={t} label={t.fTitle} badge={badge("title")} onEdit={() => setStep(1)}>{getValues("title") || "—"}</ReviewRow>
           <ReviewRow t={t} label={t.fDescription} badge={badge("description")} onEdit={() => setStep(1)}><span className="whitespace-pre-wrap break-words">{getValues("description") || "—"}</span></ReviewRow>
+          <ReviewRow t={t} label={t.rxReviewRow} onEdit={() => setStep(1)}>{isDuration(duration) || isAffected(who) ? [isDuration(duration) ? durationLabel(t, duration) : "", isAffected(who) ? affectedLabel(t, who) : ""].filter(Boolean).join(" · ") : <span className="text-muted">—</span>}</ReviewRow>
           <ReviewRow t={t} label={t.fArea} badge={badge("area")} onEdit={() => setStep(2)}>{getValues("area") || "—"}{pin ? ` · ${t.lpPinPlaced}` : ""}</ReviewRow>
           <ReviewRow t={t} label={t.wizSteps.evidence} onEdit={() => setStep(3)}>
             {photos.length === 0 ? <span className="text-muted">{t.evNone}</span> : (
@@ -379,7 +395,7 @@ function ReportFormInner({ t, lang, constituencyId }: { t: Dict; lang: Lang; con
           {step > 0 && <Button variant="secondary" onClick={() => setStep((s) => s - 1)} disabled={submitting}>{t.wizBack}</Button>}
           {isLast ? (
             <Button type="submit" variant="success" size="lg" className="flex-1" loading={submitting} disabled={busy !== "" || submitting}>
-              {submitting ? t.submitting : t.submit}
+              {submitting ? (upload ? fillNum(t.rxUploading, upload, lang) : t.submitting) : t.submit}
             </Button>
           ) : (
             <Button type="submit" className="flex-1" disabled={busy === "draft"}>{t.wizNext}</Button>

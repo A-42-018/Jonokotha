@@ -46,3 +46,16 @@ export function fmtDate(iso: string, lang: Lang) {
 export function fmtDay(iso: string, lang: Lang) {
   return dhakaParts(iso, lang).day.replace(/,/g, "");
 }
+
+/**
+ * Relative time for lists: today, yesterday, "N days ago" (up to 30 days), then the plain date. `now` is passed in (never read
+ * here) so server and browser render the same text. Calendar days are counted in Asia/Dhaka.
+ */
+export function fmtAgo(iso: string, now: number, lang: Lang) {
+  const key = (ms: number) => new Date(ms).toLocaleDateString("en-CA", { timeZone: DHAKA });
+  const days = Math.round((Date.parse(key(now)) - Date.parse(key(Date.parse(iso)))) / 86_400_000);
+  if (days <= 0) return lang === "bn" ? "আজ" : "Today";
+  if (days === 1) return lang === "bn" ? "গতকাল" : "Yesterday";
+  if (days <= 30) return lang === "bn" ? `${fmtNum(days, "bn")} দিন আগে` : `${days} days ago`;
+  return fmtDay(iso, lang);
+}

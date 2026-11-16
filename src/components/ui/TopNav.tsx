@@ -6,8 +6,10 @@ import Badge from "./Badge";
 import { buttonClass } from "./Button";
 import { cx, focusRing } from "./cx";
 import { isActivePath } from "./nav";
+import MoreMenu from "./MoreMenu";
 import NotificationBell from "./NotificationBell";
 import { useT } from "./useT";
+import { primaryNav } from "@/lib/nav-items";
 
 /**
  * The one header. Phones: logo, bell, language, account on one row, area picker below
@@ -18,21 +20,19 @@ export default function TopNav({ isStaff, picker, account }: { isStaff: boolean;
   const t = useT();
   const path = usePathname();
   const items = [
-    { href: "/", label: t.navHome },
-    { href: "/area", label: t.navArea },
-    { href: "/ideas", label: t.navIdeas },
+    ...primaryNav().map((i) => ({ href: i.href, label: t[i.key] })),
     ...(isStaff ? [{ href: "/office", label: t.officeCta }] : []),
   ];
   return (
     <header className="bg-white shadow-sm">
-      <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center gap-x-2 gap-y-1 px-4 py-2 lg:flex-nowrap lg:gap-x-3">
+      <div className="mx-auto flex w-full max-w-[120rem] flex-wrap items-center gap-x-2 gap-y-1 px-4 py-2 sm:px-6 lg:px-8 lg:flex-nowrap lg:gap-x-3">
         <Link href="/" className={cx("-ms-1 flex min-h-11 shrink-0 items-center gap-2 rounded-lg px-1 font-heading text-xl font-semibold text-civic", focusRing)}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/illustrations/logo-mark.svg" alt="" className="size-8" />
           {t.appName}
         </Link>
         <nav aria-label={t.navAria} className="hidden lg:block">
-          <ul className="flex items-center gap-1">
+          <ul className="flex items-center gap-0.5">
             {items.map((i) => {
               const active = isActivePath(path, i.href);
               return (
@@ -40,13 +40,14 @@ export default function TopNav({ isStaff, picker, account }: { isStaff: boolean;
                   <Link
                     href={i.href}
                     aria-current={active ? "page" : undefined}
-                    className={cx("inline-flex min-h-11 items-center gap-2 rounded-lg px-3 font-medium", active ? "bg-civic/10 font-semibold text-civic" : "text-foreground hover:bg-slate-100", focusRing)}
+                    className={cx("inline-flex min-h-11 items-center gap-2 rounded-lg px-2 text-sm font-medium", active ? "bg-civic/10 font-semibold text-civic" : "text-foreground hover:bg-slate-100", focusRing)}
                   >
                     {i.label}
                   </Link>
                 </li>
               );
             })}
+            <li><MoreMenu path={path} /></li>
           </ul>
         </nav>
         <div className="order-last flex w-full lg:order-none lg:ms-auto lg:w-auto">{picker}</div>
@@ -56,7 +57,7 @@ export default function TopNav({ isStaff, picker, account }: { isStaff: boolean;
           <NotificationBell />
           <div className="hidden shrink-0 lg:block"><Link href="/report" className={buttonClass()}>{t.reportCta}</Link></div>
           {/* Route handler (sets the cookie, redirects back), so a plain anchor is intended. */}
-          <a href="/lang" aria-label={t.navLangSwitch} className={cx("inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg px-2 font-medium text-civic underline", focusRing)}>
+          <a href="/lang" aria-label={t.navLangSwitch} className={cx("inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-slate-300 px-3 text-sm font-medium text-foreground hover:bg-slate-50", focusRing)}>
             {t.switchLang}
           </a>
           {account}

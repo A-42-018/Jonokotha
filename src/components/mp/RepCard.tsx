@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Badge from "@/components/ui/Badge";
+import CapabilityLabel from "@/components/ui/CapabilityLabel";
 import { buttonClass } from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import { fillNum, fmtDay, type Dict, type Lang } from "@/lib/i18n";
@@ -12,13 +13,13 @@ export default function RepCard({ rep, t, lang, showProfile = true, confirm }: {
     <Card as="article" className="space-y-3">
       <div className="flex items-start gap-3">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img loading="lazy" decoding="async" src="/illustrations/spot-find-mp.svg" alt="" className="size-20 shrink-0 rounded-xl bg-slate-50 p-1" />
+        <img loading="lazy" decoding="async" src="/illustrations/mp-portrait.svg" alt="" className="size-20 shrink-0 rounded-xl bg-slate-50" />
         <div className="min-w-0 space-y-1">
           <h3 className="text-lg font-semibold text-foreground">{rep.name}</h3>
           <p className="text-sm text-muted">{rep.role}{rep.constituency && ` · ${rep.constituency}`}</p>
           <div className="flex flex-wrap gap-2">
             <Badge tone="success" icon="✓">{t.mpVerified}</Badge>
-            {rep.sample && <Badge tone="warning">{t.exSample}</Badge>}
+            {rep.sample && <CapabilityLabel status="sample" />}
           </div>
         </div>
       </div>
