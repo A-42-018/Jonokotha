@@ -80,4 +80,29 @@ test.describe("phase 2 public pages", () => {
     await page.goto("/mp/unknown");
     await expect(page.getByRole("heading", { name: "পাতাটি পাওয়া যায়নি" })).toBeVisible();
   });
+
+  test("onboarding walks three screens and can be skipped; help and privacy are reachable from the footer", async ({ page }) => {
+    await page.goto("/welcome");
+    await expect(page.getByRole("heading", { name: "সমস্যা জানান" })).toBeVisible();
+    await page.getByRole("button", { name: "পরের ধাপ" }).click();
+    await page.getByRole("button", { name: "পরের ধাপ" }).click();
+    await expect(page.getByRole("link", { name: "শুরু করুন" })).toBeVisible();
+    await page.getByRole("link", { name: "শুরু করুন" }).click();
+    await expect(page).toHaveURL("/");
+    await expect(page.getByText("জনকথায় নতুন?")).toHaveCount(0);
+    await page.getByRole("link", { name: "সাহায্য" }).last().click();
+    await expect(page.getByRole("heading", { name: "সাহায্য ও নিরাপত্তা" })).toBeVisible();
+    await expect(page.getByText("৯৯৯")).toBeVisible();
+  });
+
+  test("notifications are labelled sample; settings can clear device data", async ({ page }) => {
+    await page.goto("/notifications");
+    await expect(page.getByText("নমুনা: নিচের নোটিফিকেশনগুলো")).toBeVisible();
+    await page.getByRole("button", { name: "সব পড়া হয়েছে চিহ্নিত করুন" }).click();
+    await expect(page.getByText("নতুন", { exact: true })).toHaveCount(0);
+    await page.goto("/settings");
+    await page.getByRole("button", { name: "এই ডিভাইসের তথ্য মুছুন" }).click();
+    await page.getByRole("button", { name: "হ্যাঁ, মুছুন" }).click();
+    await expect(page.getByText("এই ডিভাইসের তথ্য মুছে ফেলা হয়েছে।")).toBeVisible();
+  });
 });

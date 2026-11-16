@@ -43,6 +43,7 @@ export default async function Me({ searchParams }: PageProps<"/me">) {
           </div>
         )}
       </Card>
+      <Link href="/settings" className="inline-flex min-h-11 items-center text-civic underline">{t.stTitle}</Link>
       <Card title={t.meMyReports}>
         {!email ? (
           <State kind="expired" as="h2" title={t.stExpiredTitle} body={t.stExpiredBody} compact live="polite">

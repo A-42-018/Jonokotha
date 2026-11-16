@@ -1,4 +1,5 @@
 import Link from "next/link";
+import OnboardingCard from "@/components/citizen/OnboardingCard";
 import FollowedFeed from "@/components/citizen/FollowedFeed";
 import HomeFooter from "@/components/citizen/HomeFooter";
 import IdeaCtaCard from "@/components/citizen/IdeaCtaCard";
@@ -37,6 +38,7 @@ export default async function Home() {
         <img src="/illustrations/hero-mobile.svg" alt="" className="mx-auto w-full max-w-md rounded-2xl" />
         <h1 className="text-center text-2xl font-semibold text-civic sm:text-3xl">{t.tagline}</h1>
       </div>
+      <OnboardingCard />
       <div className="grid gap-4 sm:grid-cols-2">
         <ReportCtaCard t={t} />
         <IdeaCtaCard t={t} />
