@@ -11,6 +11,7 @@ import { useLang } from "@/components/ui/useLang";
 import { useLocalValue } from "@/components/ui/useLocalValue";
 import { useT } from "@/components/ui/useT";
 import { fmtDate } from "@/lib/format";
+import { safeHref } from "@/lib/safe";
 import { missingInfo, templateReply, type CopilotItem, type CopilotLog, type Decision } from "@/lib/office";
 import type { Agency, CaseRecord } from "@/lib/types";
 
@@ -97,7 +98,7 @@ export default function Copilot({ c, agency, onAskInfo }: { c: CaseRecord; agenc
         {agency ? (
           <>
             <p>{lang === "bn" ? agency.nameBn : agency.nameEn}</p>
-            <p className="text-xs text-muted">{t.source}: {agency.url ? <a href={agency.url} className="underline" target="_blank" rel="noreferrer">{agency.source}</a> : agency.source}{agency.checkedAt ? ` (${agency.checkedAt})` : ""} · {t.confidence}: {pct}%</p>
+            <p className="text-xs text-muted">{t.source}: {safeHref(agency.url) ? <a href={safeHref(agency.url)} className="underline" target="_blank" rel="noreferrer">{agency.source}</a> : agency.source}{agency.checkedAt ? ` (${agency.checkedAt})` : ""} · {t.confidence}: {pct}%</p>
           </>
         ) : <p className="text-xs text-muted">{t.confidence}: {pct}%</p>}
       </Block>

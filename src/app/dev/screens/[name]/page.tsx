@@ -29,6 +29,9 @@ const DEMO_CASES: CaseRecord[] = [
 const LONG_TOKEN = "https://example.com/" + "আর্ডলাইনহীনদীর্ঘশব্দ".repeat(8) + "-" + "x".repeat(60);
 const LONG_CASE: CaseRecord = { ...base, ref: "JK-DEMO-LONG", title: `দীর্ঘ শিরোনাম ${LONG_TOKEN}`, category: "roads", description: `নমুনা বিবরণ: ${LONG_TOKEN}\n${"খুব লম্বা একটি বাক্য যা কয়েকটি লাইনে ভাঙবে। ".repeat(12)}`, area: `ওয়ার্ড ৩ (নমুনা) ${LONG_TOKEN}`, status: "referred", createdAt: at(2), timeline: [{ status: "received", at: at(2) }, { status: "referred", at: at(1) }] };
 
+const XSS = `<img src=x onerror="window.__xss=1"><script>window.__xss=1</script>`;
+const XSS_CASE: CaseRecord = { ...base, ref: "JK-DEMO-XSS", title: `শিরোনাম ${XSS}`, category: "other", description: `বিবরণ ${XSS}\n[link](javascript:alert(1))`, area: XSS, status: "received", createdAt: at(1), timeline: [{ status: "received", at: at(1) }] };
+
 /**
  * Audit-only screens: signed-in pages rendered with labelled demo data, so axe, screenshots and
  * screen-reader passes can run without a Supabase session. Not in production unless JK_AUDIT=1 is set explicitly.
@@ -44,6 +47,8 @@ export default async function DevScreen({ params }: PageProps<"/dev/screens/[nam
       return <ReportForm t={t} lang={lang} constituencyId={DEMO_CONSTITUENCY.id} />;
     case "issue":
       return <IssueView c={DEMO_CASES[1]} t={t} lang={lang} signedIn />;
+    case "issue-xss":
+      return <IssueView c={XSS_CASE} t={t} lang={lang} signedIn />;
     case "issue-long":
       return <IssueView c={LONG_CASE} t={t} lang={lang} signedIn />;
     case "case-long":
