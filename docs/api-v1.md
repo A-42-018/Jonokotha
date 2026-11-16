@@ -194,3 +194,100 @@ Error codes added: `forbidden` with `field_errors._` = `cross_site` or `mfa_requ
 3. **"আমার তথ্য" and "অ্যাকাউন্ট মুছুন"** in settings: `GET /me/export`, `POST` and `DELETE /me/deletion-request`, date from `GET /me/profile`.
 4. **Emergency guidance**: when `source === "emergency"` or an `emergency` object is returned, show `guidance[lang]` and the numbers prominently, above any other result.
 5. **Report-only CSP**: open the app with the browser console and report any `Content-Security-Policy-Report-Only` violation; backend switches `CSP_MODE=enforce` when a week passes clean.
+
+---
+
+# Phase 5 additions (migrations 0030–0036)
+
+Every response now also carries `"data_status": "live" | "sample" | "demo" | "planned"` next to `data` (B5.13): `sample` or `demo` when the returned records say so (`is_sample`, `is_demo`), the flag's label when the route sits behind a feature flag that is not `live`, otherwise `live`. New error code `feature_disabled` (404, `field_errors._` = the flag key): the route is behind a feature flag that is switched off. Each row says: public or private, audit, rate limit per minute (user / IP). "MFA" means the §14 rule applies once `enforce_mfa` is on.
+
+## MP, office and delegation (B5.1)
+| Method and path | Who | Body / effect | Audit |
+|---|---|---|---|
+| `POST /office/constituencies/{key}/mp-approval` | MP of the area, admin (10/30) | `{required}`: turn "MP approves publications" on or off. It has an effect only while an active MP exists in the area | `constituency.mp_approval` |
+| `GET /office/approvals?status=` | requester, MP, admin (30/60) | Approval requests (announcement, public reply, project change) | |
+| `POST /office/approvals/{id}/decision` | MP, admin (30/60) | `{decision: approve\|reject, note?}`; a rejection needs a reason (422). Approving publishes the announcement, posts the reply or applies the project change; the requester is notified. 409 when already decided; managers get 403, case officers and other offices 404 | `approval.approve` / `approval.reject` |
+| `POST /office/issues/{ref}/public-reply` | manager, assigned officer, MP (20/60) | `{note}` (personal data removed). **201** when posted; **202** `{approval_required: true}` when the area requires the MP's approval. The generic `update` with `public: true` is refused (409 `approval_required`) in such areas | `reply.request_approval` |
+| `POST /office/announcements`, `.../{ref}/publish` | as before | In an approval area an office manager's publish answers `status: "pending_approval", approval_required: true`; the public sees it only after approval | `announcement.request_approval` |
+| `POST /office/projects/{ref}` | as before | adds `delay_explanation` (10–500 characters): **required whenever `expected_end_date` moves later**; in an approval area the change waits for the MP (`approval_required: true`) | `project.request_approval` |
+| `POST /office/tasks`, `GET /office/tasks?status=&mine=1` | MP, office manager delegate; assignees read their own (20/60) | `{constituency, assignee, title, detail?, due_date?, issue_ref?}`; the assignee must be active case officer or manager of that area; assignee notified | `task.delegate` |
+| `POST /office/tasks/{id}/status` | assignee, or whoever delegates (cancel only) | `{status: open\|done\|cancelled}` | `task.done` … |
+| `GET /office/mp/overview?constituency=&days=` | `view_analytics` (MP, manager) | area analytics (groups under 5 hidden) + `pending_approvals` + `open_tasks` | admin reads logged |
+
+An MP can neither alter audit history nor delete reports: no write grant on `audit_logs`, `issue_events` or `issues` exists for any session role (`tests/rls/phase5.test.ts`).
+
+## Agency liaison and referral stages (B5.2, B5.4)
+| Method and path | Who | Effect | Audit |
+|---|---|---|---|
+| `POST /office/invitations` | as before | `agency_id` (uuid) is **required** for `role: agency_liaison`; accepting binds the member to that agency | `invitation.*` |
+| `GET /liaison/cases` | agency liaison (30/60) | Cases referred to the caller's agency **in the caller's area only**: `referral_id, ref, title, category, description, area, constituency_key, forwarded_at, acknowledged_at, task_status, registration_status, external_reference, contact_channel, closure_evidence`. No reporter, no internal notes; direct reads of `issues` and `issue_events` stay closed | |
+| `POST /liaison/referrals/{id}/acknowledge` | that referral's liaison | `task_status: acknowledged`, referral stage `forwarded` → `received` | `referral.acknowledge` |
+| `POST /liaison/referrals/{id}/updates` | same | `{note, public?}`; public only if the office published the referral | `referral.update` |
+| `POST /liaison/referrals/{id}/reference` | same | `{external_reference?, channel?}` (one required) | `referral.reference` |
+| `POST /liaison/referrals/{id}/close` | same | `{evidence (≥5 chars), note?}` closes the agency task; later updates are 409 | `referral.close` |
+| `POST /office/referrals/{id}/register` | manager with `forward` | `{reference?, proof}`: sets `officially_registered`. **409 `no_integration` unless an administrator has confirmed an integration for that agency**; the database refuses the state without proof and an integration | `referral.register` |
+| `POST /admin/agency-integrations` | admin (10/30) | `{agency_id, kind: api\|email_gateway\|portal, status: planned\|confirmed\|retired, note?}` | `agency_integration.*` |
+| `GET /issues/{ref}/referrals` | public (120 IP) | Published referrals of a public issue: `agency_name, registration_status, forwarded_at, acknowledged_at, task_status, integration_confirmed`. **Stages:** `forwarded` = our office sent it; `received` = the agency's liaison confirmed receipt; `officially_registered` = proven, with a confirmed integration. Never inferred. Proof and references are not public | |
+
+## Administration (B5.3) — all admin only, audited, MFA-gated
+| Method and path | Body / effect |
+|---|---|
+| `GET /features` (public) / `GET, POST /admin/feature-flags` | flags `{key, enabled, data_status}`; POST `{key, enabled, data_status?, description?, create?}`. Routes with a flag answer `feature_disabled` when off (`idea_comments`, `polls`, `video_reports`) |
+| `GET /categories` (public: active) / `POST /admin/categories` | `{slug, name_bn, name_en, parent?, default_priority?, is_active?}`; never deleted, only deactivated; `service_code` (`JK-ROADS`) is immutable (B5.15) |
+| `GET, POST /admin/sla-policies` | `{constituency?, category?, ack_target_hours, update_target_hours, note?}` per office and category; an office manager may set their own area's, global needs admin |
+| `POST /admin/constituencies/{key}` | `{name_bn?, name_en?, district?, upazila_or_city?, is_active?}`; boundaries come from `POST /admin/constituencies/import` |
+| `POST /admin/agencies` | `{key, name_bn, name_en, categories, source, url?, checked_at, jurisdiction_level?, contact_channel?}`: a source and check date are required |
+| `GET /admin/accounts?role=&status=` | id, display name, role, status, office roles (no email); the read is audited. Role changes: `POST /admin/accounts/{id}` (existing) |
+| `POST /admin/platform-invitations`, `DELETE .../{id}`, `POST /invitations/platform/accept` | moderators and admins join by invitation (token shown once, matching confirmed email, single use, 3 days) |
+| `GET, POST /admin/integrations` | providers with `enabled` and `key_present` (secrets are never returned or stored) |
+| `GET /admin/security-events?kind=&hours=` | auth failures, rate-limit hits, permission denials, blocked cross-site requests; IPs are salted hashes; kept 90 days |
+| `GET /admin/system-health` | database, storage, queues, jobs, AI provider, notification delivery |
+| `GET, POST /admin/knowledge-sources` | `{action: add\|refresh\|retire, ...}`; adding needs name, link, licence |
+| `POST /admin/demo-data` | `{action: load\|reset}`; **403 in production** (`APP_ENV` / `VERCEL_ENV`) and `rule_not_met` when `app_settings.environment = 'production'` |
+| `GET /admin/jobs?status=`, `POST /admin/jobs/{id}/requeue` | background jobs and dead letters |
+| `GET /events?days=` | daily product-event counters |
+
+## Ideas, polls, projects, snapshot (B5.5)
+| Method and path | Who | Effect |
+|---|---|---|
+| `GET, POST /ideas/{ref}/comments` | public read; verified account writes (10/30, 10 a day) | `{body 2–500}`, personal data removed; list has no author; report with `POST /reports {type: "idea_comment", ref: <id>}`; moderators hide or restore with a reason (`moderate_item`) |
+| `GET /polls`, `GET /polls/{ref}`, `POST /polls/{ref}/vote` | public read; verified account votes | one vote per account; `results` hidden until closed (or `results_visibility: always`) **and** at least 5 votes; `my_option_id` for the voter |
+| `GET, POST /office/polls`, `POST /office/polls/{ref}/{publish\|close\|cancel}`, `GET .../results` | MP, office manager of the area | `{constituency, question, options[2..10], closes_at?, results_visibility?}`; draft → open → closed; the office sees results any time. Due polls close themselves and followers who have not voted get one reminder (job `poll_maintenance`) |
+| `GET /constituencies/{key}/snapshot?from=&to=` | public | `{reported, in_progress, resolved, last_updated, definition}` for public issues created in the range (default 30 days); not a ranking |
+| `POST /office/projects/{ref}/details` | MP, manager | `{budget_source?, budget_verified_at?, procurement_ref?, contractor_name?}`; a budget source needs its verification date; publish procurement details only where lawful |
+| `GET /projects/{ref}` | public | now also `budget_source, budget_verified_at, procurement_ref, contractor_name, delay_explanation` |
+| `GET, POST /projects/{ref}/feedback` | public summary; verified account writes | `{rating 1–5, comment?}` once, only when `completed`; average shown from 5 answers |
+| `POST /me/follows` | citizen | `type` may now be `project` (ref) or `representative` (id of a verified representative); listed by `GET /me/follows` |
+
+## Report fields and video (B5.6)
+`POST /issues` accepts `duration` (≤100 characters, "how long") and `affectedWho` (≤200, "who or what is affected"); both are office-only (`GET /office/issues/{ref}` returns `duration_text`, `affected_who`) and are not in any public view. Video, one per issue, private and pending review until the office decides:
+1. `POST /issues/{ref}/video` `{mime_type: video/mp4|webm|quicktime, bytes ≤ 20 MB, duration_seconds ≤ 180, caption?}` → `{id, upload: {path, token, signed_url}}` (the reporter only; 409 when a video exists).
+2. The client uploads straight to storage on the signed URL (serverless request bodies are too small for video); originals are stored as sent, never transcoded.
+3. `POST /issues/{ref}/video/{id}/complete` → the server checks size and the real container type (not the declared one) and runs the malware hook if configured (fails closed); a bad file is deleted and the row `rejected` (422 `video`).
+4. Optional `POST /issues/{ref}/video/{id}/poster` (multipart `file` ≤ 1 MB): the poster frame captured on the device, re-encoded with metadata removed.
+`GET /issues/{ref}/media` lists photos and videos (`type`, signed `url`, `poster_url`); only office-approved public items are shown to the public.
+
+## Hierarchy and location (B5.7)
+| Method and path | Who | Effect |
+|---|---|---|
+| `GET /admin-units?level=&parent=<code>` | public | division → district → upazila/city → union/ward (imported, sourced, dated) |
+| `POST /admin/admin-units/import` | admin | `{source: {name, url, license, fetched_at}, units[≤500]}` parent first; a union under a division is 422; repeatable |
+| `POST /admin/constituencies/{key}/units` | admin | link units to an area |
+| `GET /constituencies/lookup?lat=&lng=` | public | `{candidates: [{key, name_*, method, certain}], uncertain, manual_choice_allowed}`: **all** areas that could contain the point |
+| `POST /issues` | citizen | with coordinates but no `constituencyId`, several candidates → 422 `constituencyId: ambiguous` (the person chooses) |
+| `POST /issues/{ref}/location` | reporter, office with `update` | `{lat, lng}`; same area → 200 applied; would move the report or cannot be placed → **202** `{review_id, candidates}` |
+| `GET /office/location-changes`, `POST .../{id}/decision` | manager of the current area, admin | `{decision, target?, note?}`; approving moves the issue (assignee cleared) and is audited |
+
+## Runtime and notifications (B5.8, B5.9)
+- `POST /api/internal/jobs/run` (Bearer `CRON_SECRET`): enqueues the periodic jobs (`poll_maintenance`, `purge`, `notify_deliver`), claims due jobs and runs them. Retry backoff 30 s × 2^attempts (max 1 h), dead letter after 5 attempts, abandoned jobs reclaimed after 10 minutes.
+- Realtime publishes only `notifications` (RLS: your own rows) and `office_inbox_counts` (managers, MP, admin). `POST /events {name, lang?}` counts a product event; nothing identifying is accepted or stored.
+- New notification types: `report_submitted`, `case_assigned`, `feedback_request`, `appeal_answered`, `affected_count` (count only), `project_update`, `idea_update`, `poll_closing`, `approval_decision`, `task_assigned`. Announcements are **opt-in** (`announcement_opt_in`). Essential types (own report, replies, appeals, approvals, tasks, assignments) cannot be muted; the others carry a signed one-click link `GET|POST /notifications/unsubscribe?u=&type=&t=` (needs `UNSUBSCRIBE_SECRET` or `CRON_SECRET`). Emails are Bangla first, then English, generic text only. SMS exists only as an adapter for critical verification with consent and a budget (`src/lib/notify/sms.ts`); no provider is configured.
+
+## Agents, personalization, search, country (B5.10–B5.12)
+- `POST /ai/translate` returns `{available, translation?, original, source, target, machine_translated: true, label, reason?}`; no model call when the text is already in the target language. `POST /ai/idea-assist {title, body}` returns `{clearer_title, questions[≤4], encouragement, source: "ai" | "rules", reason?}` (suggestions only; rules fallback when the model fails). Every agent prompt starts with a cacheable block (shared rules + Bangla glossary), then the agent's prompt, then the person's style (`simple_language_mode`).
+- `GET, PATCH, DELETE /me/personalization`: view everything personalization uses; change `simple_language_mode`, `voice_first`, `numeral_style` (`bn`\|`en`), `personalization_enabled`, `announcement_opt_in`; DELETE resets (removes all follows, defaults every switch; audited). `GET /me/feed` answers with `x-simple-language` / `x-voice-first` headers and uses the plain summary in simple mode.
+- `GET /search?q=&constituency=`: public issues and ideas; Bangla and Banglish match each other (`rasta bhanga` finds `রাস্তা ভাঙা`), Bangla digits work. OTP codes are normalised with `normalizeOtp` (`src/lib/digits.ts`, used by the login form); phone normalisation is in the country adapter (`src/lib/country/bd.ts`) and no phone sign-in exists yet.
+- `GET /country`: the active adapter (locale, currency, date format, administrative levels, channels, emergency numbers). `POST /country {code, config, activate?}` (admin): a country can be activated only when its code-side adapter exists (409 otherwise).
+
+## Open311-ready identifiers (B5.15)
+Public issue items now include `service_request_id` (= `ref`, stable, never reused) and `service_code` (`JK-ROADS`, from `issue_categories.service_code`, immutable). The views `public_open311_requests` and `public_open311_services` map them to GeoReport v2 field names (`service_request_id, service_code, service_name, description, status open|closed, lat, long` (approximate point), `requested_datetime, updated_datetime`), so the Release 2 API is a read-only route with no migration.

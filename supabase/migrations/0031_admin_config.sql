@@ -247,7 +247,7 @@ end $$;
 
 -- Accounts list for administrators (no email: it stays in the auth system) -----------------------------------------------------------
 create or replace function admin_list_accounts(p_role text default null, p_status text default null, p_limit integer default 50) returns table (id uuid, display_name text, role text, account_status text, created_at timestamptz, office_roles text[])
-language plpgsql stable security definer set search_path = public as $$
+language plpgsql security definer set search_path = public as $$
 begin
   if not is_admin() then raise exception 'administrators only' using errcode = '42501'; end if;
   perform record_admin_access('profiles', null, jsonb_build_object('list', true, 'role', p_role, 'status', p_status));
@@ -365,7 +365,7 @@ declare c constituencies%rowtype; me uuid := auth.uid(); n integer := 0;
 begin
   if not is_admin() then raise exception 'administrators only' using errcode = '42501'; end if;
   if not not_production() then raise exception 'demo data is not allowed in production' using errcode = 'JK003', detail = 'production'; end if;
-  select * into c from constituencies where is_demo and is_active order by created_at limit 1;
+  select * into c from constituencies where is_demo and is_active order by key limit 1;
   if not found then raise exception 'no demo constituency exists' using errcode = 'JK404'; end if;
   if not exists (select 1 from announcements where constituency_id = c.id and is_demo) then
     insert into announcements (constituency_id, author_id, title, body, status, published_at, is_demo)

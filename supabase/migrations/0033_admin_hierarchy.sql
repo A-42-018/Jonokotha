@@ -190,8 +190,10 @@ begin
     select * into tgt from constituencies where key = coalesce(p_target, i.constituency_key) and is_active;
     if not found or not (tgt.key = any (r.candidate_keys) or tgt.key = i.constituency_key) then raise exception 'choose one of the possible areas' using errcode = 'JK002', detail = 'target'; end if;
     perform set_config('app.location_change', 'on', true);
+    perform set_config('app.in_transition', 'on', true);       -- clearing the assignee is a workflow field (see issues_workflow_guard)
     update issues set lat = r.new_lat, lng = r.new_lng, constituency_id = tgt.id, constituency_key = tgt.key, assigned_to = case when tgt.id <> i.constituency_id then null else assigned_to end where id = i.id;
     perform set_config('app.location_change', 'off', true);
+    perform set_config('app.in_transition', 'off', true);
   end if;
   update location_change_requests set status = case when p_decision = 'approve' then 'approved' else 'rejected' end, decided_by = auth.uid(), decided_at = now(), decision_note = left(p_note, 300) where id = r.id;
   perform audit_write('issue.location_change_' || p_decision, 'issue', i.id::text, jsonb_build_object('constituency', i.constituency_key), jsonb_build_object('constituency', case when p_decision = 'approve' then coalesce(p_target, i.constituency_key) else i.constituency_key end), jsonb_build_object('request', r.id));

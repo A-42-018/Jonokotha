@@ -57,7 +57,12 @@ export async function createPoll(c: Ctx): Promise<Result> {
 export async function setPollStatus(c: Ctx, status: "open" | "closed" | "cancelled"): Promise<Result> {
   return { data: await rpc(c.sb, "set_poll_status", { p_ref: checkRef(c.params.ref), p_status: status }) };
 }
-export async function officePollResults(c: Ctx): Promise<Result> { return { data: await rpc(c.sb, "poll_results", { p_ref: checkRef(c.params.ref) }) }; }
+export async function officePollResults(c: Ctx): Promise<Result> {
+  const ref = checkRef(c.params.ref);
+  const { data: own } = await c.sb.from("polls").select("id").eq("ref", ref).maybeSingle();     // RLS: only the area's office (and admin) can read a poll row
+  if (!own) throw new ApiError("not_found", "Poll not found.");
+  return { data: await rpc(c.sb, "poll_results", { p_ref: ref }) };
+}
 export async function listOfficePolls(c: Ctx): Promise<Result> {
   const { data, error } = await c.sb.from("polls").select("ref,question,status,results_visibility,closes_at,created_at,constituencies(key)").order("created_at", { ascending: false }).limit(50);
   if (error) throw fromDbError(error);

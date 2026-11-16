@@ -37,7 +37,7 @@ export async function linkUnits(c: Ctx): Promise<Result> {
 
 /** All areas that could contain the point. `certain` only for an exact match on a verified boundary; `uncertain` tells the UI to ask the person to choose. */
 export async function lookupCandidates(c: Ctx): Promise<Result> {
-  const q = parse(z.object({ lat: Lat, lng: Lng }), { lat: c.url.searchParams.get("lat"), lng: c.url.searchParams.get("lng") });
+  const q = parse(z.object({ lat: z.coerce.number().pipe(Lat), lng: z.coerce.number().pipe(Lng) }), { lat: c.url.searchParams.get("lat"), lng: c.url.searchParams.get("lng") });
   const rows = await rpc<{ key: string; name_bn: string; name_en: string; district: string | null; is_demo: boolean; method: string; certain: boolean }[]>(c.sb, "constituency_candidates", { p_lat: q.lat, p_lng: q.lng });
   return { data: { candidates: rows.map(({ is_demo, ...r }) => ({ ...r, is_sample: is_demo })), uncertain: rows.length !== 1 || !rows[0].certain, manual_choice_allowed: true } };
 }

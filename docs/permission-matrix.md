@@ -101,3 +101,24 @@ The new office permission `publish` (announcements, projects, milestones) belong
 - **Status changes** go only through `transition_issue()` / `assign_issue()` (see `docs/state-machine.md`); direct edits of status and workflow columns are refused for everyone.
 - **Citizen sees `assigned_to` on own issues** (a staff user id, no name). Acceptable for now; the office-actions API will expose a display name instead.
 - **MFA is not enforced yet** (see above).
+
+
+## Phase 5 additions (migrations 0030-0036)
+
+New office permissions (kept identical in `src/lib/auth.ts`; `tests/db/roles.test.ts` compares): **`approve`** (MP) decides approval requests; **`delegate`** (MP, office manager) assigns tasks to office staff. An MP still holds no write access to `audit_logs`, `issue_events` or `issues` (`tests/rls/phase5.test.ts`).
+
+| Table | Who can read it |
+|---|---|
+| `approval_requests` | the requester, MP of the area (`approve`), admins |
+| `office_tasks` | the assignee, MP and manager of the area (`delegate`), admins |
+| `agency_integrations`, `platform_invitations`, `integration_settings`, `security_events`, `background_jobs`, `product_events` | admins only |
+| `feature_flags` | any signed-in user (anonymous clients use `public_feature_flags()`) |
+| `idea_comments` | author, in-scope office, moderators, admins (published comments on public ideas through `public_idea_comments`, no author) |
+| `polls`, `poll_options` | in-scope office (`view`), admins (open and closed ones through `public_polls`, `public_poll_options`) |
+| `poll_votes` | the voter's own row only; results through `poll_results()` |
+| `project_feedback` | the author, in-scope office, admins (counts through `public_project_feedback`, average from 5) |
+| `admin_units`, `constituency_units`, `country_adapters` | everyone (reference data) |
+| `location_change_requests` | the requester, offices that can view the issue, admins |
+| `office_inbox_counts` | managers (`acknowledge`), MP (`view_analytics`), admins; published to Realtime |
+
+**Agency liaison** (per agency and area): no direct table access to issues or events. `liaison_cases()` returns the safe columns for referrals to their agency in their area; `liaison_acknowledge`, `liaison_add_update`, `liaison_record_reference` and `liaison_close_task` are the only writes. **Platform roles** moderator and admin can also be granted by invitation (`create_platform_invitation`, `accept_platform_invitation`).
