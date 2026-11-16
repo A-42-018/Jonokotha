@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { loadActor, type Actor } from "../auth";
 
 export async function supabaseServer() {
   const jar = await cookies();
@@ -16,7 +17,14 @@ export async function supabaseServer() {
 export async function currentUser() {
   const sb = await supabaseServer();
   const { data } = await sb.auth.getUser();
-  if (!data.user) return { sb, user: null, isStaff: false };
+  if (!data.user) return { sb, user: null, isStaff: false, actor: null as Actor | null };
   const { data: p } = await sb.from("profiles").select("role").eq("id", data.user.id).maybeSingle();
-  return { sb, user: data.user, isStaff: p?.role === "staff" || p?.role === "admin" };
+  const isStaff = p?.role === "staff" || p?.role === "admin";
+  // Office scopes and roles come from the database for this session user, never from the request.
+  let aal: Actor["aal"] = "aal1";
+  if (p?.role && p.role !== "citizen") {
+    const { data: lvl } = await sb.auth.mfa.getAuthenticatorAssuranceLevel();
+    if (lvl?.currentLevel === "aal2") aal = "aal2";
+  }
+  return { sb, user: data.user, isStaff, actor: await loadActor(sb, data.user.id, aal) };
 }

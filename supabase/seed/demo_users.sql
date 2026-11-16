@@ -23,4 +23,11 @@ begin
     update profiles set role = r.role where id = uid;
   end loop;
 end $$;
-select u.email, p.role from profiles p join auth.users u on u.id = p.id where u.email like 'demo-%@jonokotha.test';
+-- Demo staff is an office manager of the sample constituency only (scoped; no access elsewhere). Requires migration 0006.
+insert into office_members (user_id, constituency_id, office_role)
+select u.id, c.id, 'office_manager' from auth.users u, constituencies c
+where u.email = 'demo-staff@jonokotha.test' and c.key = 'demo-1'
+on conflict (user_id, constituency_id) do update set office_role = 'office_manager', status = 'active';
+select u.email, p.role, m.office_role from profiles p join auth.users u on u.id = p.id
+left join office_members m on m.user_id = p.id and m.status = 'active'
+where u.email like 'demo-%@jonokotha.test';
