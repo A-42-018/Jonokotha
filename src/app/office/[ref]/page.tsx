@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import ApproveButtons from "@/components/ApproveButtons";
 import AiPanel from "@/components/office/AiPanel";
+import AuditList from "@/components/office/AuditList";
+import OfficeActions from "@/components/office/OfficeActions";
 import StatusChip from "@/components/ui/StatusChip";
 import NoAccess from "@/components/ui/NoAccess";
 import { AGENCIES } from "@/lib/demo-data";
 import { dict, fmtDate, getLang } from "@/lib/i18n";
+import { auditFromTimeline } from "@/lib/office-actions";
 import { getCase } from "@/lib/store";
 import { currentUser } from "@/lib/supabase/server";
 
@@ -38,10 +40,12 @@ export default async function Case({ params }: PageProps<"/office/[ref]">) {
         <h2 id="rep-title" className="font-semibold text-slate-700">{t.ofReport}</h2>
         <p className="whitespace-pre-wrap break-words">{c.description}</p>
       </section>
+      <AuditList entries={auditFromTimeline(c.timeline)} t={t} lang={lang} />
       </div>
       <div className="lg:sticky lg:top-4">
       <AiPanel c={c} agency={agency} t={t} lang={lang}>
-        <ApproveButtons cref={c.ref} status={c.status} />
+        {/* Only acknowledge and refer exist in the backend today; request_info and resolve need it (see task notes). */}
+        <OfficeActions cref={c.ref} status={c.status} enabled={["acknowledge", "refer"]} />
       </AiPanel>
       </div>
       </div>
