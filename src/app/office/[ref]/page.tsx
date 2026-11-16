@@ -9,6 +9,8 @@ import NoAccess from "@/components/ui/NoAccess";
 import { AGENCIES } from "@/lib/demo-data";
 import { dict, fmtDate, getLang } from "@/lib/i18n";
 import { auditFromTimeline } from "@/lib/office-actions";
+import ReferralStatus from "@/components/issue/ReferralStatus";
+import { readReferral } from "@/lib/referral";
 import { getCase } from "@/lib/store";
 import { guardStaff } from "@/lib/guard";
 
@@ -20,6 +22,7 @@ export default async function Case({ params }: PageProps<"/office/[ref]">) {
   if (denied) return <NoAccess t={t} email={denied.email} role={denied.role} next={`/office/${ref}`} />;
   const c = await getCase(sb, ref);
   if (!c) notFound();
+  const referral = await readReferral(sb, ref);
   const agency = AGENCIES.find((a) => a.id === c.ai.agencyId);
   return (
     <div className="space-y-4">
@@ -40,6 +43,7 @@ export default async function Case({ params }: PageProps<"/office/[ref]">) {
         <h2 id="rep-title" className="font-semibold text-slate-700">{t.ofReport}</h2>
         <p className="whitespace-pre-wrap break-words">{c.description}</p>
       </section>
+      <ReferralStatus timeline={c.timeline} referral={referral} t={t} lang={lang} staff />
       <AuditList entries={auditFromTimeline(c.timeline)} t={t} lang={lang} />
       <NotesAndAssign cref={c.ref} />
       </div>
