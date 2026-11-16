@@ -14,7 +14,7 @@ Two long-lived branches off `main`: **`frontend`** and **`backend`**. Merge both
 | Data and logic | — | `src/lib/store.ts`, `intake.ts`, `types.ts`, `demo-data.ts`, `src/lib/supabase/**`, `src/proxy.ts` |
 | Database | — | `supabase/migrations/**`, RLS, seeds |
 | AI | prompts' UI (draft form, AI panel) | agents, prompts, embeddings, eval set |
-| Docs | `docs/aibc/video-script.md` | `docs/aibc/ai-architecture.md`, `data-sovereignty.md`, `problem.md` |
+| Docs | `docs/aibc/video-script.md`, `device-matrix.md`, `phase3-audit.md` | `docs/aibc/ai-architecture.md`, `data-sovereignty.md`, `problem.md`, `scalability.md`, `ethics.md`, `business.md`, `pia.md`, `security-review.md`, `qa.md` (team lead owns `team.md`, `collaborators.md`, `ai-usage.md`) |
 
 Shared files (`package.json`, `next.config.ts`): small, separate commits; tell the other person.
 
@@ -32,6 +32,8 @@ Frontend relies only on these. Change them together, in a PR that both approve.
 When the backend adds a field, it updates `types.ts` first and tells the frontend.
 
 ## Task list from the masterplan
+
+The sprint lists below are the summary. The full requirement-by-requirement map, with status and owners, is `docs/masterplan-coverage.md`; detailed tasks are in `docs/frontend.md` and `docs/backend.md` under "Masterplan alignment". The highest-priority joint item is frontend task F.1 (replace device-local stubs with the real `/api/v1` endpoints), which needs backend task M.14 (live migrations) first.
 
 ### Frontend
 - Sprint 0: finish bn/en polish, desktop layout, constituency picker UI, sign-out and account menu, loading and error states (use `state-*.svg`), onboarding screens (`onboard-*.svg`), empty states.

@@ -173,3 +173,35 @@ Things to know:
 - Shared files touched: `next.config.ts` (build id for the service-worker cache), `package.json` (`check:bundle`), `.github/workflows/ci.yml` (build and bundle scan before e2e), `src/lib/types.ts` (re-exports `CATEGORIES`). Tell the backend owner.
 - Fixed in the language commit: the I18nProvider introduced in 3.2 crashed English pages (server render asked for the Bangla strings); new tests render every page in both languages.
 - Checks: `npm run lint`, `npm run typecheck`, `npm test`, `npm run test:e2e`, `npm run check:bundle`.
+
+---
+
+## Masterplan alignment (added 2026-11-16)
+
+Full requirement map: `docs/masterplan-coverage.md`. The backend finished its Phase 2 (`docs/api-v1.md`), so the biggest open frontend job is replacing stubs with real endpoints. Items below were in the masterplan but in no phase above.
+
+### Phase 3 additions (13–20 Dec)
+
+| # | Task | Masterplan | Done when |
+|---|---|---|---|
+| F.1 | **Wire to the real API**, one screen at a time, deleting the stub and the "নমুনা" label as each goes live: `/area` and map (public coordinates, me-too counts), report (`lat`/`lng`, media upload with signed URLs, `Idempotency-Key` on submit and on the offline queue), `/ideas` (support, comments, similar), `/mp` and `/mp/[id]` (lookup, responsiveness), engagement (affected, follows, feedback, reopen, appeal), `/ask`, home feed (`/me/feed`, `personalized=false` toggle), `/notifications`, office (assign, notes, replies, announcements, duplicates, copilot suggestions with Accept/Edit/Dismiss), admin (verification, moderation, AI runs, stats, audit). Replace `useLocalValue` stubs with TanStack Query mutations. Keep the sample data only behind the audit and demo screens. | §4.2, §25 | A citizen can submit a real test issue and a staff user processes it with an auditable status update on staging (§25 completion test) |
+| F.2 | **E2E scenarios 1–15 of §21.3** as Playwright specs against local Supabase with the six test accounts: register and constituency, report with pin and photo, timeline, office acknowledge and assign, public update vs private note, forward, resolve with evidence, feedback and reopen, idea submit and support, unauthorised private read, Office A cannot see Office B, moderator abuse and appeal, find MP signed out, "me too" counted once per account with follow-up notification, rate then appeal. Axe on signed-in office and admin pages with a real session. Linux visual baselines created in CI. | §21.3 | All 15 pass at 375 and 1280 |
+| F.3 | **Device and network matrix** (§21.4): record results in `docs/aibc/device-matrix.md` for low-end Android, current Android Chrome, iOS Safari in browser and as PWA, desktop Chrome, Firefox, Safari, Edge; slow 3G; location and camera permission denied; large or invalid upload; offline draft; Bangla input and font rendering. | §21.4 | Table filled with date, device, result, issues |
+| F.4 | **MFA enrolment UI** for MP, moderator and admin (TOTP QR, code entry, recovery codes shown once, AAL2 step-up prompt before privileged pages); depends on backend M.6. | §5, §18.1 | Admin pages ask for a code; denied state tested |
+| F.5 | **Emergency guidance UI**: persistent but quiet "জরুরি হলে ৯৯৯" note on report, ask and help pages; when the backend flags imminent harm, show the guidance screen instead of the normal success flow; official-channel disclaimer wording on issue pages ("referred" vs "officially registered"). | §17.8, §21.6, §28 | Screen reachable and checked in bn and en |
+| F.6 | **Privacy, terms, takedown**: render the final notice from backend M.9 (easy-Bangla summary on top, full text, English), terms page, consent prompts that explain what is public before submission, data export and deletion requests in Settings (consents, export, deletion routes exist), content-challenge form. | §18.2, §18.3 | No draft banner left; legal text matches backend |
+| F.7 | **Public metric definitions**: every public number (counts, median time to first answer, responsiveness) shows date range, last-updated and a "how this is calculated" link; never ranks MPs. Office analytics views for the KPIs in backend M.11. | §22, §3.3 | Each metric has all three elements |
+| F.8 | **Frontend release gates** (§21.6, §29 UX): add to CI or a manual checklist: no private data in public pages (probe), no keys in bundle (exists), Bangla and English tested, keyboard and screen-reader checks (needs a person), empty, error and offline states present on every screen. Output to `docs/aibc/phase3-audit.md`. | §21.6 | Checklist all ticked or listed as open |
+| F.10 | **Push on the client**: service worker fetches `/api/v1/me/notifications` on a payload-less push, opt-in and quiet-hours controls in Settings, no sensitive text in notification previews. | §15 | Works on Android Chrome with VAPID keys |
+| F.11 | **Comments on ideas and "report content"** buttons on issues, ideas and questions wired to moderation; comment list with states. Verify these exist in the UI; build if missing. | §4.2, §7.5, §7.7 | Visible and tested |
+
+### Competition and demo (Phase 4, 21–25 Dec)
+
+| # | Task | Done when |
+|---|---|---|
+| F.9 | **Demo kit**: one-click demo citizen and demo office sign-in on staging only (env-gated, absent in production build); "ডেমো" labels on all seeded data; scripted reset; backup screen recording of the golden path on the real demo phone; offline-safe screenshots; printed one-pager with the architecture diagram; slides stored locally. Presenter owns the Q&A sheet (`docs/aibc/qa.md`, backend drafts the content). | Rehearsed to time with every role clear |
+| F.12 | **Final video support**: update `docs/aibc/video-script.md` to the §2.5 timeline (problem 0:30, solution 1:00, demo 2:00, AI approach 2:30, impact 3:00) and label any mock step on screen. | Script matches rubric table |
+
+### Definition of done additions
+
+Every screen that shows data states whether it is live, sample or demo; no screen ships with a device-local stub after F.1 except the audit screens. Every public number has its definition. Every outward action keeps a confirm step and a note where the masterplan requires one.

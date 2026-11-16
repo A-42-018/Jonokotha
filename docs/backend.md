@@ -135,3 +135,44 @@ Auth and profile; constituencies and representatives; issues and office actions;
 ## Definition of done (every task)
 
 Input validated, authorization tested for allowed and denied roles, RLS test added for any new table, audit event for privileged actions, no private data in public views, AI output validated and logged with a manual fallback, migration is repeatable on a clean database, documented in the API list, CI green.
+
+---
+
+## Masterplan alignment (added 2026-11-16)
+
+Full requirement map: `docs/masterplan-coverage.md`. Items below were in the masterplan but in no phase above. Each belongs to the phase shown; the rest of this file is unchanged.
+
+### Phase 3 additions (13–20 Dec)
+
+| # | Task | Masterplan | Done when |
+|---|---|---|---|
+| M.6 | **MFA** for MP, moderator and admin: enforce Supabase TOTP (AAL2) in `guardAdmin`, office-manager and MP routes and in RLS-backed RPCs; recovery path documented; test with an AAL1 session (403) and AAL2 (200). | §5, §14, §18.1 | AAL1 session cannot call any privileged route |
+| M.7 | **Upload safety and review**: malware-scan adapter (ClamAV or provider) wired to the existing hook, quarantine bucket, fail closed; written security review of every route with a checklist; schedule an independent penetration test or a documented self-test using OWASP ASVS L2. Report in `docs/aibc/security-review.md`. | §18.1, §21.6 | Infected test file rejected; review signed |
+| M.8 | **Emergency path**: detect imminent-harm language (rules first, AI second, never an AI reply), return Bangla emergency guidance (999 and the official channel) from intake and questions; notify moderator queue; eval cases for it. | §17.8, §21.6 | Test set passes; copy approved by the team |
+| M.9 | **Privacy and terms content**: privacy notice (easy-Bangla summary on top, then full Bangla and English), terms, takedown and challenge process (§18.3), privacy impact assessment `docs/aibc/pia.md`; counsel review recorded. Frontend renders them. | §18.2, §21.6 | PIA complete; counsel status written down |
+| M.10 | **Eval in CI**: `npm run eval` runs on every prompt, model or schema change (path filter) against a pinned fixture mode and fails on regression beyond a stated tolerance; live-model run stays manual. Add copilot reply quality, routing citation validity, Bangla readability and glossary adherence (native reviewers) and Bangla vs English parity to the report. | §17.7, §21.5 | CI blocks a deliberate regression |
+| M.11 | **KPI and analytics queries**: office-only (unassigned workload, time to acknowledgement, time in status, forwarding rate, resolution with evidence, reopen rate, copilot vs no-copilot handling time, AI acceptance rate per agent), admin (adoption, abuse and spam rate, auth failures, API errors, notification delivery, cost), public metrics each with a definition string, date range and last-updated. Small-group suppression. Documented in `docs/api-v1.md`. | §3.3, §22 | Every §3.3 KPI has a query or is marked "pilot only" |
+| M.12 | **Release-gate script** `npm run check:release`: runs the §21.6 list that can be automated (RLS suite, private-data-in-public-endpoints probe, cross-constituency probe, audit-log presence for critical transitions, restore drill timestamp, privacy and terms present, eval gate) and prints the manual ones. | §21.6, §29 | One command gives a pass/fail list |
+| M.13 | **Env names**: reconcile `.env.example` and `check:env` with §26 (`NEXT_PUBLIC_APP_URL`, `AI_MODEL`, `EMBEDDING_MODEL`, `EMBEDDING_ENDPOINT`, `STT_PROVIDER`, `STT_API_KEY`, `MAP_PROVIDER`, `SENTRY_DSN`, email and push keys); keep old names as accepted aliases for one release; separate dev, staging and production projects documented. | §26 | `check:env` passes on all three environments |
+| M.14 | **Apply migrations 0014–0021 to the live project** in order, then run the Phase 2 smoke test on staging; record the date here. | §24 | Staging runs every `/api/v1` route in `docs/api-v1.md` |
+
+### Competition package (owner: backend unless noted; due before the 20 Dec docs freeze)
+
+| # | Document | Content |
+|---|---|---|
+| M.1 | `docs/aibc/problem.md` | Replace draft: cited figures only (or qualitative), at least a few citizen and staff interviews, local and global context. Business analyst owns the evidence. |
+| M.2 | `docs/aibc/scalability.md` | Infrastructure (Vercel, Supabase tiers, read replicas, queues), country adapters, multilingual design, cost per constituency, roadmap to Release 1.1 and 2, load-test result for the feed, list and similarity queries (measured, with date). |
+| M.3 | `docs/aibc/ethics.md` | Bias mitigation (Bangla vs English parity, no ranking of MPs, no inference of identity, affiliation or credibility), human-approval points, AI inventory (each agent, model, prompt version, data it sees), redaction, appeal, known limits. |
+| M.4 | `docs/aibc/team.md`, `collaborators.md`, `ai-usage.md` | Named owner for each of the five AIBC roles; every advisor and NRB contribution (advisors never write product code or influence judging); AI tools used to build Jonokotha and what each produced. Team lead owns; facts only. |
+| M.5 | `docs/aibc/business.md` | Institutional buyer model (offices, administrations, civic or development partners), pilot plan (one constituency, verified office, limited categories, training), per-constituency cost model (hosting, AI inference, support, moderation), measurable value proposition (staff time saved per case, time to acknowledgement, duplicates merged), free citizen reporting, no sale of personal data, no political ads. No claim of partners, revenue or customers that do not exist. |
+
+### Phase 4 additions (21–25 Dec)
+
+- **Q&A sheet** (`docs/aibc/qa.md`): why AI is essential, hallucination and wrong routing, privacy and data residency, Bangla quality, how MP offices adopt it, who pays, what is real versus planned. Answers cite measured numbers only.
+- **Demo accounts** (§27): one-click demo citizen and demo office sign-in on staging only, hidden in production by env check; demo constituency cannot reach production; no fake verified MP; never send a real agency a demo case.
+- **Pinned model and prompt versions** for the demo, plus a recorded AI-response fallback (already listed above).
+- **Pilot readiness checklist** (§29 Operations): support contact, escalation owner, incident owner, rollback runbook, first verified office onboarding notes.
+
+### Definition of done additions
+
+Every endpoint also states: public or private, audit event, rate limit, and the §22 definition string if it returns a public metric. Every new AI feature adds eval cases in Bangla and English and a manual fallback test.
