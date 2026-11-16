@@ -1,5 +1,6 @@
 "use client";
 import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
 import QueryProvider from "@/components/QueryProvider";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
@@ -25,7 +26,7 @@ function KpiInner() {
   return (
     <section aria-labelledby="kpi-h" className="space-y-3">
       <h2 id="kpi-h" className="text-xl font-semibold">{t.adKpiTitle}</h2>
-      <p className="text-sm text-muted">{fillNum(t.adKpiPeriod, { n: k.period_days, date: fmtDate(k.generated_at, lang) }, lang)}</p>
+      <p className="text-sm text-muted">{fillNum(t.adKpiPeriod, { n: k.period_days, date: fmtDate(k.generated_at, lang) }, lang)} · <Link href="/metrics" className="text-civic underline">{t.mxHow}</Link></p>
       <ul className="grid gap-3 md:grid-cols-2">
         {Object.entries(k.metrics).map(([key, m]) => {
           const v = kpiValue(m);

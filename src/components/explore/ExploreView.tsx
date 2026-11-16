@@ -1,4 +1,5 @@
 "use client";
+import MetricNote from "@/components/ui/MetricNote";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
 import Link from "next/link";
@@ -164,6 +165,7 @@ function ExploreInner() {
         <span>{fillNum(t.exCount, { n: shown.length }, lang)}</span>
         {updated && <span>{fillNum(t.exUpdated, { date: fmtDate(updated, lang) }, lang)}</span>}
       </div>
+      <MetricNote id="area" period={filters.range === "all" ? t.exAll : ({ "7": t.exDate7, "30": t.exDate30, "90": t.exDate90 } as Record<string, string>)[filters.range] ?? t.exAll} updated={updated} />
 
       {query.isPending && <p role="status" className="text-sm text-muted">{t.exLoading}</p>}
       <Tabs label={t.exViewAria} tabs={[{ id: "list", label: t.exViewList, panel: list }, { id: "map", label: t.exViewMap, panel: map }]} />

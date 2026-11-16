@@ -12,7 +12,10 @@ export default function Overview({ o, t, lang }: { o: O; t: Dict; lang: Lang }) 
     <section aria-labelledby="od-h" className="space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 id="od-h" className="text-xl font-semibold">{t.odOverview}</h2>
-        <Link href="/office/announcements" className={buttonClass({ variant: "secondary" })}>{t.odAnnouncements}</Link>
+        <div className="flex flex-wrap gap-2">
+          <Link href="/office/kpis" className={buttonClass({ variant: "secondary" })}>{t.mxOfficeLink}</Link>
+          <Link href="/office/announcements" className={buttonClass({ variant: "secondary" })}>{t.odAnnouncements}</Link>
+        </div>
       </div>
       <p className="text-sm text-muted">{t.odOverviewNote}</p>
       <dl className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-5">

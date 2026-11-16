@@ -330,3 +330,11 @@ Notes: scenario 12's "appeal" is the moderator reversing a hide with a reason, b
 - **Content challenge gap (backend)**: no endpoint lets an author contest hidden content. The form checks the reference and reason, then prepares the text and hands it over by `mailto:` when `NEXT_PUBLIC_SUPPORT_EMAIL` is set, otherwise by copy, and says so. Needs a route plus a moderator queue entry before the form can submit inside the app.
 - Not done: legal text matching backend M.9 once counsel signs off; settings still do not sync notification choices to `/me/notification-preferences` (F.10).
 - Tests: `tests/unit/legal.test.tsx`.
+
+### F.7 progress (public metric definitions)
+
+- **`/metrics`** defines every public number (received, answered, waiting, median time to first answer, "me too", issues in an area): meaning, which period, limit. The page also says no MP is ranked and that small groups are hidden, never shown as zero. Ids and the list live in `lib/metrics.ts` (`PUBLIC_METRICS`); strings in `strings/metrics.ts`.
+- **`MetricNote`** (period, updated, "how this is calculated" link to `/metrics#id`) is on `/area` (issue count, period from the date filter, updated = fetch time) and on the "me too" count (period "since the report was sent", updated = fetch time). The representative profile already showed period and fetch date; its link now also points to `/metrics#median`. Admin platform KPIs link to `/metrics` next to their own period and definition.
+- **Office indicators** `/office/kpis` (`OfficeKpis`, `GET /office/kpis?constituency=&days=30`): all eight M.11 metrics, each with the server's definition, hidden when the group is under the minimum size, copilot comparison labelled as an association. A 403 or 404 says the person may not see it (office managers and the MP only). Linked from the office overview.
+- Gaps: the server's KPI definitions are English only (shown with `lang="en"`, as on the admin page); `/area` "updated" is the fetch time because the list has no `updated_at`; the responsiveness card's `note` and `method_url` from the API are not shown.
+- Tests: `tests/unit/metrics.test.tsx`. `/terms`, `/challenge`, `/metrics` were added to `tests/e2e/a11y.spec.ts`; Playwright could not be run here (no Supabase env or Docker), so those axe checks have not run.

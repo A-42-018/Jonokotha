@@ -97,6 +97,7 @@ function ProfileInner({ id }: { id: string }) {
         )}
         <p className="mt-3 text-sm text-muted">{t.mpNoRank}</p>
         <Link href="/mp/method" className="mt-2 inline-flex min-h-11 items-center text-civic underline">{t.mpHow}</Link>
+        <p className="text-sm"><Link href="/metrics#median" className="inline-flex min-h-11 items-center text-civic underline">{t.mxHow}</Link></p>
       </Card>
       <Link href="/mp" className={buttonClass({ variant: "ghost" })}>{t.mpBackFind}</Link>
     </div>

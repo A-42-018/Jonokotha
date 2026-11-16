@@ -1,4 +1,5 @@
 "use client";
+import MetricNote from "@/components/ui/MetricNote";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import Button from "@/components/ui/Button";
@@ -99,6 +100,7 @@ function IssueActionsInner({ refId, title, signedIn = false, meTooBase = 0 }: Pr
           )}
           <p className="text-sm" aria-live="polite">{fillNum(t.enMeTooCount, { n: count.data ?? meTooBase }, lang)}</p>
           <p className="text-xs text-muted">{t.enMeTooHint}</p>
+          <MetricNote id="affected" period={t.mxWinSince} updated={count.dataUpdatedAt ? new Date(count.dataUpdatedAt).toISOString() : undefined} />
           {!signedIn ? (
             <Link href={`/login?need=1&next=${encodeURIComponent(`/issue/${refId}`)}`} className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-civic px-4 font-medium text-civic">{t.isFollow} · {t.enSignIn}</Link>
           ) : (
