@@ -13,6 +13,7 @@ import { useLocalValue } from "@/components/ui/useLocalValue";
 import { fillNum } from "@/lib/i18n";
 import { FOLLOWS_KEY, isFollowing, NO_FOLLOWS, toggleFollow } from "@/lib/follows";
 import Link from "next/link";
+import ShareButtons from "@/components/ui/ShareButtons";
 
 const REASONS = ["Spam", "Abuse", "Private", "False", "Other"] as const;
 
@@ -79,6 +80,7 @@ export default function IssueActions({ refId, title, signedIn = false, meTooBase
             <Button variant="secondary" onClick={() => void copyLink()}>{t.copyLink}</Button>
             <Button variant="secondary" onClick={() => void share()}>{t.shareLink}</Button>
           </div>
+          <ShareButtons path={`/issue/${refId}`} text={`${t.shText} ${title}`} />
           <p className="text-sm text-muted">{t.isShareHint}</p>
           <Button variant="ghost" onClick={() => setOpen(true)}>{t.isReportContent}</Button>
         </div>
