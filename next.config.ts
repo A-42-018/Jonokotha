@@ -1,4 +1,7 @@
 import type { NextConfig } from "next";
+import { applyEnvAliases } from "./src/lib/env-aliases";
+
+applyEnvAliases();
 
 const nextConfig: NextConfig = {
   /* config options here */

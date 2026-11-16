@@ -1,0 +1,20 @@
+name: Uptime check
+# Calls /api/health every 15 minutes; a failed run emails the repository watchers (GitHub's default for failed scheduled workflows).
+# Set the repository variable APP_URL to the production URL (Settings > Secrets and variables > Actions > Variables).
+# Not a substitute for a paid uptime service, but it needs no account. GitHub may delay or skip scheduled runs under load.
+# The schedule is switched off while GitHub Actions is blocked by the account budget (it would only send failure emails).
+# To switch it back on, add under "on:":   schedule: [{ cron: "*/5 * * * *" }]   (jobs) or "*/15 * * * *" (uptime).
+on:
+  workflow_dispatch:
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          url="${{ vars.APP_URL || 'https://jonokotha.vercel.app' }}/api/health"
+          for i in 1 2 3; do
+            code=$(curl -s -o /tmp/h.json -w '%{http_code}' --max-time 15 "$url" || true)
+            [ "$code" = "200" ] && cat /tmp/h.json && exit 0
+            sleep 20
+          done
+          echo "::error::$url answered $code three times"; cat /tmp/h.json 2>/dev/null || true; exit 1

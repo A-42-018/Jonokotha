@@ -9,7 +9,7 @@ export default async function AdminHome() {
   const t = dict[await getLang()];
   const { denied } = await guardAdmin("/admin");
   if (denied) return <NoAccess t={t} email={denied.email} role={denied.role} next="/admin" />;
-  const items = [["/admin/verification", t.adVerifyTitle, t.adVerifyLead], ["/admin/moderation", t.adModTitle, t.adModLead], ["/admin/ai-runs", t.adAiTitle, t.adAiLead], ["/admin/stats", t.adStatsTitle, t.adStatsLead]];
+  const items = [["/admin/verification", t.adVerifyTitle, t.adVerifyLead], ["/admin/moderation", t.adModTitle, t.adModLead], ["/admin/ai-runs", t.adAiTitle, t.adAiLead], ["/admin/stats", t.adStatsTitle, t.adStatsLead], ["/admin/audit", t.adAuditPageTitle, t.adAuditLead]];
   return (
     <AdminShell t={t} title={t.adTitle} lead={t.adHomeLead} current="/admin">
       <ul className="grid gap-3 md:grid-cols-2">

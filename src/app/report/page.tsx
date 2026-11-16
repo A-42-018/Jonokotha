@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import EmergencyNote from "@/components/EmergencyNote";
 import ReportForm from "@/components/ReportForm";
 import { getConstituencyId } from "@/lib/constituency-server";
 import { DEMO_CONSTITUENCY } from "@/lib/demo-data";
@@ -9,5 +10,10 @@ export default async function Report() {
   const { user } = await currentUser();
   if (!user) redirect("/login");
   const lang = await getLang();
-  return <ReportForm t={dict[lang]} lang={lang} constituencyId={(await getConstituencyId()) ?? DEMO_CONSTITUENCY.id} />;
+  return (
+    <>
+      <EmergencyNote t={dict[lang]} />
+      <ReportForm t={dict[lang]} lang={lang} constituencyId={(await getConstituencyId()) ?? DEMO_CONSTITUENCY.id} />
+    </>
+  );
 }

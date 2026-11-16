@@ -10,5 +10,6 @@ export default defineConfig({
     setupFiles: ["./tests/unit/setup.ts"],
     include: ["tests/unit/**/*.test.{ts,tsx}"],
     css: false,
+    testTimeout: 20000, // heavy component tests exceed 5 s when the whole suite runs in parallel
   },
 });

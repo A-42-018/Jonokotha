@@ -1,85 +1,79 @@
 "use client";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import QueryProvider from "@/components/QueryProvider";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import Dialog from "@/components/ui/Dialog";
-import Select from "@/components/ui/Select";
 import Textarea from "@/components/ui/Textarea";
 import { useToast } from "@/components/ui/Toast";
 import { useLang } from "@/components/ui/useLang";
-import { useLocalValue } from "@/components/ui/useLocalValue";
 import { useT } from "@/components/ui/useT";
-import { fillNum, fmtDate } from "@/lib/format";
-import { SAMPLE_STAFF } from "@/lib/office";
-import { ASSIGN_KEY } from "./CaseTable";
+import { ApiError } from "@/lib/api-client";
+import { fmtDate } from "@/lib/format";
+import { assignTo, currentAssignee, fetchMyId, fetchOfficeIssue, postNote, splitNotes } from "@/lib/office-api";
 
-const NOTES_KEY = "jonokotha:office-notes:v1";
-const ESC_KEY = "jonokotha:office-escalations:v1";
-const NO_NOTES: Record<string, { text: string; at: string }[]> = {};
-const NO_ASSIGN: Record<string, string> = {};
-const NO_ESC: Record<string, { reason: string; at: string }[]> = {};
-const REPLY_KEY = "jonokotha:office-replies:v1";
+export default function NotesAndAssign({ cref }: { cref: string }) {
+  return <QueryProvider><NotesInner cref={cref} /></QueryProvider>;
+}
 
 /**
- * Internal notes (office only) are a separate block from public replies, on purpose.
- * Assignment and escalation (reason required). All device-local until the API has these endpoints.
+ * Internal notes (office only) are a separate block from public replies, on purpose: a public reply is confirmed first because the
+ * citizen sees it. Assignment is to yourself: the API has no staff directory yet, so assigning to a colleague is a backend gap.
  */
-export default function NotesAndAssign({ cref }: { cref: string }) {
+function NotesInner({ cref }: { cref: string }) {
   const t = useT();
   const lang = useLang();
   const toast = useToast();
-  const [notes, setNotes] = useLocalValue(NOTES_KEY, NO_NOTES);
-  const [assign, setAssign] = useLocalValue(ASSIGN_KEY, NO_ASSIGN);
-  const [esc, setEsc] = useLocalValue(ESC_KEY, NO_ESC);
-  const [replies] = useLocalValue<Record<string, { text: string; at: string }[]>>(REPLY_KEY, NO_NOTES);
+  const qc = useQueryClient();
+  const detail = useQuery({ queryKey: ["office-issue", cref], queryFn: () => fetchOfficeIssue(cref) });
+  const me = useQuery({ queryKey: ["my-id"], queryFn: fetchMyId, staleTime: Infinity });
   const [note, setNote] = useState("");
-  const [who, setWho] = useState(assign[cref] ?? "");
-  const [dlg, setDlg] = useState(false);
-  const [reason, setReason] = useState("");
-  const [err, setErr] = useState("");
-  const current = SAMPLE_STAFF.find((s) => s.id === assign[cref]);
+  const [reply, setReply] = useState("");
+  const [confirmReply, setConfirmReply] = useState(false);
+  const refresh = () => void qc.invalidateQueries({ queryKey: ["office-issue", cref] });
+  const fail = (e: unknown) => toast("error", e instanceof ApiError && e.status === 403 ? t.ofToastForbidden : t.ofToastFail);
 
-  function close() { setDlg(false); setReason(""); setErr(""); }
-  function escalate() {
-    if (reason.trim().length < 10) { setErr(t.cpReasonRequired); return; }
-    setEsc({ ...esc, [cref]: [...(esc[cref] ?? []), { reason: reason.trim(), at: new Date().toISOString() }] });
-    toast("success", fillNum(t.cpEscalated, { reason: reason.trim() }, lang));
-    close();
-  }
+  const addNote = useMutation({ mutationFn: () => postNote(cref, note, false), onSuccess: () => { setNote(""); refresh(); }, onError: fail });
+  const addReply = useMutation({ mutationFn: () => postNote(cref, reply, true), onSuccess: () => { setReply(""); setConfirmReply(false); toast("success", t.cpReplySent); refresh(); }, onError: (e) => { setConfirmReply(false); fail(e); } });
+  const assign = useMutation({ mutationFn: () => assignTo(cref, me.data!), onSuccess: () => { toast("success", t.cpAssignedToMe); refresh(); }, onError: fail });
+
+  const events = detail.data?.events ?? [];
+  const { internal, publicReplies } = splitNotes(events);
+  const assignee = detail.data ? currentAssignee(detail.data.assignments) : undefined;
+  const mine = !!assignee && assignee === me.data;
 
   return (
     <div className="space-y-4">
       <Card title={t.cpAssignTitle}>
         <div className="space-y-3">
-          <Select label={t.cpAssignLabel} placeholder={t.odBulkPick} value={who} onChange={(e) => setWho(e.target.value)} options={SAMPLE_STAFF.map((s) => ({ value: s.id, label: s.name }))} />
-          <div className="flex flex-wrap gap-2">
-            <Button variant="secondary" disabled={!who || who === assign[cref]} onClick={() => { setAssign({ ...assign, [cref]: who }); toast("success", t.odBulkDone.replace("{n}", "1")); }}>{t.cpAssignSave}</Button>
-            <Button variant="secondary" onClick={() => setDlg(true)}>{t.cpEscalate}</Button>
-          </div>
-          {current && <p role="status" className="text-sm">{fillNum(t.cpAssigned, { name: current.name }, lang)}</p>}
-          {(esc[cref] ?? []).map((e) => <p key={e.at} className="text-sm text-muted">⚑ {fillNum(t.cpEscalated, { reason: e.reason }, lang)} · {fmtDate(e.at, lang)}</p>)}
-          <p className="text-xs text-muted">{t.odAssignLocal}</p>
+          {detail.isError && <p role="alert" className="text-sm">{t.ofToastFail}</p>}
+          <p role="status" className="text-sm">{mine ? t.cpAssignedYou : assignee ? t.cpAssignedOther : t.odUnassignedLabel}</p>
+          <Button variant="secondary" loading={assign.isPending} disabled={mine || !me.data} onClick={() => assign.mutate()}>{t.cpAssignMe}</Button>
+          <p className="text-xs text-muted">{t.cpAssignNote}</p>
         </div>
       </Card>
 
       <Card tone="warning" title={<><span aria-hidden>🔒 </span>{t.cpNotesTitle}</>}>
         <p className="mb-2 text-sm">{t.cpNotesHint}</p>
-        {(notes[cref] ?? []).length === 0 ? <p className="text-sm text-muted">{t.cpNoteEmpty}</p> : (
-          <ul className="mb-3 space-y-2">{(notes[cref] ?? []).map((n) => <li key={n.at} className="rounded-lg bg-white p-2"><p className="whitespace-pre-wrap break-words">{n.text}</p><p className="text-xs text-muted">{fmtDate(n.at, lang)}</p></li>)}</ul>
+        {internal.length === 0 ? <p className="text-sm text-muted">{t.cpNoteEmpty}</p> : (
+          <ul className="mb-3 space-y-2">{internal.map((n) => <li key={n.created_at} className="rounded-lg bg-white p-2"><p className="whitespace-pre-wrap break-words">{n.internal_note}</p><p className="text-xs text-muted">{fmtDate(n.created_at, lang)}</p></li>)}</ul>
         )}
         <Textarea label={t.cpNoteLabel} rows={3} maxLength={1000} value={note} onChange={(e) => setNote(e.target.value)} />
-        <div className="mt-2"><Button variant="secondary" disabled={note.trim().length < 3} onClick={() => { setNotes({ ...notes, [cref]: [...(notes[cref] ?? []), { text: note.trim(), at: new Date().toISOString() }] }); setNote(""); }}>{t.cpNoteAdd}</Button></div>
+        <div className="mt-2"><Button variant="secondary" loading={addNote.isPending} disabled={note.trim().length < 3} onClick={() => addNote.mutate()}>{t.cpNoteAdd}</Button></div>
       </Card>
 
       <Card title={t.cpPublicTitle}>
-        {(replies[cref] ?? []).length === 0 ? <p className="text-sm text-muted">{t.cpPublicEmpty}</p> : (
-          <ul className="space-y-2">{(replies[cref] ?? []).map((r) => <li key={r.at}><p className="whitespace-pre-wrap break-words">{r.text}</p><p className="text-xs text-muted">{fmtDate(r.at, lang)}</p></li>)}</ul>
+        {publicReplies.length === 0 ? <p className="text-sm text-muted">{t.cpPublicEmpty}</p> : (
+          <ul className="mb-3 space-y-2">{publicReplies.map((r) => <li key={r.created_at}><p className="whitespace-pre-wrap break-words">{r.public_message}</p><p className="text-xs text-muted">{fmtDate(r.created_at, lang)}</p></li>)}</ul>
         )}
+        <Textarea label={t.cpReplyLabel} rows={4} maxLength={1000} hint={t.cpPublicWarn} value={reply} onChange={(e) => setReply(e.target.value)} />
+        <div className="mt-2"><Button disabled={reply.trim().length < 10} onClick={() => setConfirmReply(true)}>{t.cpReplySend}</Button></div>
       </Card>
 
-      <Dialog open={dlg} onClose={close} title={t.cpEscalateTitle} description={t.cpEscalateBody}
-        actions={<><Button variant="ghost" onClick={close}>{t.cpCancel}</Button><Button onClick={escalate}>{t.cpEscalateSend}</Button></>}>
-        <Textarea label={t.cpEscalateReason} rows={3} maxLength={500} value={reason} error={err} onChange={(e) => { setReason(e.target.value); setErr(""); }} />
+      <Dialog open={confirmReply} onClose={() => setConfirmReply(false)} title={t.cpReplyConfirmTitle} description={t.cpReplyConfirmBody}
+        actions={<><Button variant="ghost" onClick={() => setConfirmReply(false)}>{t.cpCancel}</Button><Button loading={addReply.isPending} onClick={() => addReply.mutate()}>{t.cpReplySend}</Button></>}>
+        <Card tone="info" padded><p className="whitespace-pre-wrap break-words">{reply}</p></Card>
       </Dialog>
     </div>
   );

@@ -1,28 +1,32 @@
 import Link from "next/link";
 import Badge from "@/components/ui/Badge";
+import CapabilityLabel from "@/components/ui/CapabilityLabel";
 import { buttonClass } from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import { fillNum, fmtDay, type Dict, type Lang } from "@/lib/i18n";
-import type { Rep } from "@/lib/mp";
+import { sourceHost, type RepView } from "@/lib/mp-api";
 
 /** Verified representative card: verification date and source always shown; sample entries say so. */
-export default function RepCard({ rep, t, lang, showProfile = true, confirm }: { rep: Rep; t: Dict; lang: Lang; showProfile?: boolean; confirm?: React.ReactNode }) {
-  const b = lang === "bn";
+export default function RepCard({ rep, t, lang, showProfile = true, confirm }: { rep: RepView; t: Dict; lang: Lang; showProfile?: boolean; confirm?: React.ReactNode }) {
+  const host = sourceHost(rep.source);
   return (
     <Card as="article" className="space-y-3">
       <div className="flex items-start gap-3">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img loading="lazy" decoding="async" src="/illustrations/mp-portrait.svg" alt="" className="size-20 shrink-0 rounded-xl bg-slate-50" />
         <div className="min-w-0 space-y-1">
-          <h3 className="text-lg font-semibold text-foreground">{b ? rep.nameBn : rep.nameEn}</h3>
-          <p className="text-sm text-muted">{b ? rep.roleBn : rep.roleEn} · {b ? rep.constituencyBn : rep.constituencyEn}</p>
+          <h3 className="text-lg font-semibold text-foreground">{rep.name}</h3>
+          <p className="text-sm text-muted">{rep.role}{rep.constituency && ` · ${rep.constituency}`}</p>
           <div className="flex flex-wrap gap-2">
             <Badge tone="success" icon="✓">{t.mpVerified}</Badge>
-            {rep.sample && <Badge tone="warning">{t.exSample}</Badge>}
+            {rep.sample && <CapabilityLabel status="sample" />}
           </div>
         </div>
       </div>
-      <p className="text-sm text-muted">{fillNum(t.mpVerifiedOn, { date: fmtDay(rep.verifiedAt, lang) }, lang)} · {t.mpSource}: {rep.source}</p>
+      <p className="text-sm text-muted">
+        {rep.verifiedAt && <>{fillNum(t.mpVerifiedOn, { date: fmtDay(rep.verifiedAt, lang) }, lang)}</>}
+        {host && <> · {t.mpSource}: {host}</>}
+      </p>
       <div className="flex flex-wrap gap-2">
         <Link href="/report" className={buttonClass()}>{t.mpReport}</Link>
         <Link href="/ask" className={buttonClass({ variant: "secondary" })}>{t.mpAsk}</Link>

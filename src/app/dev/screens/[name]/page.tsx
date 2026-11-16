@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import AdminShell from "@/components/admin/AdminShell";
-import ReviewQueue from "@/components/admin/ReviewQueue";
+import ModerationQueue from "@/components/admin/ModerationQueue";
+import VerifyForm from "@/components/admin/VerifyForm";
 import IssueView from "@/components/issue/IssueView";
 import AnnouncementComposer from "@/components/office/AnnouncementComposer";
 import AuditList from "@/components/office/AuditList";
@@ -12,7 +13,6 @@ import OfficeActions from "@/components/office/OfficeActions";
 import OfficeCharts from "@/components/office/OfficeCharts";
 import Overview from "@/components/office/Overview";
 import ReportForm from "@/components/ReportForm";
-import { SAMPLE_REVIEW } from "@/lib/admin";
 import { DEMO_CONSTITUENCY } from "@/lib/demo-data";
 import { dict, getLang } from "@/lib/i18n";
 import { auditFromTimeline } from "@/lib/office-actions";
@@ -82,11 +82,11 @@ export default async function DevScreen({ params }: PageProps<"/dev/screens/[nam
         </div>
       );
     case "announcements":
-      return <div className="space-y-4"><h1 className="text-2xl font-semibold text-civic">{t.anTitle}</h1><AnnouncementComposer /></div>;
+      return <div className="space-y-4"><h1 className="text-2xl font-semibold text-civic">{t.anTitle}</h1><AnnouncementComposer constituency="demo-1" /></div>;
     case "admin-verification":
-      return <AdminShell t={t} title={t.adVerifyTitle} lead={t.adVerifyLead} current="/admin/verification"><ReviewQueue kind="verification" items={SAMPLE_REVIEW} /></AdminShell>;
+      return <AdminShell t={t} title={t.adVerifyTitle} lead={t.adVerifyLead} current="/admin/verification"><VerifyForm /></AdminShell>;
     case "admin-moderation":
-      return <AdminShell t={t} title={t.adModTitle} lead={t.adModLead} current="/admin/moderation"><ReviewQueue kind="moderation" items={SAMPLE_REVIEW} /></AdminShell>;
+      return <AdminShell t={t} title={t.adModTitle} lead={t.adModLead} current="/admin/moderation"><ModerationQueue /></AdminShell>;
     case "no-access-citizen":
       return <NoAccess t={t} email="citizen@example.test" role="citizen" next="/office" />;
     case "no-access-staff-admin":

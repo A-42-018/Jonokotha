@@ -8,7 +8,7 @@ import { useToast } from "@/components/ui/Toast";
 import { useT } from "@/components/ui/useT";
 import { useLang } from "@/components/ui/useLang";
 import { fillNum } from "@/lib/format";
-import { canDo, NOTE_MAX, NOTE_MIN, OFFICE_ACTIONS, submitToApproveRoute, validateNote, type OfficeAction, type SubmitAction } from "@/lib/office-actions";
+import { canDo, NOTE_MAX, NOTE_MIN, OFFICE_ACTIONS, submitToApi, validateNote, type OfficeAction, type SubmitAction } from "@/lib/office-actions";
 import type { Status } from "@/lib/types";
 
 const LABEL = { acknowledge: "oaAcknowledge", request_info: "oaRequestInfo", refer: "oaRefer", resolve: "oaResolve" } as const;
@@ -20,8 +20,8 @@ const VARIANT = { acknowledge: "primary", request_info: "secondary", refer: "suc
 
 /**
  * Staff action buttons and their note dialogs. Staff only: render it inside the office area.
- * `enabled` limits which actions are offered; `submit` does the save (default: the existing approve route,
- * which supports acknowledge and refer only and does not store the note yet).
+ * `enabled` limits which actions are offered; `submit` does the save (default: /api/v1 for acknowledge, request information and resolve;
+ * forwarding uses the approve route).
  */
 export default function OfficeActions({ cref, status, enabled = OFFICE_ACTIONS, submit, onDone }: {
   cref: string;
@@ -57,7 +57,7 @@ export default function OfficeActions({ cref, status, enabled = OFFICE_ACTIONS, 
     if (err) { document.getElementById(`${formId}-note`)?.focus(); return; }
     setBusy(true);
     setFailMsg(null);
-    const result = await (submit ?? submitToApproveRoute(cref))(action, note.trim());
+    const result = await (submit ?? submitToApi(cref))(action, note.trim());
     setBusy(false);
     if (result === "ok") {
       const done = action;

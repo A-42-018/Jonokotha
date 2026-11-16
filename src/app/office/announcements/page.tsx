@@ -1,6 +1,8 @@
 import Link from "next/link";
 import AnnouncementComposer from "@/components/office/AnnouncementComposer";
 import NoAccess from "@/components/ui/NoAccess";
+import { getConstituencyId } from "@/lib/constituency-server";
+import { DEMO_CONSTITUENCY } from "@/lib/demo-data";
 import { guardStaff } from "@/lib/guard";
 import { dict, getLang } from "@/lib/i18n";
 
@@ -13,7 +15,7 @@ export default async function Announcements() {
       <Link href="/office" className="inline-flex min-h-11 items-center text-civic underline">← {t.anBack}</Link>
       <h1 className="text-2xl font-semibold text-civic">{t.anTitle}</h1>
       <p className="text-muted">{t.anLead}</p>
-      <AnnouncementComposer />
+      <AnnouncementComposer constituency={(await getConstituencyId()) ?? DEMO_CONSTITUENCY.id} />
     </div>
   );
 }

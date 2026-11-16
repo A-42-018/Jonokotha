@@ -1,0 +1,41 @@
+import { pair } from "./pair";
+
+/** Referral wording (masterplan 1 and 28): received, forwarded and officially registered are three different things. */
+export const referral = pair(
+  {
+    rfTitle: "সমস্যাটি কতদূর পৌঁছেছে",
+    rfReceived: "এমপির অফিস পেয়েছে",
+    rfForwarded: "দায়িত্বে থাকা সংস্থাকে জানানো হয়েছে",
+    rfRegistered: "সংস্থা নিজের খাতায় তুলেছে",
+    rfDone: "হয়েছে",
+    rfNotYet: "এখনো নয়",
+    rfUnconfirmed: "নিশ্চিত নয়",
+    rfRegisteredNone: "সংস্থা নিজে জানালে তবেই এটি লেখা হবে। জনকথা নিজে থেকে ধরে নেয় না।",
+    rfRegisteredProof: "সংস্থার নিজের রেকর্ডের প্রমাণ আছে।",
+    rfProofLink: "প্রমাণ দেখুন",
+    rfTo: "যাকে জানানো হয়েছে:",
+    rfOn: "তারিখ:",
+    rfOfficeRef: "অফিসের লেখা রেফারেন্স:",
+    rfOfficeRefNote: "এটি অফিসের লেখা নম্বর। সংস্থা নিশ্চিত করেছে, এমন নয়।",
+    rfNotShown: "যাকে জানানো হয়েছে, তার নাম এখানে দেখানো হয়নি।",
+    rfStaffNote: "সংস্থা নিজে নিশ্চিত না করা পর্যন্ত নাগরিককে “খাতায় উঠেছে” বলা যাবে না।",
+  },
+  {
+    rfTitle: "How far this issue has gone",
+    rfReceived: "Received by the MP's office",
+    rfForwarded: "Forwarded to the responsible authority",
+    rfRegistered: "Officially registered by the authority",
+    rfDone: "Done",
+    rfNotYet: "Not yet",
+    rfUnconfirmed: "Not confirmed",
+    rfRegisteredNone: "This is written only when the authority tells us. Jonokotha never assumes it.",
+    rfRegisteredProof: "There is proof from the authority's own records.",
+    rfProofLink: "See the proof",
+    rfTo: "Forwarded to:",
+    rfOn: "Date:",
+    rfOfficeRef: "Reference written by the office:",
+    rfOfficeRefNote: "This number was written by the office. It does not mean the authority has confirmed it.",
+    rfNotShown: "The name of the authority is not shown here.",
+    rfStaffNote: "Do not tell the citizen it is “registered” until the authority confirms it itself.",
+  },
+);

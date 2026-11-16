@@ -25,7 +25,7 @@ export default function ActionCards({ t }: { t: Dict }) {
           <img loading="lazy" decoding="async" src="/illustrations/card-idea.svg" alt="" className="size-24 self-start rounded-2xl" />
           <h2 className="text-xl font-semibold text-slate-800">{t.homeIdeaTitle}</h2>
           <p className="text-slate-600">{t.homeIdeaBody}</p>
-          <Link href="/ideas" className={outline}>{t.homeIdeaCta}</Link>
+          <Link href="/ideas/new" className={outline}>{t.homeIdeaCta}</Link>
         </li>
         <li className={`${CARD} border border-slate-200 bg-white`}>
           {/* eslint-disable-next-line @next/next/no-img-element */}

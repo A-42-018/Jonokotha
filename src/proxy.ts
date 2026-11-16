@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { securityHeaders } from "./lib/security-headers";
 
 // Refreshes the Supabase auth session cookie on each request.
 export async function proxy(req: NextRequest) {
@@ -15,6 +16,7 @@ export async function proxy(req: NextRequest) {
     },
   });
   await sb.auth.getUser();
+  for (const [k, v] of Object.entries(securityHeaders())) res.headers.set(k, v);
   return res;
 }
 
