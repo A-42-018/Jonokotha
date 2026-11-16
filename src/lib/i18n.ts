@@ -715,3 +715,8 @@ export function fillNum(template: string, values: Record<string, string | number
 export function fmtDate(iso: string, lang: Lang) {
   return new Date(iso).toLocaleString(lang === "bn" ? "bn-BD" : "en-GB", { timeZone: "Asia/Dhaka", dateStyle: "medium", timeStyle: "short" });
 }
+
+/** Date without time (Asia/Dhaka), Bangla digits in bn. */
+export function fmtDay(iso: string, lang: Lang) {
+  return new Date(iso).toLocaleDateString(lang === "bn" ? "bn-BD" : "en-GB", { timeZone: "Asia/Dhaka", dateStyle: "medium" });
+}
