@@ -367,3 +367,13 @@ Docker was not available on the frontend machine, so these were never executed. 
 3. `npx playwright test tests/e2e/a11y.spec.ts` with the API running (pages that call the API cannot reach network-idle without it).
 4. F.10 push: set `VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY` (`node scripts/gen-vapid.mjs`), build for production over HTTPS, opt in from Settings on Android Chrome, run the delivery job, check the alert shows only "There is news".
 5. F.11 backend gap: add `GET/POST /ideas/{ref}/comments` (contract in `src/lib/comments-api.ts`), add `comment` to the `POST /reports` types, and list comments in `/admin/moderation`.
+
+## Phase 5 progress (started 2026-11-16)
+
+### F5.13 progress (capability labels)
+
+- **What is live**: `lib/capability.ts` defines the four states (`live`, `sample`, `demo`, `planned`), reads the server's `data_status` when it is sent, falls back to the older `is_sample` / `is_demo` flags, and says "live" otherwise. `CapabilityLabel` (silent for live, icon plus text for the rest, never colour alone) replaced the hand-made "Sample" badges on the area map, home feed, ideas, public questions and MP cards. `PlannedPanel` is text only (no button, input or link) and is what every later task uses where the backend item does not exist. `FEATURES` in `lib/capability.ts` lists what this client knows the server lacks (polls, consultations, staff directory, author contest, MFA recovery codes, comment reports), each with the backend item that switches it on.
+- **Controls that looked functional and were not**: the home "Share an idea · coming soon" button was a disabled button although `/ideas/new` works since F.1: now a link. The header bell opened a "coming soon" panel although `/notifications` is live: now a plain link. The stale strings were removed.
+- **Stubbed**: nothing. `data_status` is not sent by the API yet, so only `is_sample` rows are labelled. The home representative card is still labelled sample until F5.2 replaces it.
+- **Backend gap (B5.13)**: add `data_status` (`live|sample|demo|planned`) to list and detail items and to a feature-flag endpoint. When it arrives nothing in the UI changes except that `demo` and `planned` start to show.
+- **Tests**: `tests/unit/capability.test.tsx` (9: status reading, label per state in bn and en, panel has no controls, no hard-coded disabled button or "coming soon" on a control anywhere in `src`). Full `npm test`: three heavy component tests (ask, admin moderation, office notes) time out when the whole suite runs together on this machine, as noted under F.5; they pass alone.

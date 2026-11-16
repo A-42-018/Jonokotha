@@ -3,6 +3,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import QueryProvider from "@/components/QueryProvider";
 import ReportContent from "@/components/ReportContent";
 import Badge from "@/components/ui/Badge";
+import CapabilityLabel from "@/components/ui/CapabilityLabel";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import EmptyState from "@/components/ui/EmptyState";
@@ -42,7 +43,7 @@ function Inner({ constituency, signedIn }: { constituency: string; signedIn: boo
               <p className="whitespace-pre-line break-words">{r.body}</p>
               <div className="flex flex-wrap items-center gap-2">
                 <Badge tone={r.status === "answered" ? "success" : "neutral"}>{r.status === "answered" ? t.pqAnswered : t.pqWaiting}</Badge>
-                {r.is_sample && <Badge tone="warning">{t.exSample}</Badge>}
+                {r.is_sample && <CapabilityLabel status="sample" />}
                 <ReportContent type="question" refId={r.ref} signedIn={signedIn} next="/ask" />
               </div>
             </Card>

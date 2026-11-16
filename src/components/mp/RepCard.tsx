@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Badge from "@/components/ui/Badge";
+import CapabilityLabel from "@/components/ui/CapabilityLabel";
 import { buttonClass } from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import { fillNum, fmtDay, type Dict, type Lang } from "@/lib/i18n";
@@ -18,7 +19,7 @@ export default function RepCard({ rep, t, lang, showProfile = true, confirm }: {
           <p className="text-sm text-muted">{rep.role}{rep.constituency && ` · ${rep.constituency}`}</p>
           <div className="flex flex-wrap gap-2">
             <Badge tone="success" icon="✓">{t.mpVerified}</Badge>
-            {rep.sample && <Badge tone="warning">{t.exSample}</Badge>}
+            {rep.sample && <CapabilityLabel status="sample" />}
           </div>
         </div>
       </div>

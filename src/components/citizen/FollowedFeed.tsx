@@ -2,7 +2,7 @@
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import QueryProvider from "@/components/QueryProvider";
-import Badge from "@/components/ui/Badge";
+import CapabilityLabel from "@/components/ui/CapabilityLabel";
 import Button, { buttonClass } from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import StatusChip from "@/components/ui/StatusChip";
@@ -80,7 +80,7 @@ function FeedInner({ signedIn }: { signedIn: boolean }) {
                 <p className="text-sm text-muted">{t.cats[i.category]}{i.area && ` · ${i.area}`} · {fmtDate(i.createdAt, lang)}</p>
                 <div className="flex flex-wrap items-center gap-2">
                   <StatusChip status={i.status} label={t.statuses[i.status]} />
-                  {i.sample && <Badge tone="warning">{t.exSample}</Badge>}
+                  {i.sample && <CapabilityLabel status="sample" />}
                   <span className="text-xs text-muted">{why(i.why)}</span>
                 </div>
               </Card>

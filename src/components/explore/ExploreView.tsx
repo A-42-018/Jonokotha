@@ -4,7 +4,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import Badge from "@/components/ui/Badge";
+import CapabilityLabel from "@/components/ui/CapabilityLabel";
 import Button, { buttonClass } from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import EmptyState from "@/components/ui/EmptyState";
@@ -95,7 +95,7 @@ function ExploreInner() {
                 <p className="text-sm text-muted">{t.cats[i.category]}{i.area && ` · ${i.area}`} · {fmtDate(i.createdAt, lang)}</p>
                 <div className="flex flex-wrap items-center gap-2">
                   <StatusChip status={i.status} label={t.statuses[i.status]} />
-                  {i.sample && <Badge tone="warning">{t.exSample}</Badge>}
+                  {i.sample && <CapabilityLabel status="sample" />}
                   {i.supports !== undefined && <span className="text-sm text-muted">{fillNum(t.exSupports, { n: i.supports }, lang)}</span>}
                 </div>
               </div>
@@ -115,7 +115,7 @@ function ExploreInner() {
           <p className="mb-2 text-sm text-muted">{t.cats[pick.category]} · {pick.area}</p>
           <div className="flex flex-wrap items-center gap-2">
             <StatusChip status={pick.status} label={t.statuses[pick.status]} />
-            {pick.sample && <Badge tone="warning">{t.exSample}</Badge>}
+            {pick.sample && <CapabilityLabel status="sample" />}
             <Link href={`/issue/${pick.ref}`} className={buttonClass({ variant: "secondary" })}>{t.exOpen}</Link>
           </div>
         </Card>
