@@ -62,6 +62,8 @@ export const FEATURES = {
   adminFlags: { status: "planned", backend: "B5.3" },
   adminKnowledgeManage: { status: "planned", backend: "B5.3" },
   adminDemo: { status: "planned", backend: "B5.3" },
+  ideaClarity: { status: "planned", backend: "B5.10" },
+  insightBrief: { status: "planned", backend: "B5.10" },
 } as const satisfies Record<string, { status: DataStatus; backend: string }>;
 
 export type FeatureKey = keyof typeof FEATURES;

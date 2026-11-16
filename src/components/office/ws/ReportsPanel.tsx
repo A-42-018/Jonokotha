@@ -12,6 +12,7 @@ import { useT } from "@/components/ui/useT";
 import { fillNum, fmtDate } from "@/lib/format";
 import { createOfficeReport, fetchOfficeReports, setReportStatus } from "@/lib/office-workspace-api";
 import Boundary, { label, saveError } from "./Boundary";
+import InsightBriefs from "./InsightBriefs";
 
 export default function ReportsPanel({ constituency }: { constituency: string }) {
   return <QueryProvider><Inner constituency={constituency} /></QueryProvider>;
@@ -67,6 +68,7 @@ function Inner({ constituency }: { constituency: string }) {
           )}
         </Boundary>
       </section>
+      <InsightBriefs />
     </div>
   );
 }

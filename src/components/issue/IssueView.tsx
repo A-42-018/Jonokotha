@@ -8,6 +8,7 @@ import ReferralStatus from "@/components/issue/ReferralStatus";
 import StatusTimeline from "@/components/issue/StatusTimeline";
 import Badge from "@/components/ui/Badge";
 import Card from "@/components/ui/Card";
+import TranslatedText from "@/components/ui/TranslatedText";
 import PlannedPanel from "@/components/ui/PlannedPanel";
 import StatusChip from "@/components/ui/StatusChip";
 import { fmtDate, type Dict, type Lang } from "@/lib/i18n";
@@ -33,7 +34,7 @@ export default function IssueView({ c, t, lang, signedIn = false, referral = nul
             </div>
           </header>
           <Card title={t.isReportDetails}>
-            <p className="whitespace-pre-wrap break-words">{c.description}</p>
+            <TranslatedText text={c.description} className="whitespace-pre-wrap break-words" signedIn={signedIn} next={`/issue/${encodeURIComponent(c.ref)}`} />
           </Card>
           <OfficialResponse t={t} lang={lang} />
           <ReferralStatus timeline={c.timeline} referral={referral} t={t} lang={lang} />

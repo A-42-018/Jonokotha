@@ -10,6 +10,7 @@ import { Checkbox } from "@/components/ui/Choice";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import Textarea from "@/components/ui/Textarea";
+import ClarityHelper from "./ClarityHelper";
 import { useToast } from "@/components/ui/Toast";
 import { useLang } from "@/components/ui/useLang";
 import { useT } from "@/components/ui/useT";
@@ -115,6 +116,7 @@ function NewIdeaInner({ constituency, signedIn }: { constituency: string; signed
       )}
       <Textarea label={t.idFProblem} rows={4} maxLength={700} value={f.problem} error={errors.problem} onChange={(e) => set("problem", e.target.value)} />
       <Textarea label={t.idFSolution} rows={4} maxLength={700} value={f.solution} error={errors.solution} onChange={(e) => set("solution", e.target.value)} />
+      <ClarityHelper title={f.title} text={`${f.problem} ${f.solution}`} />
       <Textarea label={t.idFBenefit} optional rows={3} maxLength={300} value={f.benefit} onChange={(e) => set("benefit", e.target.value)} />
       <Input label={t.idFArea} optional maxLength={120} value={f.area} onChange={(e) => set("area", e.target.value)} />
       <Select label={t.idFCategory} placeholder={t.idChoose} required value={f.category} error={errors.category} onChange={(e) => set("category", e.target.value)} options={CATEGORIES.map((c) => ({ value: c, label: t.cats[c] }))} />
