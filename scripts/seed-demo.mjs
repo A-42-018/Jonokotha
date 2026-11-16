@@ -16,20 +16,20 @@ const demo = [
   { title: L + "ময়লার ভাগাড় সরানো হয়নি", category: "waste", area: "পল্লবী", description: "বাজারের পাশে ময়লা জমে দুর্গন্ধ ছড়াচ্ছে।", ai_agency: "ag-city", status: "resolved" },
 ];
 
-const { error: delErr } = await sb.from("cases").delete().eq("is_demo", true);
+const { error: delErr } = await sb.from("issues").delete().eq("is_demo", true);
 if (delErr) { console.error("Cleanup failed:", delErr.message); process.exit(1); }
 
 const refs = [];
 for (const [i, d] of demo.entries()) {
   const { dupOf, status, ...row } = d;
   const similar = dupOf !== undefined ? [refs[dupOf]] : [];
-  const { data, error } = await sb.from("cases").insert({ ...base, ...row, ai_similar: similar, ai_confidence: similar.length ? 0.85 : 0.7, ai_summary: "নমুনা তথ্য — বাস্তব অভিযোগ নয়।" }).select("ref").single();
+  const { data, error } = await sb.from("issues").insert({ ...base, ...row, ai_similar: similar, ai_confidence: similar.length ? 0.85 : 0.7, ai_summary: "নমুনা তথ্য — বাস্তব অভিযোগ নয়।" }).select("ref").single();
   if (error) { console.error(`Insert ${i} failed:`, error.message); process.exit(1); }
   refs.push(data.ref);
   // Walk the status forward so the public timeline shows real events (the trigger logs each change).
   const path = { received: [], acknowledged: ["acknowledged"], referred: ["acknowledged", "referred"], resolved: ["acknowledged", "referred", "resolved"] }[status];
   for (const st of path) {
-    const { error: e2 } = await sb.from("cases").update({ status: st }).eq("ref", data.ref);
+    const { error: e2 } = await sb.from("issues").update({ status: ({ received: "submitted", referred: "referred_to_authority" })[st] ?? st }).eq("ref", data.ref);
     if (e2) { console.error(`Status ${st} failed:`, e2.message); process.exit(1); }
   }
 }

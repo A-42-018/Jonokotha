@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "check:env": "node --env-file=.env.local scripts/check-env.mjs",
-    "seed:demo": "node --env-file=.env.local scripts/seed-demo.mjs"
+    "seed:demo": "node --env-file=.env.local scripts/seed-demo.mjs",
+    "test:db": "vitest run --config vitest.db.config.mts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.8.0",
@@ -24,10 +25,13 @@
   "devDependencies": {
     "@tailwindcss/turbopack": "4.3.3",
     "@types/node": "^22.20.5",
+    "@types/pg": "^8.23.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.4.6",
+    "pg": "^8.23.1",
+    "supabase": "^3.1.0",
     "tailwindcss": "4.3.3",
     "typescript": "^5",
     "vitest": "^5.1.0"

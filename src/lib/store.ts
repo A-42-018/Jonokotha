@@ -49,7 +49,7 @@ export async function createCase(sb: SupabaseClient, userId: string, input: Inta
   const { data: peers } = await sb.from("public_cases").select("ref,title,description").eq("category", input.category).order("created_at", { ascending: false }).limit(50);
   const text = `${input.title} ${input.description}`;
   const similar = (peers ?? []).filter((c) => similarity(text, `${c.title} ${c.description}`) > 0.35).slice(0, 3).map((c) => c.ref);
-  const { data, error } = await sb.from("cases").insert({
+  const { data, error } = await sb.from("issues").insert({
     reporter_id: userId, title: input.title, category: input.category, description: input.description, area: input.area,
     constituency_key: input.constituencyId, ai_summary: summary, ai_agency: pickAgency(await getAgencies(sb), input.category).id,
     ai_confidence: similar.length ? 0.85 : 0.7, ai_similar: similar,
@@ -70,8 +70,13 @@ export async function getCase(sb: SupabaseClient, ref: string) {
   return data ? toRecord(data as unknown as Row, await eventsFor(sb, [ref])) : undefined;
 }
 
+/** Legacy 4-state UI status -> 13-state model (masterplan §9). Mirrors legacy_to_issue_status() in migration 0005. */
+export const LEGACY_TO_ISSUE_STATUS: Record<Status, string> = {
+  received: "submitted", acknowledged: "acknowledged", referred: "referred_to_authority", resolved: "resolved",
+};
+
 /** Returns false if the row was not updated (not staff, or no such case). RLS enforces staff-only. */
 export async function advance(sb: SupabaseClient, ref: string, status: Status) {
-  const { data } = await sb.from("cases").update({ status }).eq("ref", ref).select("ref");
+  const { data } = await sb.from("issues").update({ status: LEGACY_TO_ISSUE_STATUS[status] }).eq("ref", ref).select("ref");
   return (data?.length ?? 0) > 0;
 }
