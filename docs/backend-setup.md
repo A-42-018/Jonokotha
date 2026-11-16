@@ -11,3 +11,9 @@
 
 ## Staging (2026-11-16)
 Vercel project `jonokotha` (team devalif), production branch `backend`: https://jonokotha.vercel.app. Supabase redirect URLs include its `/auth/callback`. Env vars set in Vercel: Supabase URL and anon key, Anthropic key and model. While the Anthropic key is invalid, `/api/intake` returns `source: "fallback"`.
+
+## Dev-period demo login (temporary)
+Email delivery is limited (see step 2), so `/login` has one-click **Citizen** and **Office staff** buttons. They sign in to two real accounts (`demo-citizen@` and `demo-staff@jonokotha.test`), so RLS and the staff gate still apply; admin is not available.
+- Enabled only when the server env vars `DEMO_LOGIN=true` and `DEMO_PASSWORD` are both set (`.env.local`, Vercel env). Unset `DEMO_LOGIN` to turn it off; no deploy needed beyond a redeploy.
+- Create the accounts with `supabase/seed/demo_users.sql` (replace `__DEMO_PASSWORD__`; never commit the real value).
+- **Before real users or judging:** unset `DEMO_LOGIN`, and delete the two demo users (SQL in the seed file header). Anyone who can reach the site while it is on can become demo staff. Revisit in the Phase 3 security review.
