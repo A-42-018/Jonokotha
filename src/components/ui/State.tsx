@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { buttonClass } from "./Button";
 
 export type StateKind = "error" | "notFound" | "noAccess" | "offline" | "maintenance" | "empty" | "officeEmpty" | "noResults" | "expired";
 
@@ -29,16 +30,12 @@ export default function State({ kind, title, body, children, compact = false, li
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={`/illustrations/${ART[kind]}.svg`} alt="" className={compact ? "w-32" : "w-48 sm:w-56"} />
       <Heading className="text-2xl font-semibold text-civic">{title}</Heading>
-      {body && <p className="text-slate-600">{body}</p>}
+      {body && <p className="text-muted">{body}</p>}
       {children && <div className="mt-2 flex w-full flex-col items-stretch justify-center gap-2 sm:w-auto sm:flex-row">{children}</div>}
     </section>
   );
 }
 
-export const btnPrimary = "inline-flex min-h-11 items-center justify-center rounded-xl bg-civic px-5 font-medium text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-civic";
-export const btnSecondary = "inline-flex min-h-11 items-center justify-center rounded-xl border border-civic px-5 font-medium text-civic focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-civic";
-
-/** Grey pulsing block for loading skeletons. */
-export function SkeletonBlock({ className = "" }: { className?: string }) {
-  return <div aria-hidden className={`animate-pulse rounded-xl bg-slate-200 motion-reduce:animate-none ${className}`} />;
-}
+/** Class strings for links styled as buttons. Prefer `buttonClass()` / `<Button>` in new code. */
+export const btnPrimary = buttonClass({ variant: "primary" });
+export const btnSecondary = buttonClass({ variant: "secondary" });
