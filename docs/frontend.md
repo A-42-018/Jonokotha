@@ -291,3 +291,17 @@ Every screen that shows data states whether it is live, sample or demo; no scree
 | Still device-local on purpose or not yet wired | Settings and onboarding (`SettingsPanel`, `Onboarding*`: language, notification choices, privacy actions are F.6 and F.10), saved queue filters, the offline report queue (this is the design), the "did I press me too / support" button hints, the feed ordering switch, and the two static sample FAQ entries on `/ask`. `lib/sample.ts`, `lib/mp.ts` and `lib/places.ts` still hold sample data used by the audit screens, the location search in the report wizard (`places.ts`) and unit tests. |
 
 Known gaps: offline-queued reports keep the text only (photos live in memory, not in storage); the full emergency screen is F.5; "data last updated" on `/area` is the fetch time because the list has no `updated_at`; status filter and text search work on the loaded pages only. Playwright could not be run here (no Supabase env); unit tests, typecheck, lint and `next build` + `check:bundle` pass.
+
+### F.2 progress (real-stack e2e, written 2026-11-16, not yet run)
+
+`tests/e2e/real/` holds scenarios 1-15 of §21.3 plus axe on signed-in screens, on the real `/api/v1` and a local Supabase, no mocks, at 375 and 1280px. Run with `npx supabase start` then `npm run test:e2e:real` (`scripts/e2e-real.mjs` reads `supabase status`, refuses a non-local URL, starts its own Next server with the local keys). Without `E2E_REAL=1` the specs skip, so `npm run test:e2e` and CI are unchanged.
+
+| File | Covers |
+|---|---|
+| `lifecycle.spec.ts` | 1 register by email code (Mailpit on :54324) and pick constituency; 2 report with pin and photo; 3 reference and timeline; 4 acknowledge and assign; 5 public update vs private note; 6 forward with external reference; 7 resolve with evidence; 8 feedback once, reopen |
+| `community.spec.ts` | 9 idea submit (moderator publishes) and support once; 14 me-too once per account, follower is notified; 15 rate, appeal, cannot close from reopened |
+| `access.spec.ts` | 10 private data unreadable (API, public key, office page); 11 Office A vs B both ways; 12 abuse report, hide, contest, restore, audit; 13 find MP signed out |
+| `axe.spec.ts` | citizen, office and admin pages with a real session, bn and en |
+
+The six accounts are made per run through the Supabase admin API (`support.ts`, `buildWorld`) and removed afterwards; the session cookie is built with `@supabase/ssr` so the app sees a normal sign-in. Office A uses the sample constituency `demo-1` because the UI picker only offers that one; office B gets its own.
+Notes: scenario 12's "appeal" is the moderator reversing a hide with a reason, because no endpoint lets an author contest a hidden item yet (F.6 content-challenge form). Linux visual baselines are still created in CI only. These specs were typechecked and linted but could not be executed in the authoring environment (no Docker), so expect to fix selectors or response shapes on the first real run.
