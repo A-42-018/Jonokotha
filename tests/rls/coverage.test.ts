@@ -7,12 +7,13 @@ import { withClient } from "../db/helpers";
  * Adding a table without adding RLS tests fails this test, which is the point (masterplan §14, definition of done).
  */
 const COVERED = [
-  "agencies", "ai_runs", "ai_suggestions", "app_settings", "audit_logs", "consents", "constituencies", "graph_edges", "idempotency_keys", "issue_feedback", "rate_limits",
+  "agencies", "ai_runs", "ai_suggestions", "app_settings", "audit_logs", "consents", "constituencies", "graph_edges", "idempotency_keys", "issue_feedback", "issue_affected", "follows", "analytics_reports", "office_invitations", "moderation_reports", "ai_eval_runs", "notification_deliveries", "push_subscriptions", "announcements", "projects", "project_milestones", "representative_fields", "ideas", "idea_supports", "questions", "question_messages", "rate_limits",
   "issue_agency_referrals", "issue_assignments", "issue_categories", "issue_embeddings", "issue_events", "issue_media", "issue_transitions", "issues",
   "knowledge_chunks", "knowledge_sources", "notifications", "office_members", "office_permissions", "profiles",
-  "representative_constituencies", "representatives", "user_preferences",
+  "representative_constituencies", "representatives", "user_preferences", "sla_policies", "issue_sla", "issue_sla_pauses",
 ];
-const ANON_READABLE = ["agencies", "constituencies", "issue_categories", "issue_transitions", "knowledge_sources", "office_permissions", "representative_constituencies", "representatives"];
+const PUBLIC_VIEWS = ["public_analytics_reports", "public_announcements", "public_case_events", "public_cases", "public_ideas", "public_project_milestones", "public_projects", "public_question_messages", "public_questions"];
+const ANON_READABLE = ["agencies", "constituencies", "issue_categories", "issue_transitions", "knowledge_sources", "office_permissions", "representative_constituencies", "representative_fields", "representatives"];
 
 describe("RLS coverage guard", () => {
   it("every public table has RLS enabled and RLS tests", () => withClient(async (c) => {
@@ -24,7 +25,7 @@ describe("RLS coverage guard", () => {
   it("anonymous visitors hold no privileges except on reference tables and the two public views", () => withClient(async (c) => {
     const { rows } = await c.query(
       `select table_name from information_schema.role_table_grants where grantee='anon' and table_schema='public' group by table_name order by 1`);
-    expect(rows.map((r) => r.table_name)).toEqual([...ANON_READABLE, "public_case_events", "public_cases"].sort());
+    expect(rows.map((r) => r.table_name)).toEqual([...ANON_READABLE, ...PUBLIC_VIEWS].sort());
     const { rows: w } = await c.query("select 1 from information_schema.role_table_grants where grantee='anon' and table_schema='public' and privilege_type <> 'SELECT'");
     expect(w).toEqual([]);
   }));

@@ -33,3 +33,20 @@ No accuracy figures are claimed. The evaluation set and baseline arrive in Phase
 Multilingual embeddings + pgvector duplicate detection, graph edges between
 cases, AI run log, and a versioned Bangla/English evaluation set with scripted
 runs in CI. Results will be published here.
+
+
+## Phase 2 agents (2026-11-16)
+
+Every agent goes through `runAgent` (forced tool call, Zod-validated, typed fallback, `ai_runs` log). None of them applies anything: output is a draft, or a pending `ai_suggestions` row that staff Accept, Edit or Dismiss.
+
+| Agent | Input (always redacted) | Output | Citations and fallback |
+|---|---|---|---|
+| Intake v2 (`prompts` intake@v2) | citizen's text | title, category, description, area hint, urgency | urgency guidance is fixed text, danger words force `urgent` and point to 999; keyword fallback |
+| Translation (translate@v1) | text | translation, labelled machine translation | `available:false` shows the original |
+| Transcription | audio (never stored) | text, redacted | provider optional; typing always works |
+| Office Copilot (copilot@v1) | numbered facts of one issue | summary, missing information, Bangla reply draft, confidence | every output cites fact ids that exist; an answer citing nothing valid becomes the rule-based fallback |
+| Routing (routing@v1) | issue + retrieved agency/rule chunks | agency | citations are source name, URL, date checked; model choices outside the retrieved set are ignored; no chunk above the threshold means "no confident suggestion"; demo and real sources never share an index |
+| Insight (insight@v1) | aggregate statistics only | three-sentence note | dropped if it contains a number that is not in the statistics |
+| Duplicate (Phase 1.8) | redacted public text | candidates with reasons | scoped to office and category |
+
+Confidence figures are the model's own report or absent; retrieval scores are not probabilities and are labelled as such. Quality of the Phase 2 agents is **not yet measured**: the evaluation run on the final prompts (Phase 3) must cover copilot reply quality, routing top-1/top-3 and citation validity, and Bangla speech accuracy before any number is published.

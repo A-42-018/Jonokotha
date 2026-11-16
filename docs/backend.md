@@ -2,7 +2,7 @@
 
 Owner: `backend` branch. Source of truth: `masterplan_JONOKOTHA.md` (§9 status model, §12 database, §13 API, §14 RLS, §15 notifications, §16 maps, §17 AI core, §18 security, §20 reliability, §21 testing). Frontend contract: `docs/WORK_SPLIT.md`.
 
-Phases follow the sprints (§24). Dates are 2026.
+Phases 0–4 follow the sprints (§24); phases 5–8 complete the whole masterplan (MVP completion, pilot, Release 1.1, Release 2). Dates are reference points, not the scope boundary. Every masterplan section is mapped in `docs/masterplan-coverage.md`.
 
 ## Stack and conventions
 
@@ -47,6 +47,8 @@ Exit: golden path on staging; keys safe; nothing public leaks personal data.
 
 ## Phase 1 — Foundation hardening (21 Nov – 1 Dec)
 
+**Status 2026-11-16:** items 1–12 are done (migrations 0004–0013; 0011–0013 applied locally only; 1.8 uses hosted BGE-M3, provider chosen by env, Bangla retrieval test still to run once a key is set). CI now has a `database` job (all DB/RLS/API tests on a local Supabase) and a `security` job (gitleaks, npm audit). Item 10 is done: 118-case dataset, `npm run eval`, baseline in `docs/aibc/eval-baseline.md` (keyword fallback and AI drafting measured; embedding duplicate precision/recall not measured until `EMBEDDINGS_*` is set, which also tunes the 0.80 threshold). Open: an index back-fill for existing issues.
+
 Goal: secure core with tested permissions and first AI metrics (§24).
 
 1. **Schema completion** (§12): add `representatives`, `representative_constituencies`, `office_members`, `issue_categories`, `issue_media`, `issue_assignments`, `issue_agency_referrals`, `notifications`, `audit_logs`, `consents`, `user_preferences`, `knowledge_sources`, `knowledge_chunks`, `issue_embeddings`, `graph_edges`, `ai_runs`, `ai_suggestions`. Rename working tables toward masterplan names (`cases` → `issues`, `case_events` → `issue_events`) in one migration with data preserved. UUID PKs, UTC timestamps, indexes, FKs, retention columns.
@@ -69,6 +71,8 @@ Exit: RLS and transition tests green in CI; baseline AI metrics recorded.
 ## Phase 2 — MVP build (2–12 Dec)
 
 Goal: every MVP backend feature in §4.2.
+
+**Status 2026-11-16:** all 15 items are built and tested (migrations 0014–0020, applied to the local stack only; the live project still needs them in order). API list: `docs/api-v1.md` (Phase 2). Tests: `npm run test:db` (235), `npm test` (345), clean-database reset verified. Not measured yet: Bangla speech accuracy (no provider key), embedding-based routing and similar-idea quality (needs `EMBEDDINGS_*`), push delivery to real devices (needs VAPID keys and the frontend service worker). Those are Phase 3 evaluation work.
 
 **Citizen features**
 1. **Speech and translation**: `POST /api/v1/ai/transcribe` (Bangla and English; evaluate Whisper-family and cloud bn-BD), translation endpoint labelled and on demand; typed input always works.
@@ -120,9 +124,85 @@ Exit: security checklist signed, eval results published, restore drill passed.
 
 ---
 
-## After the Congress (Release 1.1, §4.3)
+## Phase 5 — MVP completion
 
-Consultations with consensus mapping, WhatsApp/SMS reporting webhooks, project check-ins, for/against idea points, support thresholds, PostgreSQL graph queries evaluated against Apache AGE.
+Goal: everything the masterplan requires of the MVP product (§4.2, §5, §6, §10, §12, §13, §17, §19, §31) that phases 0–4 did not plan. Each item: migration, RLS and tests, `docs/api-v1.md` entry, audit where privileged.
+
+| # | Task | Masterplan |
+|---|---|---|
+| B5.1 | **MP role features**: approve official statements and commitments before publish (approval record on announcements, public replies, project changes); constituency-level analytics for MP; delegation of tasks to office staff; MP cannot alter audit history or delete reports. | §5.2 |
+| B5.2 | **Agency liaison**: invited per agency and constituency; sees only cases referred to their agency; acknowledge receipt, add authorised updates, record external reference or channel link, close agency task with evidence; never labelled as official integration unless confirmed. | §5.5, §12 `issue_agency_referrals` |
+| B5.3 | **Admin configuration APIs**: users and role management (invite, suspend, change role with audit); categories CRUD (bn/en names, parent, default priority, active); SLA targets per office and category; constituency boundaries and directory records management; feature flags table and server check; integrations config (providers enabled, keys present, never returned); system health endpoint (DB, storage, queues, AI provider, notification delivery); security alerts feed (auth failures, rate-limit hits, RLS denials); knowledge-source management (add, refresh, retire); safe demo-data management (load, reset, never in production). | §5.6, §6.4, §31 admin |
+| B5.4 | **Received vs forwarded vs officially registered**: explicit field on referrals (`received`, `forwarded`, `officially_registered` with proof); public view exposes it; never infer "registered" without an integration record. | §1, §28, §31 #18 |
+| B5.5 | **Missing MVP tables and endpoints**: `idea_comments` (moderated, rate-limited, report action) with `POST /ideas/{id}/comments`; `polls`, `poll_options`, `poll_votes` (unique per user) with office create, publish, close and citizen vote APIs, results only after close or per office setting; constituency snapshot endpoint for home (reported, in progress, resolved, with date range); projects: budget source and verification date, procurement and work details where lawful, delay explanation required, post-completion feedback; follows on projects and representatives. | §4.2, §7.3, §8.5, §12, §21.2 |
+| B5.6 | **Report fields**: duration ("how long"), who/what is affected, video upload (size and type limits, poster frame, no transcoding of private originals). | §7.4 |
+| B5.7 | **Administrative hierarchy**: division → district → upazila/city → ward/union tables from verified data; lookup returns all possible constituencies when the boundary is uncertain; PostGIS for point-in-polygon if enabled; coordinate change that moves jurisdiction goes to review. | §7.13, §8.1, §12.2, §16 |
+| B5.8 | **Runtime services**: background job runner (notifications, media processing, AI tasks, ingestion) with retry and dead letters; Realtime channels only for a user's own status changes and office inbox counts; Sentry for server and edge; privacy-conscious product analytics (no personal data, no cross-site tracking). | §10.1, §11, §20 |
+| B5.9 | **Notification completeness**: every §15 event wired (incl. poll closing reminder, appeal answered, announcement opt-in); unsubscribe for non-essential; email templates in Bangla first; SMS only for critical verification where consented and budgeted. | §15 |
+| B5.10 | **Remaining agents**: Translation (bn ↔ en on demand, labelled, original kept); Idea Assistant clarity suggestions; Insight Agent hotspot and trend brief linking to cases, office review before sharing; prompt caching with stable content first; Bangla glossary in every system prompt; refusal, timeout and malformed-output fallbacks logged. | §17.2, §17.5 |
+| B5.11 | **Personalization and language**: `simple_language_mode` and `voice_first` respected by agents and feed; view, reset and switch off personalization; Banglish search (transliteration index so "rasta bhanga" finds "রাস্তা ভাঙা"); phone and OTP accept Bangla digits; numeral preference stored. | §17.4, §19.1 |
+| B5.12 | **Country adapters**: country, admin hierarchy, locale, currency, date format, categories, agency directory, identity checks and notification channels as configuration; Bangladesh as the first adapter; no Bangladesh-specific logic in shared modules. | §2.8.4, §31 #21 |
+| B5.13 | **Capability labels**: every API response for a feature flag, sample or demo record carries `data_status` (`live`, `sample`, `demo`, `planned`) so the UI can label it. | §2.9, §31 #20 |
+| B5.14 | **Architecture record**: `docs/architecture.md` with the decision to keep the single Next.js app instead of the §10.2 monorepo (or the migration plan), domain module map (§10.4), data-flow diagram; `docs/runbooks/`, `docs/security.md`, `docs/workflows.md` as listed in §10.2. | §10.2, §10.4 |
+| B5.15 | **Open311-ready IDs**: stable public IDs and category codes now, so the Release 2 GeoReport v2 API needs no migration. | §13.10, §4.4 |
+
+Exit: every §31 "required" feature has a working endpoint, test and documented contract.
+
+---
+
+## Phase 6 — Pilot readiness and operations
+
+Goal: one verified MP office and a citizen tester group using the live product (§24 After the Congress, §2.8.3, §29).
+
+| # | Task | Masterplan |
+|---|---|---|
+| B6.1 | Pilot plan: one constituency, verified office, limited categories, onboarding and training material, support contact and escalation; cost tracking against the M.5 model. | §2.8.3, §29 Operations |
+| B6.2 | **Real data ingestion** with lineage (source, licence, fetch date, checksum) and scheduled refresh: constituencies and current MPs (Election Commission, Parliament), administrative boundaries (HDX, licence checked), OSM with ODbL attribution, public-service directory (National Portal, agency sites), GRS link, 999 and 333 helplines verified before display. Scrapers respect robots.txt and rate limits; no personal data collected; demo and real indexes separate. | §17.6, §17.3 |
+| B6.3 | Legal and governance: counsel review of Bangladesh data-protection, cyber-security and platform obligations; named data-protection owner; retention per data class with legal hold; anonymous-to-public reporting with abuse controls; residency map confirmed. | §18.2, §18.4 |
+| B6.4 | Environments: separate dev, staging and production Supabase and Vercel projects; migrations only through reviewed CI/CD; rollback plan for app and forward-fix for DB; least-privilege deploy credentials; status page or service notice. | §20, §26 |
+| B6.5 | AI with real use: consented real examples added to the eval set; Bangla speech tested with different districts, ages and noisy streets; routing accuracy checked against office final decisions; thresholds set from measured baselines. | §17.7, §19.6, §3.3 |
+| B6.6 | KPI baselines measured in the pilot (north-star metric, time to acknowledgement, copilot vs no-copilot handling time, accessibility task completion); published with method. | §3.2, §3.3 |
+| B6.7 | Independent penetration test before large-scale public launch; fix and retest. | §18.1 |
+
+Exit: §29 launch checklist fully ticked.
+
+---
+
+## Phase 7 — Release 1.1
+
+| # | Task | Masterplan |
+|---|---|---|
+| B7.1 | **Consultations with consensus mapping**: `consultations`, `consultation_statements`, `statement_votes` (unique per user and statement), `consultation_reports`; MP or delegate approval before opening; moderated statements; AI groups voting patterns and summarises agreement and differences (aggregates only, minimum group size, no individual profiling); office review of the AI summary; "you said, we did" report; notifications to participants and area followers. | §7.14, §8.10, §12 R1.1 |
+| B7.2 | **WhatsApp and SMS intake** through approved providers: `channel_messages`; inbound webhooks with signature check; consent and privacy notice first; Intake Agent draft reply; "হ্যাঁ" creates the case with the same reference, timeline and privacy rules; updates on the same channel within preferences; Unicode SMS length budget; provider cost alerts. | §7.15, §8.12, §19.7 |
+| B7.3 | **Project check-ins**: `project_checkins` (photo, note, visited_at, moderation), labelled citizen-submitted, never changes official status; office response. | §7.16 |
+| B7.4 | **Email and SMS notification integration** where available; area alerts for followed areas. | §4.3, §7.15 |
+| B7.5 | **Ideas**: `idea_arguments` and `idea_argument_votes` (for/against points, helpful votes); per-area support threshold and office response time; threshold reached alerts office, idea shows awaiting response with due date, missed date shown publicly as overdue. | §7.7, §8.11 |
+| B7.6 | **Public polls and surveys** opened to citizens (tables from B5.5), citizen satisfaction surveys after closure. | §4.3 |
+| B7.7 | **Project and commitment tracker**: commitments linked to announcements, projects and ideas, with evidence and status history. | §4.3 |
+| B7.8 | **Community priority ranking** of local needs: non-binding, clearly labelled, one ranking per verified local account, aggregate only. | §4.3 |
+| B7.9 | **Weekly AI insight briefs** for offices from the Insight Agent, office review before sharing. | §4.3 |
+| B7.10 | **Exportable office reports** (CSV and PDF with correct Bangla conjunct rendering), permission-checked. | §4.3, §19.7 |
+| B7.11 | **Better clustering and heatmaps** data endpoints with small-group suppression. | §4.3, §22 |
+| B7.12 | **Read-aloud** (text-to-speech) for key screens and office replies, Bangla voice. | §19.6 |
+| B7.13 | Release 1.1 notification events (§15) and KPIs (§3.3); E2E scenarios 16–17 (§21.3). | §15, §3.3, §21.3 |
+| B7.14 | Evaluate PostgreSQL recursive graph queries against Apache AGE once query size grows. | §11 |
+
+---
+
+## Phase 8 — Release 2
+
+| # | Task | Masterplan |
+|---|---|---|
+| B8.1 | Public budget and expenditure transparency with verified source documents only. | §4.4 |
+| B8.2 | Agency integrations only where official APIs or authorised workflows exist; marks referrals "officially registered" with proof. | §4.4, B5.4 |
+| B8.3 | Assisted reporting through community volunteers and kiosks: volunteer role, on-behalf-of reports with consent record. | §4.4 |
+| B8.4 | Open-data portal with privacy-safe aggregated datasets and licence. | §4.4 |
+| B8.5 | Multi-constituency and regional administration support (regional admins, cross-office views within scope). | §4.4 |
+| B8.6 | Participatory budgeting only where an office controls a real budget and agrees to follow the result. | §4.4 |
+| B8.7 | Right to Information helper: drafts a request and points to the official channel; never files on the citizen's behalf. | §4.4 |
+| B8.8 | MP activity from official parliamentary records with plain-Bangla AI summaries; sourced, neutral, never a score. | §4.4 |
+| B8.9 | Open311 GeoReport v2–compatible public API. | §4.4, §13.10 |
+| B8.10 | Second-country adapter pilot after local legal, electoral and data-protection review. | §2.8.4 |
 
 ## Endpoint checklist (target, §13)
 
@@ -131,3 +211,44 @@ Auth and profile; constituencies and representatives; issues and office actions;
 ## Definition of done (every task)
 
 Input validated, authorization tested for allowed and denied roles, RLS test added for any new table, audit event for privileged actions, no private data in public views, AI output validated and logged with a manual fallback, migration is repeatable on a clean database, documented in the API list, CI green.
+
+---
+
+## Masterplan alignment (added 2026-11-16)
+
+Full requirement map: `docs/masterplan-coverage.md`. Items below were in the masterplan but in no phase above. Each belongs to the phase shown; the rest of this file is unchanged.
+
+### Phase 3 additions (13–20 Dec)
+
+| # | Task | Masterplan | Done when |
+|---|---|---|---|
+| M.6 | **MFA** for MP, moderator and admin: enforce Supabase TOTP (AAL2) in `guardAdmin`, office-manager and MP routes and in RLS-backed RPCs; recovery path documented; test with an AAL1 session (403) and AAL2 (200). | §5, §14, §18.1 | AAL1 session cannot call any privileged route |
+| M.7 | **Upload safety and review**: malware-scan adapter (ClamAV or provider) wired to the existing hook, quarantine bucket, fail closed; written security review of every route with a checklist; schedule an independent penetration test or a documented self-test using OWASP ASVS L2. Report in `docs/aibc/security-review.md`. | §18.1, §21.6 | Infected test file rejected; review signed |
+| M.8 | **Emergency path**: detect imminent-harm language (rules first, AI second, never an AI reply), return Bangla emergency guidance (999 and the official channel) from intake and questions; notify moderator queue; eval cases for it. | §17.8, §21.6 | Test set passes; copy approved by the team |
+| M.9 | **Privacy and terms content**: privacy notice (easy-Bangla summary on top, then full Bangla and English), terms, takedown and challenge process (§18.3), privacy impact assessment `docs/aibc/pia.md`; counsel review recorded. Frontend renders them. | §18.2, §21.6 | PIA complete; counsel status written down |
+| M.10 | **Eval in CI**: `npm run eval` runs on every prompt, model or schema change (path filter) against a pinned fixture mode and fails on regression beyond a stated tolerance; live-model run stays manual. Add copilot reply quality, routing citation validity, Bangla readability and glossary adherence (native reviewers) and Bangla vs English parity to the report. | §17.7, §21.5 | CI blocks a deliberate regression |
+| M.11 | **KPI and analytics queries**: office-only (unassigned workload, time to acknowledgement, time in status, forwarding rate, resolution with evidence, reopen rate, copilot vs no-copilot handling time, AI acceptance rate per agent), admin (adoption, abuse and spam rate, auth failures, API errors, notification delivery, cost), public metrics each with a definition string, date range and last-updated. Small-group suppression. Documented in `docs/api-v1.md`. | §3.3, §22 | Every §3.3 KPI has a query or is marked "pilot only" |
+| M.12 | **Release-gate script** `npm run check:release`: runs the §21.6 list that can be automated (RLS suite, private-data-in-public-endpoints probe, cross-constituency probe, audit-log presence for critical transitions, restore drill timestamp, privacy and terms present, eval gate) and prints the manual ones. | §21.6, §29 | One command gives a pass/fail list |
+| M.13 | **Env names**: reconcile `.env.example` and `check:env` with §26 (`NEXT_PUBLIC_APP_URL`, `AI_MODEL`, `EMBEDDING_MODEL`, `EMBEDDING_ENDPOINT`, `STT_PROVIDER`, `STT_API_KEY`, `MAP_PROVIDER`, `SENTRY_DSN`, email and push keys); keep old names as accepted aliases for one release; separate dev, staging and production projects documented. | §26 | `check:env` passes on all three environments |
+| M.14 | **Apply migrations 0014–0021 to the live project** in order, then run the Phase 2 smoke test on staging; record the date here. | §24 | Staging runs every `/api/v1` route in `docs/api-v1.md` |
+
+### Competition package (owner: backend unless noted; due before the 20 Dec docs freeze)
+
+| # | Document | Content |
+|---|---|---|
+| M.1 | `docs/aibc/problem.md` | Replace draft: cited figures only (or qualitative), at least a few citizen and staff interviews, local and global context. Business analyst owns the evidence. |
+| M.2 | `docs/aibc/scalability.md` | Infrastructure (Vercel, Supabase tiers, read replicas, queues), country adapters, multilingual design, cost per constituency, roadmap to Release 1.1 and 2, load-test result for the feed, list and similarity queries (measured, with date). |
+| M.3 | `docs/aibc/ethics.md` | Bias mitigation (Bangla vs English parity, no ranking of MPs, no inference of identity, affiliation or credibility), human-approval points, AI inventory (each agent, model, prompt version, data it sees), redaction, appeal, known limits. |
+| M.4 | `docs/aibc/team.md`, `collaborators.md`, `ai-usage.md` | Named owner for each of the five AIBC roles; every advisor and NRB contribution (advisors never write product code or influence judging); AI tools used to build Jonokotha and what each produced. Team lead owns; facts only. |
+| M.5 | `docs/aibc/business.md` | Institutional buyer model (offices, administrations, civic or development partners), pilot plan (one constituency, verified office, limited categories, training), per-constituency cost model (hosting, AI inference, support, moderation), measurable value proposition (staff time saved per case, time to acknowledgement, duplicates merged), free citizen reporting, no sale of personal data, no political ads. No claim of partners, revenue or customers that do not exist. |
+
+### Phase 4 additions (21–25 Dec)
+
+- **Q&A sheet** (`docs/aibc/qa.md`): why AI is essential, hallucination and wrong routing, privacy and data residency, Bangla quality, how MP offices adopt it, who pays, what is real versus planned. Answers cite measured numbers only.
+- **Demo accounts** (§27): one-click demo citizen and demo office sign-in on staging only, hidden in production by env check; demo constituency cannot reach production; no fake verified MP; never send a real agency a demo case.
+- **Pinned model and prompt versions** for the demo, plus a recorded AI-response fallback (already listed above).
+- **Pilot readiness checklist** (§29 Operations): support contact, escalation owner, incident owner, rollback runbook, first verified office onboarding notes.
+
+### Definition of done additions
+
+Every endpoint also states: public or private, audit event, rate limit, and the §22 definition string if it returns a public metric. Every new AI feature adds eval cases in Bangla and English and a manual fallback test.

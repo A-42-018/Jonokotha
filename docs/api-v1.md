@@ -68,3 +68,100 @@ MPs can read the queue and detail but cannot change status. Agency liaisons and 
 | `POST /api/intake` | unchanged (`{draft, source, pii}`). AI drafting moves to `/api/v1/ai/intake` in Phase 2. |
 | `POST /api/cases` | `{ref}` / `{error}`; alias of `POST /api/v1/issues` without an Idempotency-Key. |
 | `POST /api/cases/[ref]/approve` | alias of `acknowledge` (`acknowledge`) and `forward` (`refer`, to the suggested agency). Extra failure codes: 409, 422, 500. |
+
+## AI suggestions (Phase 1.9)
+
+`POST /api/v1/ai/suggestions/{id}/decision` — body `{ "decision": "accept" | "edit" | "dismiss", "final_value"?: object }` (`final_value` required for `edit`). Office staff in scope (or admin) only; 403 otherwise, 409 `rule_not_met` if already decided, 422 for a missing `final_value`. Returns `{ id, decision, decided_at, final_value }`. Every decision is audited and mirrored onto `ai_runs.decision`. Nothing a suggestion contains is applied to an issue automatically.
+
+AI calls go through `src/lib/ai/run.ts` (forced tool call, Zod-validated, typed outcome, logged to `ai_runs` through `log_ai_run()` which only the service role can call; without `SUPABASE_SERVICE_ROLE_KEY` on the server the run is a JSON log line). Prompts are versioned in `src/lib/ai/prompts/`. Cost appears only if `AI_PRICE_IN_PER_MTOK` and `AI_PRICE_OUT_PER_MTOK` are set.
+
+## Duplicate Agent (Phase 1.8)
+
+`POST /api/v1/office/issues/{ref}/duplicates` → `{ available, candidates: [{ suggestion_id, ref, score, reasons }] }`. Office staff in scope (or admin). Candidates are the nearest issues of the same office and category (cosine score at or above `DUPLICATE_MIN_SCORE`, default 0.80, to be tuned on the eval set); each becomes a pending suggestion. `available: false` means embeddings are not configured, so the office uses manual search. Accept or Edit through `/ai/suggestions/{id}/decision` records a `duplicate_of` graph edge (the master must be another issue of the same office); the status change itself is the separate `mark-duplicate` action.
+
+Embeddings: hosted BGE-M3 (1024 dimensions) through any OpenAI-compatible `/embeddings` service. Server env: `EMBEDDINGS_BASE_URL`, `EMBEDDINGS_API_KEY` (and optional `EMBEDDINGS_MODEL`, default `BAAI/bge-m3`). Text is redacted before it leaves the server; new reports are indexed best-effort at submission (capped at 3 s), and `/duplicates` indexes the issue it is asked about. Existing issues are not back-filled yet.
+
+## Engagement (Phase 2.5, migration 0014)
+
+| Method and path | Auth | Notes |
+|---|---|---|
+| `POST /issues/{ref}/affected` | signed in | "আমারও একই সমস্যা". One per user per issue, idempotent. Returns `{ref, affected: true, affected_count}`. 409 `rule_not_met` for the reporter (their report already counts); 404 for hidden or unknown issues. |
+| `DELETE /issues/{ref}/affected` | signed in | Withdraws it (idempotent). |
+| `GET /me/follows` | signed in | The caller's follows: `{id, type: issue\|area\|category, target, label, created_at}`. |
+| `POST /me/follows` | signed in | `{type, target}`: issue ref, constituency key or category slug. 201, idempotent (same follow returned). Max 200 per user (409 `rule_not_met`). |
+| `DELETE /me/follows/{id}` | signed in | Someone else's id is 404. |
+
+Only the **count** of affected users is public: `affected_count` on `GET /issues` items and `GET /issues/{ref}`. Who is never exposed; `issue_affected` and `follows` are readable only by their owner, and writes go through `set_issue_affected()`, `add_follow()` and `remove_follow()` (SECURITY DEFINER). Feedback and reopen/appeal already exist (see Citizen above).
+
+
+# Phase 2 (migrations 0015-0020)
+
+Same conventions as above (envelope, errors, pagination, rate limits). New error code: `unavailable` (503) for a feature whose server setting is missing (photo storage, Web Push, AI).
+Everything below needs an `Idempotency-Key` only where stated; POSTs accept one optionally.
+
+## AI helpers (signed in)
+| Method and path | Notes |
+|---|---|
+| `POST /ai/intake` `{text, language?: bn\|en\|auto}` | Draft only; nothing is stored or submitted. Returns `title, category, description, area_hint, urgency (routine\|soon\|urgent), urgency_guidance, language, pii_warnings, source (ai\|fallback)`. Banglish accepted; Bangla output unless English was chosen or the text is English. Danger words always force `urgent`, whose guidance is fixed text pointing to 999. |
+| `POST /ai/transcribe` (multipart `audio`, `language`) | Bangla or English speech to text; audio type checked by content, 10 MB, never stored; spoken personal data is redacted. `{available:false, reason}` when no provider is configured. Env: `TRANSCRIBE_BASE_URL`, `TRANSCRIBE_API_KEY`, `TRANSCRIBE_MODEL`. |
+| `POST /ai/translate` `{text, to}` | On demand, always `machine_translated: true`; `available:false` means show the original. |
+
+## Location, issues and media
+| Method and path | Notes |
+|---|---|
+| `GET /constituencies/search?q=` | Manual area fallback (Bangla or English name, district, upazila). |
+| `GET /representatives/lookup?lat=&lng=` or `?area=` | Constituency by point (boundary polygon with holes, else bounding box; `method` says which) and its verified current representatives. `needs_manual_choice: true` when nothing matches. |
+| `POST /issues` | Now also takes `lat, lng` (inside Bangladesh), `locationSource (device\|map\|manual_area)`, `locationAccuracyM`; `constituencyId` is optional when coordinates are sent (derived from the boundary; 422 `constituencyId` if no area contains the point). The exact point is private; `GET /issues*` items carry `location: {lat, lng, approximate: true}` snapped to a grid cell (`app_settings.public_location_precision_m`, default 300 m). |
+| `GET /issues` | New filters: `area` (text), `from`, `to` (dates), `near=lat,lng` with `radius_km` (0.1-50, on the approximate points). |
+| `POST /issues/{ref}/media` (multipart `file`, `caption?`) | Reporter only. Type decided by content (JPEG, PNG, WebP), up to 8 MB; re-encoded as JPEG (longest edge 1600) so all EXIF/GPS is dropped; optional malware-scan hook (`MALWARE_SCAN_URL`, fails closed); max 5 per issue; stored in the private `issue-media` bucket, `private` and `pending` until the office reviews it. Needs `SUPABASE_SERVICE_ROLE_KEY`. |
+| `GET /issues/{ref}/media` | Signed URLs (5 min). Reporter and office: all photos; everyone else: only photos approved for public display. |
+| `POST /office/issues/{ref}/media/{id}` `{visibility, status}` | Office (`update` permission) approves or rejects a photo and sets `private\|office\|public`. Audited. |
+
+## Ideas and questions
+| Method and path | Notes |
+|---|---|
+| `GET /ideas`, `GET /ideas/{ref}` | Public (published and decided ideas): `constituency, category, status, sort=supported` filters, cursor pagination; `support_count`, never who. The author also sees their own pending idea. |
+| `POST /ideas` `{constituency, category?, title, body}` | Verified account; 5 per day; personal data redacted; starts `pending_review` until a moderator publishes. |
+| `POST/DELETE /ideas/{ref}/support` | One per verified account, not your own; returns the count. |
+| `GET /ideas/{ref}/similar`, `GET /ideas/new/similar?constituency=&text=` | Similar ideas in the same area (trigram similarity); the second form checks a draft before posting. |
+| `POST /office/ideas/{ref}/decision` `{decision: under_consideration\|planned\|declined, note?}` | Office manager (`decide`); a decline needs a note. Audited. |
+| `GET /questions`, `GET /questions/{ref}` | Public questions (moderated) with their thread; the asker and the in-scope office also see private ones. |
+| `POST /questions` `{constituency, visibility: private\|public, title, body}` | Verified account; 3 per hour, 10 per day. Public ones wait for moderation. |
+| `POST /questions/{ref}/messages`, `POST /questions/{ref}/close` | Asker or office (`update`); 30 citizen messages per question, 5 per 10 minutes. |
+| `GET /me/questions`, `GET /office/questions`, `POST /office/questions/{ref}/assign` | Own questions; office queue (RLS decides what a case officer sees); manager assigns to an active member. |
+
+## Representatives, projects, responsiveness
+| Method and path | Notes |
+|---|---|
+| `GET /representatives`, `GET /representatives/{id}` | Verified only. Profile fields each carry `source_url` and `checked_at`; detail adds recent announcements and projects. |
+| `GET /constituencies/{key}/responsiveness?from=&to=` | `received, answered, pending, median_hours_to_first_response`, the stated date range and `method_url` for ONE area. "Answered" = a status change or note by someone other than the reporter. There is no comparison or ordering across areas. |
+| `GET /announcements`, `POST /office/announcements`, `POST /office/announcements/{ref}/withdraw\|publish` | MP or office manager (`publish`). Audited. |
+| `GET /projects`, `GET /projects/{ref}`, `POST /office/projects`, `POST /office/projects/{ref}`, `POST /office/projects/{ref}/milestones[/{id}]` | Projects with milestones; a source link needs the date it was checked; a delayed milestone needs a note. Audited. |
+
+## Feed and notifications (signed in)
+| Method and path | Notes |
+|---|---|
+| `GET /me/feed?personalized=true\|false` | Public issues; what you explicitly follow first, then newest. Never ordered by popularity; no inference about the person; each item has `why` (issue, area, category or null). `personalized=false` or the preference off gives plain newest-first. |
+| `GET /me/notifications?unread=true`, `POST /me/notifications/{id}/read`, `POST /me/notifications/read-all` | Header `x-unread-count`. Text is generic (reference number and a short label, Bangla with `en`), never the issue content. |
+| `GET/PUT /me/notification-preferences` | `channels {push,email}`, `muted_types`, `quiet_hours {start,end}` (HH:MM, your `timezone`), `personalization_enabled`. Quiet hours delay push and email, never the in-app item. |
+| `GET /notifications/vapid-key`, `POST/DELETE /me/push-subscriptions` | Web Push opt-in. Push is sent **without a payload**; the service worker fetches `/me/notifications` after waking (frontend). |
+| `POST /api/internal/notifications/deliver` | Scheduled worker, `Authorization: Bearer $CRON_SECRET`. Sends due push and email (Resend or Postmark: `EMAIL_PROVIDER`, `EMAIL_API_KEY`, `EMAIL_FROM`), retries with backoff 1, 2, 4, 8 minutes, dead-letters after 5 tries. Events: status change (reporter and followers), new issue in followed area or category (once per day), question reply, idea decision or publication, announcement. |
+
+## Office AI and analytics
+| Method and path | Notes |
+|---|---|
+| `POST /office/issues/{ref}/copilot` | Summary, missing-information checklist and a Bangla reply draft as three pending `ai_suggestions` with citations (the facts used) and confidence; rule-based `source: fallback` without a model or when the answer cites nothing valid. Needs `update` on the issue. Nothing is sent; staff edit and approve through `/ai/suggestions/{id}/decision`, and a public reply is posted by staff via `update`. |
+| `POST /office/issues/{ref}/routing` | Routing Agent: retrieves agency and rule chunks (semantic if embeddings are set, else lexical), proposes an agency with citations (source, URL, date checked). `suggestion: null` + `reason` means no confident suggestion. Demo and real sources never mix. |
+| `GET /office/analytics?constituency=&days=` | `view_analytics` (office manager, MP). Groups under 5 are hidden; hotspots are approximate grid cells; duplicate clusters come from a recursive walk over `duplicate_of` edges. |
+| `POST /office/analytics/reports`, `GET /office/analytics/reports`, `POST .../{id}/approve\|withdraw`, `GET /analytics/reports` | A frozen snapshot is a draft until an office manager approves it; only approved reports are public. A generated narrative is dropped if it contains a number not in the statistics. |
+| `POST /api/mcp` | MCP server (JSON-RPC over HTTP), `Authorization: Bearer <staff access token>`; row-level security applies as that person. Tools: `search_cases`, `agency_directory`, `case_timeline`, `area_statistics` (read-only) and `propose_note` (creates a pending suggestion only). Every call is audited (tool and argument keys). |
+
+## Admin and moderation
+| Method and path | Notes |
+|---|---|
+| `POST /reports` `{type: issue\|idea\|question\|media, ref, reason, details?}` | Verified account; one report per person and item; 10 per day. |
+| `GET /admin/moderation`, `POST /admin/moderation/items`, `POST /admin/moderation/review` | Moderators and admins. The queue shows excerpts of public content only (no reporter or author, no private issue data). `hide\|restore\|dismiss` and `publish\|reject` need a reason; audited. |
+| `POST /office/invitations`, `GET /office/invitations`, `POST /office/invitations/{id}/revoke`, `POST /invitations/accept` | Staff join by invitation (single-use token, only its hash is stored, 7 days). Office managers invite case officers and agency liaisons into their own office; admins invite anyone; an MP invitation needs a verified representative of that area. Accepting needs the matching confirmed email. |
+| `POST /admin/representatives/{id}/verify`, `PUT /admin/representatives/{id}/fields`, `POST /admin/accounts/{id}` | Admins. Verification needs an official source link; each field a source and check date; role or suspension changes need a reason and not on yourself. Audited. |
+| `GET /admin/ai/runs`, `GET/POST /admin/ai/evals`, `GET /admin/audit` | Admins. Reading the run log or the audit trail is itself audited (`admin.access`). |
+| `POST /admin/constituencies/import` `{source, geojson}`, `POST /admin/knowledge/ingest` `{rules?}` | Boundary import from a sourced file (closed rings inside Bangladesh, source name, URL, licence and fetch date required); knowledge index rebuild (idempotent). |

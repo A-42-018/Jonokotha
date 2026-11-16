@@ -33,3 +33,26 @@ Migration 0009 (feedback, idempotency, shared rate limits, notes) must be applie
 Migration 0009 (API support: issue_feedback, idempotency keys, shared rate limits, add_issue_note) was applied on the live project on 2026-11-16 after 0008. Verified: RLS on the three new tables, anonymous callers cannot execute the new functions or read the tables, existing data unchanged. The /api/v1 routes can now be deployed.
 
 Migration 0010 (immutable audit trail) was applied on the live project on 2026-11-16 after 0009. Verified by catalog: append-only triggers on audit_logs and issue_events, 8 audit triggers, audit_write not executable by API roles, no write privileges on audit_logs except via the audit functions; existing data unchanged. Not exercised live on purpose (a probe row would be permanent); covered by tests/db/audit.test.ts locally.
+
+Migrations 0011 (SLA targets, timers, pauses; Phase 1.7) and 0012 (AI plumbing; 1.9) are applied to the local stack only. Set `SUPABASE_SERVICE_ROLE_KEY` as a server-only env var (Vercel) so AI runs are stored in `ai_runs`. Apply to the live project in the SQL editor after 0010, before deploying code that reads `issue_sla`.
+
+## Evaluation (Phase 1.10)
+`npm run eval` measures the keyword fallback, PII redaction and the lexical duplicate baseline on `tests/ai/dataset.v0.json`, and prints the report to `tests/ai/out/latest.md`. Add `EVAL_AI=1` to also call the model (sends the synthetic cases to the provider; needs the key in the environment, e.g. `EVAL_AI=1 node --env-file=.env.local node_modules/vitest/vitest.mjs run --config vitest.eval.config.mts`). Set `EMBEDDINGS_BASE_URL` and `EMBEDDINGS_API_KEY` to measure duplicate precision/recall per threshold. `EVAL_WRITE=1` rewrites `docs/aibc/eval-baseline.md`; do that only for a deliberate, dated baseline.
+
+## Phase 2 (migrations 0014-0020)
+Applied to the local stack only (`npx supabase db reset` replays all twenty from scratch and passes the full suite). **Live project: run 0014 to 0020 in the SQL editor, in order, before deploying this branch.** 0015 creates the private `issue-media` storage bucket (hosted Supabase: confirm it exists under Storage afterwards) and needs the `pg_trgm` extension (available by default).
+
+Server-only settings, all optional; a feature without its setting says `unavailable` or falls back, it never breaks the golden path (`npm run check:env` lists them):
+| Setting | Feature |
+|---|---|
+| `SUPABASE_SERVICE_ROLE_KEY` | photo storage and signed URLs, AI suggestions (copilot, routing, duplicates), AI run log, knowledge ingest, notification worker |
+| `TRANSCRIBE_BASE_URL`, `TRANSCRIBE_API_KEY`, `TRANSCRIBE_MODEL` | `/ai/transcribe` (any OpenAI-compatible `/audio/transcriptions`: Whisper family or a hosted bn-BD model) |
+| `EMBEDDINGS_BASE_URL`, `EMBEDDINGS_API_KEY` | semantic duplicate search and semantic routing retrieval (otherwise lexical) |
+| `MALWARE_SCAN_URL`, `MALWARE_SCAN_TOKEN` | scan hook for uploads (POST bytes, answer `{"clean": true}`); if set it fails closed |
+| `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` | Web Push (`node scripts/gen-vapid.mjs` prints a key pair) |
+| `EMAIL_PROVIDER` (`resend` or `postmark`), `EMAIL_API_KEY`, `EMAIL_FROM`, `NEXT_PUBLIC_APP_URL` | transactional email (notifications, invitations) |
+| `CRON_SECRET` (16+ characters) | the scheduled delivery worker `POST` or `GET /api/internal/notifications/deliver` with `Authorization: Bearer $CRON_SECRET` (Vercel Cron sends this header for you when `CRON_SECRET` is set; schedule it every minute or every few minutes) |
+
+Local tests: the storage container must be running (`npx supabase start` without excluding storage; CI already does this). Test suites set the local keys themselves; nothing contacts a real provider (providers are faked in the tests).
+
+Frontend contract notes: push is sent without a payload, so the service worker must fetch `GET /api/v1/me/notifications?unread=true` when a push wakes it; `x-unread-count` carries the badge number. Public issue items gained `affected_count` and `location`.

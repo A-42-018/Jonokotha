@@ -32,6 +32,7 @@ The database is the authority (functions `office_can`, `office_scope`, RLS in st
 | close | yes | | | |
 | decide (reject, duplicate, out of jurisdiction, office reopen) | yes | | | |
 | view_analytics | yes | yes | | |
+| publish (announcements, projects and milestones) | yes | yes | | |
 
 Case officers recommend forwarding or resolution; the office manager performs it (§5.4). The MP views, sees analytics and (Phase 2) publishes announcements; the MP does not change case status. Changing this table is a migration plus an edit to `OFFICE_PERMISSIONS`, never an ad-hoc SQL update.
 
@@ -76,6 +77,24 @@ Rules that hold across tables:
 - Anonymous visitors hold privileges only on reference tables and the two public views.
 - Internal events (`issue_events.is_public = false`) and `internal_note` never reach `public_case_events`.
 - Moderators can read none of this yet; they get access to moderation queues when `moderation_reports` is built (Phase 2).
+
+## Phase 2 tables (migrations 0014-0020)
+
+Tested in `tests/rls/phase2.test.ts` (read matrix for citizen A/B, office A/B, moderator, admin and anonymous; direct writes refused for every account) and listed in `tests/rls/coverage.test.ts`. No user session can insert, update or delete these tables directly: all writes go through audited SECURITY DEFINER functions, which re-check identity, scope and permission.
+
+| Table | Who can read it |
+|---|---|
+| `issue_affected`, `idea_supports`, `follows`, `notification_deliveries`, `push_subscriptions` (id, user, dates only) | the user it belongs to |
+| `ideas` | author, office with `view` in that constituency, moderators, admins (everyone else through `public_ideas`, published and decided only) |
+| `questions`, `question_messages` | asker, in-scope office (`view`; case officers only when assigned), admins. **Not moderators.** Public moderated questions through `public_questions` and `public_question_messages` |
+| `announcements`, `projects`, `project_milestones` | in-scope office, admins (everyone through the `public_*` views; drafts never) |
+| `representative_fields` | everyone, but only for verified representatives; admins see all |
+| `moderation_reports` | the reporter, moderators, admins |
+| `office_invitations` | office managers of that office (`assign`), admins; never `token_hash` |
+| `analytics_reports` | office with `view_analytics`, admins (approved reports through `public_analytics_reports`) |
+| `ai_eval_runs` | admins |
+
+The new office permission `publish` (announcements, projects, milestones) belongs to the office manager and the MP. Moderators act only through `moderation_queue()`, `moderate_item()` and `review_pending()`: they see excerpts of public content, never reporter or author identity and never private issue data. A citizen becomes staff only by accepting an invitation addressed to their confirmed email (`profiles_guard` allows exactly that one role change, for one minute after acceptance).
 
 ## Known gaps (tracked)
 - **AI fields at insert.** `issues.ai_summary`, `ai_agency`, `ai_similar` and `ai_confidence` are written by the citizen's own session during submission, so a determined citizen could forge them through the API. Impact: advisory fields shown to staff. Fix: step 8/9 moves them into server-written `ai_suggestions`, after which the insert policy rejects them.

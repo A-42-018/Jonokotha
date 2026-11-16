@@ -2,7 +2,7 @@
 
 Owner: `frontend` branch. Source of truth: `masterplan_JONOKOTHA.md` (§6 navigation, §7 UX, §19 language and accessibility, §20 performance). Backend contract: see `docs/WORK_SPLIT.md`.
 
-Phases follow the sprints (§24). Dates are 2026.
+Phases 0–4 follow the sprints (§24); phases 5–8 complete the whole masterplan (MVP completion, pilot, Release 1.1, Release 2). Dates are reference points, not the scope boundary. Every masterplan section is mapped in `docs/masterplan-coverage.md`.
 
 ## Stack and conventions
 
@@ -111,9 +111,78 @@ Exit: audit report with zero serious a11y issues and performance budget met.
 
 ---
 
-## After the Congress (Release 1.1, §4.3)
+## Phase 5 — MVP completion
 
-Consultations with consensus map, WhatsApp/SMS entry points, citizen project check-ins, for/against points on ideas, support thresholds, P3 illustrations (4, not generated yet).
+Goal: every screen and control the masterplan requires of the MVP (§4.2, §5, §6, §7, §17.4, §19, §31). Every control works or is hidden from production navigation (§31 UI bar). Each item: bn and en, 375 and 1280, all §7.12 states, axe clean, e2e test, wired to the backend item named.
+
+| # | Task | Masterplan | Backend |
+|---|---|---|---|
+| F5.1 | **Citizen navigation complete**: desktop top nav adds Projects, Ask Your MP, Find your MP, About/Help; additional pages Project Tracker and Polls & Surveys; Consultations entry hidden behind a flag until Release 1.1. | §6.1, §6.2 | B5.5 |
+| F5.2 | **Home v3**: constituency snapshot (reported, in progress, resolved with date range), popular community ideas, verified representative card, active polls, footer with accessibility link and official-channel disclaimer. | §7.3 | B5.5 |
+| F5.3 | **Report and issue detail completion**: report fields "how long" and "who is affected"; video upload with progress and retry; issue detail shows forwarding destination and reference when publishable, progress evidence, "এখনও হচ্ছে / আরও তথ্য আছে" action, received / forwarded / officially registered label; abuse report on every public item. | §7.4, §7.5, §1 | B5.4, B5.6 |
+| F5.4 | **Office dashboard complete** (§6.3 sidebar): My Assigned Cases, All Constituency Issues, Ideas & Proposals review with decision and public reason, Questions & Messages inbox with assign and reply, Projects & Commitments (create, milestones, delay notes, budget source), Polls & Surveys (create, publish, close), Analytics & Reports (KPIs from M.11 with definitions), Staff & Roles (invite, role, suspend), Audit Log, Office Settings (SLA targets, categories in use); MP approval step for official statements; evidence attachments on updates and resolution; appeal queue; affected counts on cases. | §5.2, §6.3, §7.10, §31 office | B5.1, B5.5, M.11 |
+| F5.5 | **Agency liaison workspace**: list of referred cases only, acknowledge, update, add external reference or link, close with evidence; banner that this is not an official integration unless confirmed. | §5.5 | B5.2 |
+| F5.6 | **Status language for referrals**: "received by office", "forwarded to authority", "officially registered" shown everywhere a referral appears, never implied. | §1, §28 | B5.4 |
+| F5.7 | **Admin console complete** (§6.4): Platform Overview, Constituencies & Boundaries, Representatives (verify with source and date), Office Verification, Users (role, suspend), Categories & SLA Configuration, Content Moderation, Abuse Reports, Appeals, System Health, Audit & Security (alerts), Integrations, Feature Flags, Knowledge Sources, AI evaluation results, Demo data (staging only). | §5.6, §6.4, §31 admin | B5.3 |
+| F5.8 | **Ideas complete**: full submit form (problem, solution, benefit, area, citizen cost estimate labelled not official, attachments, conduct acknowledgement); every idea workflow status with public reason; comments list with moderation states; share and report actions. | §7.7, §8.4 | B5.5 |
+| F5.9 | **Find your MP picker**: district → upazila/city → ward/union cascade from real data, or location once; shows all possible constituencies when the boundary is uncertain and lets the citizen confirm; same picker in onboarding and profile, with "request correction". | §7.13, §8.1 | B5.7 |
+| F5.10 | **Projects**: `/projects` and `/projects/[id]` with milestones, budget source and verification date, delay explanations, completion evidence, follow, post-completion feedback; never show citizen estimates as official. | §6.1, §8.5 | B5.5 |
+| F5.11 | **Realtime and polls**: live status and inbox counts via Realtime for own items only; polls list and vote (one per user), results per office setting; notification preferences per event type with unsubscribe; status page link. | §10.1, §15, §20 | B5.5, B5.8, B5.9 |
+| F5.12 | **Country-ready UI**: admin hierarchy labels, currency, date format and categories come from configuration, not hard-coded Bangladesh names in components. | §2.8.4 | B5.12 |
+| F5.13 | **Capability labels**: render `data_status` (live, sample, demo, planned) consistently; planned features never look functional. | §2.9, §31 #20 | B5.13 |
+| F5.14 | **Translation and AI helpers**: "অনুবাদ দেখুন" on public text (labelled, original one tap away); Idea Assistant clarity suggestions in the idea form; Insight brief view in office analytics with review step. | §17.2 | B5.10 |
+| F5.15 | **Personalization controls**: simple-language mode (shorter copy, more icons), voice-first mode (mic first on report and ask), view why an item is in my feed, reset, switch off. | §17.4 | B5.11 |
+| F5.16 | **Language completeness**: setting for Bangla or Latin numerals; money as ৳ with lakh and crore grouping; Banglish search in every search box; phone and OTP fields accept both digit sets; conjunct, reph and ya-phala rendering checked on low-end Android and in exports. | §19.1, §19.7 | B5.11 |
+| F5.17 | **Terms and About** pages; accessibility statement; emergency and official-channel disclaimers in footer. | §6.2, §21.6, §29 | M.9 |
+
+Exit: every §31 required citizen, office and admin feature is reachable, functional and tested; no decorative control remains.
+
+---
+
+## Phase 6 — Pilot readiness
+
+| # | Task | Masterplan |
+|---|---|---|
+| F6.1 | Office onboarding and training screens for the pilot office (first-run tour of queue, copilot, approvals); in-app help for staff. | §2.8.3, §24 |
+| F6.2 | Citizen help and support contact flow; feedback form for testers. | §29 Operations |
+| F6.3 | **Field testing**: first-glance test with citizens of basic reading skills from different districts, ages and education levels, including older and first-time smartphone users; accessibility task-completion rate measured; fixes logged in `docs/aibc/language/`. | §19.9, §3.3 |
+| F6.4 | Native-speaker plain-language sign-off on every string (part of Definition of Done from here on). | §19.1, §19.9 |
+| F6.5 | Real-device pass of the whole product on the §21.4 matrix with production data volumes. | §21.4 |
+
+---
+
+## Phase 7 — Release 1.1
+
+| # | Task | Masterplan | Backend |
+|---|---|---|---|
+| F7.1 | **Consultations**: list and detail; one statement at a time with একমত / একমত নই / জানি না; add a short statement (moderated); no reply threads; aggregate agreement view in plain Bangla with minimum group size; "আপনারা বললেন, যা করা হলো" report page; office composer with MP approval, open and close. | §7.14, §8.10 | B7.1 |
+| F7.2 | **WhatsApp and SMS entry points**: "WhatsApp-এ জানান" links and number display; reports from channels appear in My Reports with the same timeline; area alert preferences. | §7.15 | B7.2, B7.4 |
+| F7.3 | **Project check-ins**: follow a project; add dated photo check-in ("আজ গিয়ে দেখলাম…") labelled citizen-submitted; office response shown. | §7.16 | B7.3 |
+| F7.4 | **For / against points** on ideas (পক্ষে, বিপক্ষে, helpful marks) replacing open comment threads where enabled. | §7.7 | B7.5 |
+| F7.5 | **Support threshold**: progress toward the office threshold, "উত্তরের অপেক্ষায়" with due date, public overdue label, office setting screen. | §7.7, §8.11 | B7.5 |
+| F7.6 | Public polls and surveys for citizens; satisfaction surveys after closure. | §4.3 | B7.6 |
+| F7.7 | Project and commitment tracker pages. | §4.3 | B7.7 |
+| F7.8 | Community priority ranking (non-binding label) and weekly insight brief view for offices; exportable office reports (CSV, PDF). | §4.3 | B7.8–B7.10 |
+| F7.9 | **Read-aloud** button on key screens and office replies. | §19.6 | B7.12 |
+| F7.10 | Better map clustering and heatmaps; **dark mode**. | §4.3, §7.2 | B7.11 |
+| F7.11 | P3 illustrations (4, not generated yet) for consultations, check-ins and channels. | §31 UI bar | — |
+| F7.12 | E2E scenarios 16–17 (§21.3) and Release 1.1 KPIs in office analytics. | §21.3, §3.3 | B7.13 |
+
+---
+
+## Phase 8 — Release 2
+
+| # | Task | Masterplan | Backend |
+|---|---|---|---|
+| F8.1 | Budget and expenditure transparency pages, each figure with its source document. | §4.4 | B8.1 |
+| F8.2 | "Officially registered" referral display with external tracking link where an agency integration exists. | §4.4 | B8.2 |
+| F8.3 | Assisted reporting mode for volunteers and kiosks (shared device, on-behalf-of consent, auto sign-out). | §4.4 | B8.3 |
+| F8.4 | Open-data portal pages with download and licence. | §4.4 | B8.4 |
+| F8.5 | Regional administration views. | §4.4 | B8.5 |
+| F8.6 | Participatory budgeting flow where an office controls a real budget. | §4.4 | B8.6 |
+| F8.7 | Right to Information helper (draft, then link to the official channel). | §4.4 | B8.7 |
+| F8.8 | MP activity pages from official records with plain-Bangla summaries, never a score. | §4.4 | B8.8 |
+| F8.9 | Second-locale UI pass for the next country adapter. | §2.8.4 | B8.10 |
 
 ## Illustration map
 
@@ -173,3 +242,35 @@ Things to know:
 - Shared files touched: `next.config.ts` (build id for the service-worker cache), `package.json` (`check:bundle`), `.github/workflows/ci.yml` (build and bundle scan before e2e), `src/lib/types.ts` (re-exports `CATEGORIES`). Tell the backend owner.
 - Fixed in the language commit: the I18nProvider introduced in 3.2 crashed English pages (server render asked for the Bangla strings); new tests render every page in both languages.
 - Checks: `npm run lint`, `npm run typecheck`, `npm test`, `npm run test:e2e`, `npm run check:bundle`.
+
+---
+
+## Masterplan alignment (added 2026-11-16)
+
+Full requirement map: `docs/masterplan-coverage.md`. The backend finished its Phase 2 (`docs/api-v1.md`), so the biggest open frontend job is replacing stubs with real endpoints. Items below were in the masterplan but in no phase above.
+
+### Phase 3 additions (13–20 Dec)
+
+| # | Task | Masterplan | Done when |
+|---|---|---|---|
+| F.1 | **Wire to the real API**, one screen at a time, deleting the stub and the "নমুনা" label as each goes live: `/area` and map (public coordinates, me-too counts), report (`lat`/`lng`, media upload with signed URLs, `Idempotency-Key` on submit and on the offline queue), `/ideas` (support, comments, similar), `/mp` and `/mp/[id]` (lookup, responsiveness), engagement (affected, follows, feedback, reopen, appeal), `/ask`, home feed (`/me/feed`, `personalized=false` toggle), `/notifications`, office (assign, notes, replies, announcements, duplicates, copilot suggestions with Accept/Edit/Dismiss), admin (verification, moderation, AI runs, stats, audit). Replace `useLocalValue` stubs with TanStack Query mutations. Keep the sample data only behind the audit and demo screens. | §4.2, §25 | A citizen can submit a real test issue and a staff user processes it with an auditable status update on staging (§25 completion test) |
+| F.2 | **E2E scenarios 1–15 of §21.3** as Playwright specs against local Supabase with the six test accounts: register and constituency, report with pin and photo, timeline, office acknowledge and assign, public update vs private note, forward, resolve with evidence, feedback and reopen, idea submit and support, unauthorised private read, Office A cannot see Office B, moderator abuse and appeal, find MP signed out, "me too" counted once per account with follow-up notification, rate then appeal. Axe on signed-in office and admin pages with a real session. Linux visual baselines created in CI. | §21.3 | All 15 pass at 375 and 1280 |
+| F.3 | **Device and network matrix** (§21.4): record results in `docs/aibc/device-matrix.md` for low-end Android, current Android Chrome, iOS Safari in browser and as PWA, desktop Chrome, Firefox, Safari, Edge; slow 3G; location and camera permission denied; large or invalid upload; offline draft; Bangla input and font rendering. | §21.4 | Table filled with date, device, result, issues |
+| F.4 | **MFA enrolment UI** for MP, moderator and admin (TOTP QR, code entry, recovery codes shown once, AAL2 step-up prompt before privileged pages); depends on backend M.6. | §5, §18.1 | Admin pages ask for a code; denied state tested |
+| F.5 | **Emergency guidance UI**: persistent but quiet "জরুরি হলে ৯৯৯" note on report, ask and help pages; when the backend flags imminent harm, show the guidance screen instead of the normal success flow; official-channel disclaimer wording on issue pages ("referred" vs "officially registered"). | §17.8, §21.6, §28 | Screen reachable and checked in bn and en |
+| F.6 | **Privacy, terms, takedown**: render the final notice from backend M.9 (easy-Bangla summary on top, full text, English), terms page, consent prompts that explain what is public before submission, data export and deletion requests in Settings (consents, export, deletion routes exist), content-challenge form. | §18.2, §18.3 | No draft banner left; legal text matches backend |
+| F.7 | **Public metric definitions**: every public number (counts, median time to first answer, responsiveness) shows date range, last-updated and a "how this is calculated" link; never ranks MPs. Office analytics views for the KPIs in backend M.11. | §22, §3.3 | Each metric has all three elements |
+| F.8 | **Frontend release gates** (§21.6, §29 UX): add to CI or a manual checklist: no private data in public pages (probe), no keys in bundle (exists), Bangla and English tested, keyboard and screen-reader checks (needs a person), empty, error and offline states present on every screen. Output to `docs/aibc/phase3-audit.md`. | §21.6 | Checklist all ticked or listed as open |
+| F.10 | **Push on the client**: service worker fetches `/api/v1/me/notifications` on a payload-less push, opt-in and quiet-hours controls in Settings, no sensitive text in notification previews. | §15 | Works on Android Chrome with VAPID keys |
+| F.11 | **Comments on ideas and "report content"** buttons on issues, ideas and questions wired to moderation; comment list with states. Verify these exist in the UI; build if missing. | §4.2, §7.5, §7.7 | Visible and tested |
+
+### Competition and demo (Phase 4, 21–25 Dec)
+
+| # | Task | Done when |
+|---|---|---|
+| F.9 | **Demo kit**: one-click demo citizen and demo office sign-in on staging only (env-gated, absent in production build); "ডেমো" labels on all seeded data; scripted reset; backup screen recording of the golden path on the real demo phone; offline-safe screenshots; printed one-pager with the architecture diagram; slides stored locally. Presenter owns the Q&A sheet (`docs/aibc/qa.md`, backend drafts the content). | Rehearsed to time with every role clear |
+| F.12 | **Final video support**: update `docs/aibc/video-script.md` to the §2.5 timeline (problem 0:30, solution 1:00, demo 2:00, AI approach 2:30, impact 3:00) and label any mock step on screen. | Script matches rubric table |
+
+### Definition of done additions
+
+Every screen that shows data states whether it is live, sample or demo; no screen ships with a device-local stub after F.1 except the audit screens. Every public number has its definition. Every outward action keeps a confirm step and a note where the masterplan requires one.
