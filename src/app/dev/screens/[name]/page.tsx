@@ -80,7 +80,7 @@ export default async function DevScreen({ params }: PageProps<"/dev/screens/[nam
         </div>
       );
     case "announcements":
-      return <div className="space-y-4"><h1 className="text-2xl font-semibold text-civic">{t.anTitle}</h1><AnnouncementComposer /></div>;
+      return <div className="space-y-4"><h1 className="text-2xl font-semibold text-civic">{t.anTitle}</h1><AnnouncementComposer constituency="demo-1" /></div>;
     case "admin-verification":
       return <AdminShell t={t} title={t.adVerifyTitle} lead={t.adVerifyLead} current="/admin/verification"><ReviewQueue kind="verification" items={SAMPLE_REVIEW} /></AdminShell>;
     case "admin-moderation":

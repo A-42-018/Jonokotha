@@ -59,8 +59,8 @@ test.describe("citizen golden path", () => {
 
 test.describe("staff approval", () => {
   test("acknowledge needs a note, then confirms with a toast (human decision, logged in the dialog flow)", async ({ page }) => {
-    let body: { action?: string; note?: string } | undefined;
-    await page.route("**/api/cases/*/approve", async (r) => { body = r.request().postDataJSON(); await r.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true }) }); });
+    let body: { internal_note?: string } | undefined;
+    await page.route("**/api/v1/office/issues/*/acknowledge", async (r) => { body = r.request().postDataJSON(); await r.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ data: {} }) }); });
     await demo(page, "case");
     await page.getByRole("button", { name: "স্বীকৃতি দিন" }).first().click();
     const dialog = page.getByRole("dialog");
@@ -70,16 +70,23 @@ test.describe("staff approval", () => {
     await dialog.getByLabel("নোট").fill("ঘটনাস্থলে লোক পাঠানো হচ্ছে, আজ দেখা হবে।");
     await dialog.getByRole("button", { name: "স্বীকৃতি দিন" }).click();
     await expect(page.getByRole("status").filter({ hasText: "স্বীকৃতি দেওয়া হয়েছে" })).toBeVisible();
-    expect(body).toMatchObject({ action: "acknowledge" });
+    expect(body).toMatchObject({ internal_note: "ঘটনাস্থলে লোক পাঠানো হচ্ছে, আজ দেখা হবে।" });
   });
 
-  test("the AI copilot offers suggestions but changes nothing by itself", async ({ page }) => {
-    let calls = 0;
-    await page.route("**/api/v1/issues**", async (r) => { calls++; await r.abort(); });
+  test("the AI copilot fetches suggestions only on request and changes nothing by itself", async ({ page }) => {
+    const posts: string[] = [];
+    await page.route("**/api/v1/**", async (r) => {
+      const req = r.request();
+      if (req.method() === "POST") posts.push(new URL(req.url()).pathname);
+      await r.fulfill({ status: 503, contentType: "application/json", body: JSON.stringify({ code: "unavailable", message: "x", field_errors: {}, request_id: "t" }) });
+    });
     await demo(page, "case");
     await expect(page.getByText(/শুধু কর্মীদের|কর্মীদের জন্য/).first()).toBeVisible();
-    await page.getByRole("button", { name: "বাদ দিন" }).first().click(); // dismissing a suggestion is local
-    expect(calls).toBe(0);
+    await expect(page.getByRole("button", { name: "মেনে নিন" })).toHaveCount(0); // nothing to decide until suggestions exist
+    expect(posts).toEqual([]);
+    await page.getByRole("button", { name: "এআই-এর প্রস্তাব আনুন" }).click();
+    await expect(page.getByText("এআই-এর প্রস্তাব এই সার্ভারে চালু নেই।").first()).toBeVisible();
+    expect(posts.every((x) => x.endsWith("/copilot") || x.endsWith("/routing") || x.endsWith("/duplicates"))).toBe(true);
   });
 });
 
@@ -90,7 +97,7 @@ test.describe("role denial", () => {
   });
 
   test("a rejected staff action (403) keeps the note and explains in the dialog", async ({ page }) => {
-    await page.route("**/api/cases/*/approve", (r) => r.fulfill({ status: 403, contentType: "application/json", body: JSON.stringify({ error: "forbidden" }) }));
+    await page.route("**/api/v1/office/issues/*/acknowledge", (r) => r.fulfill({ status: 403, contentType: "application/json", body: JSON.stringify({ code: "forbidden" }) }));
     await demo(page, "case");
     await page.getByRole("button", { name: "স্বীকৃতি দিন" }).first().click();
     const dialog = page.getByRole("dialog");
