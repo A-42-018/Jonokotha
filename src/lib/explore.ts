@@ -14,6 +14,8 @@ export interface ExploreIssue {
   lng?: number;
   /** Count of "me too" supports. Sample rows only until the API exposes it. */
   supports?: number;
+  /** Constituency id, so "follow area" can match. */
+  areaId?: string;
   /** True for demo rows: always labelled "নমুনা" in the UI. */
   sample?: boolean;
 }

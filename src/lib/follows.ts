@@ -21,3 +21,11 @@ export interface Feedback { rating?: number; reopen?: string; appeal?: string; a
 export const FEEDBACK_KEY = "jonokotha:feedback:v1";
 export const NO_FEEDBACK: Record<string, Feedback> = {};
 export const isRating = (n: unknown): n is 1 | 2 | 3 | 4 | 5 => Number.isInteger(n) && (n as number) >= 1 && (n as number) <= 5;
+
+/** Personalised feed: issues in followed areas, in followed categories, or followed directly. Newest update first. */
+export function feedFor<T extends { ref: string; category: Category; updatedAt: string; areaId?: string }>(f: Follows, issues: T[], limit = 5): T[] {
+  return issues
+    .filter((i) => f.issues.includes(i.ref) || f.categories.includes(i.category) || (i.areaId !== undefined && f.areas.includes(i.areaId)))
+    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+    .slice(0, limit);
+}

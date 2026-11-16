@@ -12,7 +12,7 @@ const T = (d: number) => new Date(Date.UTC(2026, 10, 16 - d, 6)).toISOString();
 
 const row = (n: number, title: string, category: Category, status: Status, area: string, ago: number, upd: number, lat: number, lng: number, supports: number): ExploreIssue => ({
   ref: `JK-SAMPLE-${100 + n}`, title, category, status, area, createdAt: T(ago), updatedAt: T(upd),
-  lat: approxCoord(lat), lng: approxCoord(lng), supports, sample: true,
+  lat: approxCoord(lat), lng: approxCoord(lng), supports, areaId: "demo-1", sample: true,
 });
 
 export const SAMPLE_ISSUES: ExploreIssue[] = [
@@ -43,4 +43,13 @@ export const SAMPLE_IDEAS: Idea[] = [
   I(6, "নদীর পাড়ে বহুতল পার্কিং", "বড় খরচ ও জায়গার সীমাবদ্ধতায় এই আইডিয়া এখন করা সম্ভব নয়।", "roads", "ওয়ার্ড ৫ (নমুনা)", 12, "not_planned", 45, "জায়গা ও বাজেটের সীমাবদ্ধতা; পরে সম্ভাব্যতা যাচাই করা যেতে পারে।"),
   I(7, "ময়লা আলাদা করার ডাস্টবিন", "পাড়ায় তিন রঙের ডাস্টবিন রেখে ময়লা আলাদা করা শুরু হোক।", "waste", "ওয়ার্ড ৩ (নমুনা)", 27, "in_progress", 30),
   I(8, "মাঠে কমিউনিটি বইয়ের তাক", "খেলার মাঠের এক কোণে ছোট খোলা লাইব্রেরি।", "education", "ওয়ার্ড ১ (নমুনা)", 19, "implemented", 70),
+];
+
+/** SAMPLE in-app notifications (নমুনা). Real ones need the notifications API (not built). */
+export interface Notice { id: string; kind: "status" | "reply" | "area" | "idea"; bn: string; en: string; at: string; href: string }
+export const SAMPLE_NOTICES: Notice[] = [
+  { id: "n1", kind: "status", bn: "আপনার অনুসরণ করা অভিযোগের অবস্থা বদলেছে: “অফিস দেখেছে”।", en: "A report you follow changed status: “Seen by office”.", at: T(0), href: "/area" },
+  { id: "n2", kind: "reply", bn: "এমপি অফিস আপনার প্রশ্নের উত্তর দিয়েছে।", en: "The MP office replied to your question.", at: T(1), href: "/ask/inbox" },
+  { id: "n3", kind: "area", bn: "আপনার অনুসরণ করা এলাকায় নতুন একটি সমস্যা জানানো হয়েছে।", en: "A new problem was reported in an area you follow.", at: T(2), href: "/area" },
+  { id: "n4", kind: "idea", bn: "আপনার সমর্থন করা আইডিয়া “বিবেচনায়” গেছে।", en: "An idea you supported is now “under consideration”.", at: T(5), href: "/ideas" },
 ];

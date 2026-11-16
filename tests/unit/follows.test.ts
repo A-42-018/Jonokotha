@@ -15,3 +15,27 @@ describe("follows", () => {
     expect([0, 6, 2.5, NaN, "3", undefined].some(isRating)).toBe(false);
   });
 });
+
+import { feedFor } from "@/lib/follows";
+import { SAMPLE_ISSUES } from "@/lib/sample";
+import { unreadOf } from "@/components/citizen/NotificationList";
+import { SAMPLE_NOTICES } from "@/lib/sample";
+
+describe("feed and notifications", () => {
+  it("shows nothing when nothing is followed", () => {
+    expect(feedFor(NO_FOLLOWS, SAMPLE_ISSUES)).toEqual([]);
+  });
+  it("matches followed categories, areas and issues, newest update first, capped", () => {
+    const byCat = feedFor({ ...NO_FOLLOWS, categories: ["roads"] }, SAMPLE_ISSUES);
+    expect(byCat.length).toBeGreaterThan(0);
+    expect(byCat.every((i) => i.category === "roads")).toBe(true);
+    expect(feedFor({ ...NO_FOLLOWS, areas: ["demo-1"] }, SAMPLE_ISSUES, 3)).toHaveLength(3);
+    expect(feedFor({ ...NO_FOLLOWS, issues: ["JK-SAMPLE-104"] }, SAMPLE_ISSUES).map((i) => i.ref)).toEqual(["JK-SAMPLE-104"]);
+    const all = feedFor({ ...NO_FOLLOWS, areas: ["demo-1"] }, SAMPLE_ISSUES, 20);
+    expect(all[0].updatedAt >= all[1].updatedAt).toBe(true);
+  });
+  it("counts unread notices", () => {
+    expect(unreadOf(SAMPLE_NOTICES, []).length).toBe(SAMPLE_NOTICES.length);
+    expect(unreadOf(SAMPLE_NOTICES, ["n1", "n2"]).length).toBe(SAMPLE_NOTICES.length - 2);
+  });
+});

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import FollowedFeed from "@/components/citizen/FollowedFeed";
 import HomeFooter from "@/components/citizen/HomeFooter";
 import IdeaCtaCard from "@/components/citizen/IdeaCtaCard";
 import RecentIssues from "@/components/citizen/RecentIssues";
@@ -8,6 +9,7 @@ import { findConstituency } from "@/lib/constituency";
 import { getConstituencyId } from "@/lib/constituency-server";
 import { DEMO_CONSTITUENCY } from "@/lib/demo-data";
 import { dict, getLang } from "@/lib/i18n";
+import { SAMPLE_ISSUES } from "@/lib/sample";
 import { listCases } from "@/lib/store";
 import { currentUser } from "@/lib/supabase/server";
 import type { CaseRecord } from "@/lib/types";
@@ -39,6 +41,7 @@ export default async function Home() {
         <ReportCtaCard t={t} />
         <IdeaCtaCard t={t} />
       </div>
+      <FollowedFeed issues={SAMPLE_ISSUES} />
       <RecentIssues t={t} lang={lang} cases={cases} failed={failed} />
       <RepresentativeCard t={t} areaName={lang === "bn" ? area.nameBn : area.nameEn} />
       {isStaff && <Link href="/office" className="inline-flex min-h-11 items-center text-civic underline">{t.officeCta}</Link>}
