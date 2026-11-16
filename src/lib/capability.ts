@@ -44,6 +44,8 @@ export const FEATURES = {
   staffDirectory: { status: "planned", backend: "B5.1" },
   authorContest: { status: "planned", backend: "M.9" },
   mfaRecoveryCodes: { status: "planned", backend: "M.6" },
+  areaHierarchy: { status: "planned", backend: "B5.7" },
+  areaCorrection: { status: "planned", backend: "B5.7" },
   commentReports: { status: "planned", backend: "B5.5" },
 } as const satisfies Record<string, { status: DataStatus; backend: string }>;
 

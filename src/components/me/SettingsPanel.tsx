@@ -4,6 +4,7 @@ import { useState } from "react";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import { Checkbox } from "@/components/ui/Choice";
+import MyAreaCard from "@/components/me/MyAreaCard";
 import DataRights from "@/components/me/DataRights";
 import PushSettings from "@/components/me/PushSettings";
 import Dialog from "@/components/ui/Dialog";
@@ -26,6 +27,7 @@ export default function SettingsPanel({ email, role }: { email: string | null; r
         <p className="mb-2">{lang === "bn" ? t.stLangNow : "Now: English"}</p>
         <a href="/lang" className="inline-flex min-h-11 items-center rounded-xl border border-civic px-4 font-medium text-civic focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-civic">{t.stLangSwitch}</a>
       </Card>
+      <MyAreaCard />
       <Card title={t.stNotif}>
         <Checkbox label={t.stNotifStatus} checked={prefs.status} onChange={(e) => setPrefs({ ...prefs, status: e.target.checked })} />
         <Checkbox label={t.stNotifReply} checked={prefs.reply} onChange={(e) => setPrefs({ ...prefs, reply: e.target.checked })} />
