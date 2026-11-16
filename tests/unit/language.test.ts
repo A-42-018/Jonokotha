@@ -33,7 +33,7 @@ describe("Bangla strings follow §19.1 and §19.2", () => {
     expect(bn.filter(([, s]) => sadhu.test(s))).toEqual([]);
   });
   it("office or heavily formal words from the §19.2 avoid-list are not used", () => {
-    const formal = /(অভিযোগ|দাখিল|প্রদান করুন|নিবন্ধন|সংশ্লিষ্ট|কার্যালয়|প্রস্তাবনা|(?<!বি)জ্ঞাপন|প্রেরণ|উন্মুক্ত|বিজ্ঞপ্তি|অবস্থান নির্ধারণ|সংযুক্ত|পর্যবেক্ষণ|সম্পাদনা)/;
+    const formal = /(অভিযোগ|দাখিল|প্রদান করুন|নিবন্ধন|সংশ্লিষ্ট|কার্যালয়|প্রস্তাবনা|(?<!বি)জ্ঞাপন|প্রেরণ|উন্মুক্ত|বিজ্ঞপ্তি|অবস্থান নির্ধারণ|সংযুক্ত|পর্যবেক্ষণ|সম্পাদনা|গ্রহণ)/;
     expect(bn.filter(([, s]) => formal.test(s))).toEqual([]);
   });
   it("sentences stay short (about 12 words, never more than 20)", () => {

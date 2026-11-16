@@ -50,7 +50,7 @@ export const admin = pair(
     adAiColDecision: "কর্মীর সিদ্ধান্ত",
     adAiColLatency: "সময় (মি.সে.)",
     adAiCaption: "এআই কাজের নমুনা লগ",
-    adDec_accepted: "গ্রহণ",
+    adDec_accepted: "মেনে নেওয়া হয়েছে",
     adDec_edited: "সম্পাদিত",
     adDec_dismissed: "বাদ",
     adDec_pending: "অপেক্ষায়",

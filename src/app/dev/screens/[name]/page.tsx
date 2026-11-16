@@ -7,6 +7,7 @@ import AuditList from "@/components/office/AuditList";
 import CaseTable from "@/components/office/CaseTable";
 import Copilot from "@/components/office/Copilot";
 import NotesAndAssign from "@/components/office/NotesAndAssign";
+import NoAccess from "@/components/ui/NoAccess";
 import OfficeActions from "@/components/office/OfficeActions";
 import Overview from "@/components/office/Overview";
 import ReportForm from "@/components/ReportForm";
@@ -79,6 +80,10 @@ export default async function DevScreen({ params }: PageProps<"/dev/screens/[nam
       return <AdminShell t={t} title={t.adVerifyTitle} lead={t.adVerifyLead} current="/admin/verification"><ReviewQueue kind="verification" items={SAMPLE_REVIEW} /></AdminShell>;
     case "admin-moderation":
       return <AdminShell t={t} title={t.adModTitle} lead={t.adModLead} current="/admin/moderation"><ReviewQueue kind="moderation" items={SAMPLE_REVIEW} /></AdminShell>;
+    case "no-access-citizen":
+      return <NoAccess t={t} email="citizen@example.test" role="citizen" next="/office" />;
+    case "no-access-staff-admin":
+      return <NoAccess t={t} email="staff@example.test" role="staff" next="/admin" />;
     case "boom":
       throw new Error("Demo error for the error-boundary test");
     default:
