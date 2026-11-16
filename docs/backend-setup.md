@@ -20,4 +20,4 @@ Email delivery is limited (see step 2), so `/login` has one-click **Citizen** an
 
 ## Local Supabase for database tests (Phase 1)
 Docker must be running. `npx supabase start` (first run pulls images), `npx supabase db reset` applies every migration and `supabase/seed/seed.sql` to a clean local database, `npm run test:db` runs the database tests against it (they refuse any non-local URL). The local stack never touches the live project.
-Live project: run migrations 0004 and 0005 in the SQL editor, in order, before deploying the code that reads `issues`. 0005 keeps the old app working through a compatibility view `cases` and the unchanged `public_cases` / `public_case_events` contracts (they gain a `status_detail` column).
+Live project: 0004 and 0005 were applied on 2026-11-16 (SQL editor, in order). To repeat elsewhere, run migrations 0004 and 0005 in the SQL editor, in order, before deploying the code that reads `issues`. 0005 keeps the old app working through a compatibility view `cases` and the unchanged `public_cases` / `public_case_events` contracts (they gain a `status_detail` column).
