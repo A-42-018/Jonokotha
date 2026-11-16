@@ -1,6 +1,6 @@
 import { defineConfig } from "@playwright/test";
 
-const port = 3000;
+const port = Number(process.env.PW_PORT ?? 3000);
 const ci = !!process.env.CI;
 // Local: installed Chrome (no browser download). CI sets PW_CHANNEL="" to use the installed chromium.
 const channel = process.env.PW_CHANNEL === "" ? {} : { channel: process.env.PW_CHANNEL ?? "chrome" };

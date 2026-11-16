@@ -1,14 +1,23 @@
-import Link from "next/link";
-import { buttonClass } from "@/components/ui/Button";
-import ComingSoon from "@/components/ui/ComingSoon";
-import { dict, getLang } from "@/lib/i18n";
+import ExploreView from "@/components/explore/ExploreView";
+import { nowMs, type ExploreIssue } from "@/lib/explore";
+import { SAMPLE_ISSUES } from "@/lib/sample";
+import { listCases } from "@/lib/store";
+import { currentUser } from "@/lib/supabase/server";
 
+export const dynamic = "force-dynamic";
+
+/** Explore issues. Real public cases (no coordinates yet: list only) plus labelled sample rows. */
 export default async function Area() {
-  const t = dict[await getLang()];
-  return (
-    <ComingSoon art="spot-find-mp" soonLabel={t.comingSoon} title={t.areaSoonTitle} body={t.areaSoonBody}>
-      <Link href="/report" className={buttonClass()}>{t.reportCta}</Link>
-      <Link href="/" className={buttonClass({ variant: "secondary" })}>{t.soonBackHome}</Link>
-    </ComingSoon>
-  );
+  let real: ExploreIssue[] = [];
+  let loadFailed = false;
+  try {
+    const { sb } = await currentUser();
+    real = (await listCases(sb)).map((c) => ({
+      ref: c.ref, title: c.title, category: c.category, status: c.status, area: c.area, createdAt: c.createdAt,
+      updatedAt: c.timeline.at(-1)?.at ?? c.createdAt,
+    }));
+  } catch {
+    loadFailed = true;
+  }
+  return <ExploreView issues={[...real, ...SAMPLE_ISSUES]} loadFailed={loadFailed} now={nowMs()} />;
 }

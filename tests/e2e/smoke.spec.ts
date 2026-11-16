@@ -41,3 +41,16 @@ test.describe("golden path smoke", () => {
     }
   });
 });
+
+test.describe("phase 2 public pages", () => {
+  test("explore: sample banner, search narrows the list, map tab opens", async ({ page }) => {
+    await page.goto("/area");
+    await expect(page.getByText("নমুনা: এখানকার").first()).toBeVisible();
+    await page.getByLabel("খুঁজুন").fill("ড্রেন");
+    await expect(page.getByText("১টি সমস্যা পাওয়া গেছে")).toBeVisible();
+    await page.getByLabel("খুঁজুন").fill("zzzz");
+    await expect(page.getByRole("heading", { name: "কিছু মেলেনি" })).toBeVisible();
+    await page.getByRole("tab", { name: "মানচিত্র" }).click();
+    await expect(page.getByRole("region", { name: /সমস্যার মানচিত্র/ })).toBeVisible();
+  });
+});

@@ -1,3 +1,5 @@
+import { p2 } from "./strings";
+
 export type Lang = "bn" | "en";
 
 export async function getLang(): Promise<Lang> {
@@ -7,7 +9,7 @@ export async function getLang(): Promise<Lang> {
   return c === "en" ? "en" : "bn";
 }
 
-export const dict = {
+const base = {
   bn: {
     appName: "জনকথা",
     tagline: "আপনার এলাকার সমস্যা, সরাসরি জনপ্রতিনিধির কাছে",
@@ -686,6 +688,12 @@ export const dict = {
       tRef: "Number", tSubject: "Subject", tStatus: "Status", tCaption: "Sample report list", rowA: "Large pothole on the road", rowB: "Blocked drain", rowC: "No street light at night",
     },
   },
+} as const;
+
+/** Phase 2 strings live in `strings/*` (bn and en must have the same keys: checked by types). */
+export const dict = {
+  bn: { ...base.bn, ...p2.bn },
+  en: { ...base.en, ...p2.en },
 } as const;
 
 type Widen<T> = T extends string ? string : { [K in keyof T]: Widen<T[K]> };
