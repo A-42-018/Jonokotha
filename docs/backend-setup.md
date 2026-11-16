@@ -24,3 +24,8 @@ Live project: 0004 and 0005 were applied on 2026-11-16 (SQL editor, in order). T
 Migrations 0006 (roles and scopes) and 0007 (RLS) were applied on the live project on 2026-11-16, in that order. 0006 backfilled the two existing staff accounts (demo-staff and the promoted owner account) as office managers of the sample constituency. Staff without an office membership see no private cases. Run `npm run check:env` after any live migration.
 
 Migration 0008 (state machine) was applied on the live project on 2026-11-16 after 0007. Verified: 70 transitions, guard trigger present, anonymous callers cannot execute transition_issue, the live issue and its events are unchanged.
+
+## Tests (local)
+`npm test` (unit, no database), `npm run test:db` (schema, roles, RLS, state machine, API routes; needs `npx supabase start` and a database reset with `npx supabase db reset`), `npm run test:rls`, `npm run test:api`. The database tests refuse any non-local URL. API tests sign in real local users and call the route handlers directly; they take the local URL and keys from `supabase status`, or from `SUPABASE_API_URL`, `SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY_LOCAL` in CI.
+Migration 0009 (feedback, idempotency, shared rate limits, notes) must be applied on the live project before the v1 routes are deployed.
+

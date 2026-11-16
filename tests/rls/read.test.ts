@@ -17,6 +17,10 @@ const MATRIX: Row[] = [
     expect: (w) => ({ officeA: [w.assignmentA], admin: [w.assignmentA] }) },
   { table: "issue_agency_referrals", col: "id", all: (w) => [w.refOffice, w.refPublic],
     expect: (w) => ({ citizenA: [w.refPublic], officeA: [w.refOffice, w.refPublic], admin: [w.refOffice, w.refPublic] }) },
+  { table: "issue_feedback", col: "id", all: (w) => [w.feedbackA], expect: (w) => ({ citizenA: [w.feedbackA], officeA: [w.feedbackA], admin: [w.feedbackA] }) },
+  // Server-only bookkeeping: reachable only through SECURITY DEFINER functions, never by table.
+  { table: "idempotency_keys", col: "key", all: (w) => [w.idemA], expect: () => ({}) },
+  { table: "rate_limits", col: "scope", all: (w) => [w.rateA], expect: () => ({}) },
   { table: "notifications", col: "id", all: (w) => [w.notifA, w.notifB], expect: (w) => ({ citizenA: [w.notifA], citizenB: [w.notifB] }) },
   { table: "consents", col: "id", all: (w) => [w.consentA, w.consentB], expect: (w) => ({ citizenA: [w.consentA], citizenB: [w.consentB] }) },
   { table: "user_preferences", col: "user_id", all: (w) => [w.citizenA, w.citizenB], expect: (w) => ({ citizenA: [w.citizenA], citizenB: [w.citizenB] }) },

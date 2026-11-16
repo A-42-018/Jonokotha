@@ -7,7 +7,7 @@ import { withClient } from "../db/helpers";
  * Adding a table without adding RLS tests fails this test, which is the point (masterplan §14, definition of done).
  */
 const COVERED = [
-  "agencies", "ai_runs", "ai_suggestions", "app_settings", "audit_logs", "consents", "constituencies", "graph_edges",
+  "agencies", "ai_runs", "ai_suggestions", "app_settings", "audit_logs", "consents", "constituencies", "graph_edges", "idempotency_keys", "issue_feedback", "rate_limits",
   "issue_agency_referrals", "issue_assignments", "issue_categories", "issue_embeddings", "issue_events", "issue_media", "issue_transitions", "issues",
   "knowledge_chunks", "knowledge_sources", "notifications", "office_members", "office_permissions", "profiles",
   "representative_constituencies", "representatives", "user_preferences",
@@ -32,6 +32,15 @@ describe("RLS coverage guard", () => {
   it("signed-in users hold no delete or truncate privilege anywhere in public", () => withClient(async (c) => {
     const { rows } = await c.query("select table_name, privilege_type from information_schema.role_table_grants where grantee='authenticated' and table_schema='public' and privilege_type in ('DELETE','TRUNCATE')");
     expect(rows).toEqual([]);
+  }));
+
+  it("workflow and bookkeeping functions are not callable by anonymous visitors, but are by signed-in users", () => withClient(async (c) => {
+    const fns = ["transition_issue(uuid,issue_status,jsonb,text)", "assign_issue(uuid,uuid,text,text)", "add_issue_note(uuid,text,boolean,text)",
+      "idempotency_begin(text,text,text)", "idempotency_finish(text,text,integer,jsonb)", "idempotency_release(text,text)", "consume_rate_limit(text,integer,integer)"];
+    for (const f of fns) {
+      const { rows } = await c.query("select has_function_privilege('anon', $1, 'execute') as anon, has_function_privilege('authenticated', $1, 'execute') as authed", [`public.${f}`]);
+      expect(rows[0], f).toEqual({ anon: false, authed: true });
+    }
   }));
 
   it("no SECURITY DEFINER view or table leaks: public views list only safe columns", () => withClient(async (c) => {

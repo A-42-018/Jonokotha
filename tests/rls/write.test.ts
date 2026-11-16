@@ -160,4 +160,40 @@ describe("RLS write rules", () => {
     }
     expect(await upd("officeA")).toMatchObject({ ok: true, rowCount: 1 });
   })));
+  it("feedback: only the reporter, only after resolution, once, rating 1-5, never edited", () => withClient((c) => tx(c, async () => {
+    const w = await buildWorld(c);
+    await c.query("delete from issue_feedback");
+    const ins = (who: Who, user: string, rating = 5) => as(c, w, who, () => attempt(c, "insert into issue_feedback (issue_id, user_id, rating) values ($1,$2,$3)", [w.issueA.id, user, rating]));
+    // Not resolved yet: refused even for the reporter.
+    expect(await ins("citizenA", w.citizenA)).toMatchObject({ ok: false, code: RLS });
+    await c.query("select transition_issue($1, 'acknowledged')", [w.issueA.id]);
+    await c.query("select transition_issue($1, 'resolved', '{\"resolution_note\":\"done and dusted\"}')", [w.issueA.id]);
+    expect(await ins("citizenB", w.citizenB)).toMatchObject({ ok: false, code: RLS });        // not the reporter
+    expect(await ins("citizenA", w.citizenB)).toMatchObject({ ok: false, code: RLS });        // forged user_id
+    expect(await ins("officeA", w.officeA)).toMatchObject({ ok: false, code: RLS });          // staff do not rate
+    expect(await ins("anon", w.citizenA)).toMatchObject({ ok: false });
+    expect(await ins("citizenA", w.citizenA, 6)).toMatchObject({ ok: false, code: "23514" }); // rating range
+    expect(await ins("citizenA", w.citizenA, 0)).toMatchObject({ ok: false, code: "23514" });
+    expect(await ins("citizenA", w.citizenA, 4)).toMatchObject({ ok: true });
+    expect(await ins("citizenA", w.citizenA, 5)).toMatchObject({ ok: false, code: "23505" }); // once
+    const edit = await as(c, w, "citizenA", () => attempt(c, "update issue_feedback set rating = 1"));
+    expect(edit.ok ? edit.rowCount : 0).toBe(0);
+  })));
+
+  it("idempotency keys and rate limits are per user and invisible to other users", () => withClient((c) => tx(c, async () => {
+    const w = await buildWorld(c);
+    const state = (r: Awaited<ReturnType<typeof attempt>>) => (r.ok ? (r.rows[0].r as { state: string }).state : "refused");
+    const begin = (who: Who, hash: string) => as(c, w, who, () => attempt(c, "select idempotency_begin('shared-key-0001', 'POST /x', $1) as r", [hash]));
+    expect(state(await begin("citizenA", "h1"))).toBe("new");
+    expect(state(await begin("citizenB", "h2"))).toBe("new");      // same key and endpoint, other user: independent, nothing leaks
+    expect(state(await begin("citizenA", "h3"))).toBe("conflict"); // same user, same key, different request
+    expect(state(await begin("anon", "h1"))).toBe("refused");
+    const allowed = async (who: Who) => { const r = await as(c, w, who, () => attempt(c, "select consume_rate_limit('test-scope', 2, 60) as r")); return r.ok ? (r.rows[0].r as { allowed: boolean }).allowed : "refused"; };
+    expect(await allowed("citizenA")).toBe(true);
+    expect(await allowed("citizenA")).toBe(true);
+    expect(await allowed("citizenA")).toBe(false);
+    expect(await allowed("citizenB")).toBe(true);                  // B has its own counter
+    expect(await allowed("anon")).toBe("refused");
+    expect(await as(c, w, "citizenA", () => attempt(c, "select consume_rate_limit('Bad Scope!', 2, 60)"))).toMatchObject({ ok: false });
+  })));
 });

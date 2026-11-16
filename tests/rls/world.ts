@@ -10,6 +10,7 @@ export interface World {
   notifA: string; notifB: string; consentA: string; consentB: string;
   runA: string; runB: string; runNone: string; sugA: string; sugB: string;
   chunk: string; edge: string; embedding: string; repVerified: string; repHidden: string; audit: string;
+  feedbackA: string; idemA: string; rateA: string;
 }
 export type Who = keyof Pick<World, "citizenA" | "citizenB" | "officeA" | "officeB" | "moderator" | "admin"> | "anon";
 export const WHO: Who[] = ["anon", "citizenA", "citizenB", "officeA", "officeB", "moderator", "admin"];
@@ -46,7 +47,12 @@ export async function buildWorld(c: Client): Promise<World> {
   const repVerified = await id(c, "insert into representatives (full_name, verification_status, is_demo) values ('v','verified',true) returning id");
   const repHidden = await id(c, "insert into representatives (full_name, verification_status, is_demo) values ('u','unverified',true) returning id");
   const audit = await id(c, "insert into audit_logs (action, resource_type) values ('test','x') returning id");
-  return { A, B, citizenA, citizenB, officeA, officeB, moderator, admin, issueA, issueB, mediaA, assignmentA, refOffice, refPublic, notifA, notifB, consentA, consentB, runA, runB, runNone, sugA, sugB, chunk, edge, embedding, repVerified, repHidden, audit };
+  const feedbackA = await id(c, "insert into issue_feedback (issue_id, user_id, rating) values ($1,$2,4) returning id", [issueA.id, citizenA]);
+  const idemA = "idem-key-0001";
+  await c.query("insert into idempotency_keys (user_id, endpoint, key, request_hash) values ($1,'POST /x',$2,'h')", [citizenA, idemA]);
+  const rateA = "rls-test-scope";
+  await c.query("insert into rate_limits (scope, user_id, window_start, hits) values ($1,$2,now(),1)", [rateA, citizenA]);
+  return { A, B, citizenA, citizenB, officeA, officeB, moderator, admin, issueA, issueB, mediaA, assignmentA, refOffice, refPublic, notifA, notifB, consentA, consentB, runA, runB, runNone, sugA, sugB, chunk, edge, embedding, repVerified, repHidden, audit, feedbackA, idemA, rateA };
 }
 
 export const userOf = (w: World, who: Who) => (who === "anon" ? null : w[who]);
