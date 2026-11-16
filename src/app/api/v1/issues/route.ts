@@ -19,6 +19,7 @@ export async function GET(req: Request) {
 const CreateIssue = CaseInput.extend({
   constituencyId: z.string().max(60).regex(/^[a-z0-9-]+$/, "invalid").optional(),
   lat: Lat.optional(), lng: Lng.optional(),
+  duration: z.string().trim().max(100).optional(), affectedWho: z.string().trim().max(200).optional(),   // "how long" and "who or what is affected" (office-only)
   locationSource: z.enum(["device", "map", "manual_area"]).optional(), locationAccuracyM: z.number().int().min(0).max(100_000).optional(),
 }).strict().refine((b) => (b.lat === undefined) === (b.lng === undefined), { message: "lat and lng go together", path: ["lat"] });
 export async function POST(req: Request) {
@@ -29,6 +30,9 @@ export async function POST(req: Request) {
     if (!constituencyId && parsed.lat !== undefined && parsed.lng !== undefined) {
       const m = await lookupByPoint(c.sb, parsed.lat, parsed.lng);
       if (!m.length) throw new ApiError("validation_failed", "No constituency contains this location. Choose the area by hand.", { constituencyId: "required" });
+      // When the boundary is uncertain (several areas could contain the point) the person chooses; the app never guesses (B5.7).
+      const { data: cand } = await c.sb.rpc("constituency_candidates", { p_lat: parsed.lat, p_lng: parsed.lng });
+      if (Array.isArray(cand) && cand.length > 1) throw new ApiError("validation_failed", "Several areas could contain this location. Choose the area.", { constituencyId: "ambiguous" });
       constituencyId = m[0].key;
     }
     const input = { ...parsed, constituencyId: constituencyId ?? "demo-1" };

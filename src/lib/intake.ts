@@ -27,7 +27,7 @@ export function heuristicDraft(text: string): IntakeDraft {
   return { title: first, category, description: t, area: "" };
 }
 
-export interface AiContext { actorId?: string | null; requestId?: string | null }
+export interface AiContext { actorId?: string | null; requestId?: string | null; /** the person's simple_language_mode (B5.11): agents write short sentences and common words */ simpleLanguage?: boolean }
 
 export async function draftFromText(input: string, ctx: AiContext = {}): Promise<{ draft: IntakeDraft; source: "ai" | "fallback"; pii: PiiKind[] }> {
   // Personal data never reaches the model: redact first, and tell the UI what was removed.

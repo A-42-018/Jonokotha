@@ -123,7 +123,7 @@ describe("no direct writes to the Phase 2 tables from a user session", () => {
     const fns = ["set_issue_affected(text,boolean)", "add_follow(text,text)", "create_idea(text,text,text,text)", "set_idea_support(text,boolean)", "decide_idea(text,text,text)", "ask_question(text,text,text,text)",
       "post_question_message(text,text)", "save_announcement(text,text,text,boolean)", "create_project(text,text,text,text,text,date,date,text,date)", "review_issue_media(uuid,text,text)",
       "me_feed(boolean,integer,integer,timestamptz,text)", "report_content(text,text,text,text)", "moderation_queue(integer)", "moderate_item(text,text,text,text)", "verify_representative(uuid,text,text,text)",
-      "create_office_invitation(text,text,text,uuid)", "accept_office_invitation(text)", "analytics_overview(text,integer)", "retrieve_knowledge(uuid,vector,integer)", "record_mcp_call(text,jsonb,integer)",
+      "create_office_invitation(text,text,text,uuid,uuid)", "accept_office_invitation(text)", "analytics_overview(text,integer)", "retrieve_knowledge(uuid,vector,integer)", "record_mcp_call(text,jsonb,integer)",
       "import_constituencies(jsonb,jsonb)", "save_push_subscription(text,text,text)"];
     for (const f of fns) {
       const { rows } = await c.query("select has_function_privilege('anon', $1, 'execute') as anon, has_function_privilege('authenticated', $1, 'execute') as authed", [`public.${f}`]);

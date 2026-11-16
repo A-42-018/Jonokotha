@@ -15,6 +15,12 @@ const COVERED = [
 const PUBLIC_VIEWS = ["public_analytics_reports", "public_announcements", "public_case_events", "public_cases", "public_ideas", "public_project_milestones", "public_projects", "public_question_messages", "public_questions"];
 const ANON_READABLE = ["agencies", "constituencies", "issue_categories", "issue_transitions", "knowledge_sources", "office_permissions", "representative_constituencies", "representative_fields", "representatives"];
 
+// Phase 5 (migrations 0030-0036). Each table has RLS tests in tests/rls/phase5.test.ts.
+COVERED.push("admin_units", "agency_integrations", "approval_requests", "background_jobs", "constituency_units", "country_adapters", "feature_flags", "idea_comments", "integration_settings", "location_change_requests",
+  "office_inbox_counts", "office_tasks", "platform_invitations", "poll_options", "poll_votes", "polls", "product_events", "project_feedback", "security_events");
+PUBLIC_VIEWS.push("public_case_referrals", "public_idea_comments", "public_open311_requests", "public_open311_services", "public_poll_options", "public_polls", "public_project_feedback");
+ANON_READABLE.push("admin_units", "constituency_units", "country_adapters");
+
 describe("RLS coverage guard", () => {
   it("every public table has RLS enabled and RLS tests", () => withClient(async (c) => {
     const { rows } = await c.query("select c.relname, c.relrowsecurity from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='public' and c.relkind='r'");
