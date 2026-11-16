@@ -24,6 +24,8 @@ Phases follow the sprints (§24). Dates are 2026.
 
 ## Phase 0 — Preliminary submission (15–20 Nov)
 
+**Status 2026-11-16:** code for 0.2, 0.4, 0.5, 0.6, 0.7, 0.9, 0.10 is done (migration 0003, `seed.sql`, `check:env`, `seed:demo`, `pii.ts`, rate limits, tests). Waiting on the owner: 0.1 (apply migrations), 0.2 (valid Anthropic key), 0.3 (manual test log), 0.8 (Vercel deploy). See `docs/backend-setup.md`.
+
 Goal: the golden path works on staging with real auth and real AI.
 
 | # | Task | Done when |
