@@ -17,7 +17,7 @@ import { currentUser } from "./supabase/server";
 export const ERROR_STATUS = {
   invalid_json: 400, idempotency_key_required: 400, unauthenticated: 401, forbidden: 403, not_found: 404, method_not_allowed: 405,
   invalid_transition: 409, rule_not_met: 409, conflict: 409, idempotency_conflict: 409, idempotency_in_progress: 409,
-  payload_too_large: 413, validation_failed: 422, rate_limited: 429, internal_error: 500,
+  payload_too_large: 413, validation_failed: 422, rate_limited: 429, internal_error: 500, unavailable: 503,
 } as const;
 export type ErrorCode = keyof typeof ERROR_STATUS;
 
@@ -43,6 +43,8 @@ export interface Opts {
   limit?: { user?: number; ip?: number };
   maxBytes?: number;
   idempotency?: "required" | "optional" | "none";
+  /** Uploads: the handler reads `c.req` itself (formData); the body is not parsed here, only its declared size is capped by `maxBytes`. */
+  rawBody?: boolean;
 }
 
 const REQUEST_ID = /^[A-Za-z0-9._-]{8,64}$/;
@@ -116,7 +118,8 @@ export async function run(req: Request, params: Record<string, string>, opts: Op
       const r = rateLimit(`${opts.name}:ip:${ip}`, opts.limit.ip, 60_000);
       if (!r.ok) throw new ApiError("rate_limited", "Too many requests. Try again shortly.", {}, { "Retry-After": String(r.retryAfterSec) });
     }
-    const { data: body, raw } = await readBody(req, opts.maxBytes ?? 16 * 1024);
+    if (opts.rawBody && Number(req.headers.get("content-length") ?? 0) > (opts.maxBytes ?? 16 * 1024)) throw new ApiError("payload_too_large", `Body is limited to ${opts.maxBytes} bytes.`);
+    const { data: body, raw } = opts.rawBody ? { data: {}, raw: "" } : await readBody(req, opts.maxBytes ?? 16 * 1024);
     const { sb, user, actor } = await currentUser(rid);
     actorId = user?.id;
     if (opts.auth === "required" && !user) throw new ApiError("unauthenticated", "Sign in to continue.");
@@ -160,4 +163,11 @@ export async function run(req: Request, params: Record<string, string>, opts: Op
   } finally {
     log({ level: status >= 500 ? "error" : "info", request_id: rid, route: opts.name, method: req.method, path: url.pathname, status, ms: Date.now() - started, actor: actorId });
   }
+}
+
+/** Calls a database function as the signed-in user and turns its errors into ApiErrors (see fromDbError). */
+export async function rpc<T = unknown>(sb: SupabaseClient, fn: string, args: Record<string, unknown> = {}): Promise<T> {
+  const { data, error } = await sb.rpc(fn, args);
+  if (error) throw fromDbError(error);
+  return data as T;
 }

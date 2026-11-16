@@ -72,6 +72,8 @@ Exit: RLS and transition tests green in CI; baseline AI metrics recorded.
 
 Goal: every MVP backend feature in §4.2.
 
+**Status 2026-11-16:** all 15 items are built and tested (migrations 0014–0020, applied to the local stack only; the live project still needs them in order). API list: `docs/api-v1.md` (Phase 2). Tests: `npm run test:db` (235), `npm test` (345), clean-database reset verified. Not measured yet: Bangla speech accuracy (no provider key), embedding-based routing and similar-idea quality (needs `EMBEDDINGS_*`), push delivery to real devices (needs VAPID keys and the frontend service worker). Those are Phase 3 evaluation work.
+
 **Citizen features**
 1. **Speech and translation**: `POST /api/v1/ai/transcribe` (Bangla and English; evaluate Whisper-family and cloud bn-BD), translation endpoint labelled and on demand; typed input always works.
 2. **Intake v2**: `POST /ai/intake` returns title, category, description, area hint, urgency guidance, PII warnings; never submits; Banglish accepted; output always plain চলিত Bangla unless the user chose English.

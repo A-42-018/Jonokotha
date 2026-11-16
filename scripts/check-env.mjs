@@ -2,6 +2,10 @@
 const need = [
   ["NEXT_PUBLIC_SUPABASE_URL", true], ["NEXT_PUBLIC_SUPABASE_ANON_KEY", true], ["ANTHROPIC_API_KEY", true],
   ["ANTHROPIC_MODEL", false], ["AI_BASE_URL", false], ["SUPABASE_SERVICE_ROLE_KEY", false], ["EMBEDDINGS_BASE_URL", false], ["EMBEDDINGS_API_KEY", false],
+  // Phase 2 (all optional: each feature reports "unavailable" or falls back when its setting is missing)
+  ["TRANSCRIBE_BASE_URL", false], ["TRANSCRIBE_API_KEY", false], ["TRANSCRIBE_MODEL", false], ["MALWARE_SCAN_URL", false],
+  ["VAPID_PUBLIC_KEY", false], ["VAPID_PRIVATE_KEY", false], ["VAPID_SUBJECT", false], ["EMAIL_PROVIDER", false], ["EMAIL_API_KEY", false], ["EMAIL_FROM", false],
+  ["CRON_SECRET", false], ["NEXT_PUBLIC_APP_URL", false],
 ];
 let bad = 0;
 const row = (ok, name, note = "") => { console.log(`${ok ? "OK     " : "FAIL   "} ${name}${note ? " — " + note : ""}`); if (!ok) bad++; };
