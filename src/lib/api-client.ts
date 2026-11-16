@@ -1,4 +1,5 @@
 // Browser-side client for /api/v1 (docs/api-v1.md). One place for the envelope, the error format and Idempotency-Key.
+import { isMfaRequired, mfaUrl } from "@/lib/mfa";
 import type { Emergency } from "@/lib/types";
 
 export interface Page { next_cursor: string | null; limit: number }
@@ -34,7 +35,10 @@ export async function api<T>(path: string, init: ApiInit = {}, doFetch: typeof f
   const json = (await res.json().catch(() => null)) as { data?: T; page?: Page; code?: string; field_errors?: Record<string, string>; request_id?: string } | null;
   if (!res.ok) {
     const retry = Number(res.headers.get("Retry-After"));
-    throw new ApiError(json?.code ?? "internal_error", res.status, json?.field_errors ?? {}, json?.request_id, Number.isFinite(retry) && retry > 0 ? retry : undefined);
+    const err = new ApiError(json?.code ?? "internal_error", res.status, json?.field_errors ?? {}, json?.request_id, Number.isFinite(retry) && retry > 0 ? retry : undefined);
+    // A privileged call from a password-only session: go and enter the code, then come back to this page.
+    if (isMfaRequired(err) && typeof window !== "undefined") window.location.assign(mfaUrl(window.location.pathname + window.location.search));
+    throw err;
   }
   return { data: json?.data as T, page: json?.page, replayed: res.headers.get("Idempotent-Replay") === "true" };
 }

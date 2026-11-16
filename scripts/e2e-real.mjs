@@ -13,5 +13,11 @@ const env = {
   NEXT_PUBLIC_SUPABASE_URL: url, NEXT_PUBLIC_SUPABASE_ANON_KEY: anon, SUPABASE_SERVICE_ROLE_KEY: service,
   PW_REUSE_SERVER: "0",
 };
-const r = spawnSync("npx", ["playwright", "test", "tests/e2e/real", ...process.argv.slice(2)], { stdio: "inherit", env, shell: true });
+// `--mfa` runs only the two-step sign-in spec, alone: it switches enforce_mfa on for the whole local database while it runs.
+const args = process.argv.slice(2);
+const mfa = args.includes("--mfa");
+const rest = args.filter((a) => a !== "--mfa");
+if (mfa) env.E2E_MFA = "1";
+const target = mfa ? ["tests/e2e/real/mfa.spec.ts", "--workers=1"] : ["tests/e2e/real"];
+const r = spawnSync("npx", ["playwright", "test", ...target, ...rest], { stdio: "inherit", env, shell: true });
 process.exit(r.status ?? 1);
