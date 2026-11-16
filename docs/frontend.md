@@ -357,3 +357,13 @@ Notes: scenario 12's "appeal" is the moderator reversing a hide with a reason, b
 - **Comments on ideas** (`IdeaComments`, `lib/comments-api.ts`): a "Show comments" toggle on each idea loads the list only when opened. States: loading, empty, error with retry, published, "waiting for review" (author only, with a badge), "removed by a moderator" (the text is never shown), more, signed-out sign-in link, and a post form (3 to 1000 characters, Idempotency-Key, 429 message, personal-detail removal note). A new comment is shown to its author as waiting for review.
 - **Backend gap (needs the backend owner):** there is no comments route or table. `docs/api-v1.md` has no `/ideas/{ref}/comments`, and `POST /reports` accepts only `issue | idea | question | media`. The UI is written to the contract in `lib/comments-api.ts` (`GET` and `POST /ideas/{ref}/comments`; a comment has `id, body, status published|pending_review|hidden, created_at, mine`). Until that route exists the toggle shows "comments are not switched on at this server yet" (a 404 is read as that, not as a failure). Reporting a single comment needs `comment` added to the report types; it is not offered yet. Moderators also need comments in `/admin/moderation`.
 - Tests: `tests/unit/community.test.tsx` (14), `engagement.test.tsx` updated (signed-out issue page now has a third sign-in link, for report). Not tested against a real server for the reasons above. Production build and `check:bundle` pass; `/ask` added to the release-gate probe.
+
+### Handover: tests the backend engineer must run in Docker (written 2026-11-16)
+
+Docker was not available on the frontend machine, so these were never executed. Please run them against a local Supabase (`npx supabase start`) and send back failures.
+
+1. `npm run test:e2e:real` (F.2: scenarios 1-15 of §21.3, axe on signed-in office and admin pages). Expect to fix selectors or response shapes on the first run; the specs were only typechecked and linted. Files: `tests/e2e/real/`.
+2. `npm run test:e2e:real -- --mfa` (F.4: `mfa.spec.ts`, flips `enforce_mfa` for the whole database, so it runs alone).
+3. `npx playwright test tests/e2e/a11y.spec.ts` with the API running (pages that call the API cannot reach network-idle without it).
+4. F.10 push: set `VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY` (`node scripts/gen-vapid.mjs`), build for production over HTTPS, opt in from Settings on Android Chrome, run the delivery job, check the alert shows only "There is news".
+5. F.11 backend gap: add `GET/POST /ideas/{ref}/comments` (contract in `src/lib/comments-api.ts`), add `comment` to the `POST /reports` types, and list comments in `/admin/moderation`.
