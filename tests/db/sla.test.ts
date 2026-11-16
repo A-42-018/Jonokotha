@@ -94,7 +94,7 @@ describe("SLA targets and timers (migration 0011)", () => {
     await actAs(c, w.stranger);
     expect((await attempt(c, "insert into sla_policies (constituency_id, ack_target_hours, update_target_hours) values ($1, 1, 1)", [w.A])).ok).toBe(false);
     await actAs(c, w.admin);
-    expect((await attempt(c, "update sla_policies set update_target_hours = 99 where constituency_id=$1", [w.A])).rowCount).toBe(1);
+    expect(await attempt(c, "update sla_policies set update_target_hours = 99 where constituency_id=$1", [w.A])).toMatchObject({ ok: true, rowCount: 1 });
     expect((await attempt(c, "delete from sla_policies where constituency_id=$1", [w.A])).ok).toBe(false);
     await actAs(c, null);
     expect((await attempt(c, "select 1 from sla_policies")).ok).toBe(false);

@@ -68,3 +68,9 @@ MPs can read the queue and detail but cannot change status. Agency liaisons and 
 | `POST /api/intake` | unchanged (`{draft, source, pii}`). AI drafting moves to `/api/v1/ai/intake` in Phase 2. |
 | `POST /api/cases` | `{ref}` / `{error}`; alias of `POST /api/v1/issues` without an Idempotency-Key. |
 | `POST /api/cases/[ref]/approve` | alias of `acknowledge` (`acknowledge`) and `forward` (`refer`, to the suggested agency). Extra failure codes: 409, 422, 500. |
+
+## AI suggestions (Phase 1.9)
+
+`POST /api/v1/ai/suggestions/{id}/decision` — body `{ "decision": "accept" | "edit" | "dismiss", "final_value"?: object }` (`final_value` required for `edit`). Office staff in scope (or admin) only; 403 otherwise, 409 `rule_not_met` if already decided, 422 for a missing `final_value`. Returns `{ id, decision, decided_at, final_value }`. Every decision is audited and mirrored onto `ai_runs.decision`. Nothing a suggestion contains is applied to an issue automatically.
+
+AI calls go through `src/lib/ai/run.ts` (forced tool call, Zod-validated, typed outcome, logged to `ai_runs` through `log_ai_run()` which only the service role can call; without `SUPABASE_SERVICE_ROLE_KEY` on the server the run is a JSON log line). Prompts are versioned in `src/lib/ai/prompts/`. Cost appears only if `AI_PRICE_IN_PER_MTOK` and `AI_PRICE_OUT_PER_MTOK` are set.

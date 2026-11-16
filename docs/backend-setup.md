@@ -34,4 +34,4 @@ Migration 0009 (API support: issue_feedback, idempotency keys, shared rate limit
 
 Migration 0010 (immutable audit trail) was applied on the live project on 2026-11-16 after 0009. Verified by catalog: append-only triggers on audit_logs and issue_events, 8 audit triggers, audit_write not executable by API roles, no write privileges on audit_logs except via the audit functions; existing data unchanged. Not exercised live on purpose (a probe row would be permanent); covered by tests/db/audit.test.ts locally.
 
-Migration 0011 (SLA targets, timers, pauses; Phase 1.7) is applied to the local stack only. Apply to the live project in the SQL editor after 0010, before deploying code that reads `issue_sla`.
+Migrations 0011 (SLA targets, timers, pauses; Phase 1.7) and 0012 (AI plumbing; 1.9) are applied to the local stack only. Set `SUPABASE_SERVICE_ROLE_KEY` as a server-only env var (Vercel) so AI runs are stored in `ai_runs`. Apply to the live project in the SQL editor after 0010, before deploying code that reads `issue_sla`.
