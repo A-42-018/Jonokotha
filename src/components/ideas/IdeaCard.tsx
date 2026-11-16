@@ -5,6 +5,8 @@ import { useState } from "react";
 import Badge, { type BadgeTone } from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
+import IdeaComments from "@/components/ideas/IdeaComments";
+import ReportContent from "@/components/ReportContent";
 import { useLocalValue } from "@/components/ui/useLocalValue";
 import { useLang } from "@/components/ui/useLang";
 import { useShare } from "@/components/ui/useShare";
@@ -74,7 +76,9 @@ export default function IdeaCard({ idea, signedIn, heading: H = "h2" }: { idea: 
           <Link href={`/login?need=1&next=${encodeURIComponent("/ideas")}`} className="inline-flex min-h-11 items-center text-civic underline">{t.idSupportNeedsSignIn}</Link>
         )}
         <Button variant="ghost" onClick={() => void share()}>{t.shareLink}</Button>
+        {!idea.sample && <ReportContent type="idea" refId={idea.id} signedIn={signedIn} next="/ideas" />}
       </div>
+      {!idea.sample && idea.status !== "moderation" && <IdeaComments refId={idea.id} signedIn={signedIn} />}
     </Card>
   );
 }

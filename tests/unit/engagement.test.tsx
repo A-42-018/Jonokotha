@@ -80,7 +80,7 @@ describe("IssueActions", () => {
     const f = router();
     vi.stubGlobal("fetch", f);
     wrap(false);
-    expect(screen.getAllByRole("link", { name: new RegExp(t.enSignIn) }).length).toBe(2);
+    expect(screen.getAllByRole("link", { name: new RegExp(t.enSignIn) }).length).toBe(3); // me too, follow, and report (which needs an account)
     expect(await screen.findByText("৪ জন একই সমস্যায় আছেন")).toBeInTheDocument();
     expect(f.mock.calls.some((c) => String((c as unknown[])[0]).includes("/me/follows"))).toBe(false);
     vi.unstubAllGlobals();

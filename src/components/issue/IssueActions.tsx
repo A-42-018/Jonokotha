@@ -1,12 +1,8 @@
 "use client";
 import MetricNote from "@/components/ui/MetricNote";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
-import Dialog from "@/components/ui/Dialog";
-import { RadioGroup } from "@/components/ui/Choice";
-import Textarea from "@/components/ui/Textarea";
 import { useToast } from "@/components/ui/Toast";
 import { useShare } from "@/components/ui/useShare";
 import { useT } from "@/components/ui/useT";
@@ -14,14 +10,13 @@ import { useLang } from "@/components/ui/useLang";
 import { useLocalValue } from "@/components/ui/useLocalValue";
 import { fillNum } from "@/lib/format";
 import { ApiError } from "@/lib/api-client";
-import { fetchAffectedCount, reportContent, setAffected, type ReportReason } from "@/lib/engagement-api";
+import { fetchAffectedCount, setAffected } from "@/lib/engagement-api";
+import ReportContent from "@/components/ReportContent";
 import { FOLLOWS_KEY, isFollowing, NO_FOLLOWS } from "@/lib/follows";
 import { useFollows } from "@/components/ui/useFollows";
 import QueryProvider from "@/components/QueryProvider";
 import Link from "next/link";
 import ShareButtons from "@/components/ui/ShareButtons";
-
-const REASONS = ["Spam", "Abuse", "Private", "False", "Other"] as const;
 
 type Props = { refId: string; title: string; signedIn?: boolean; meTooBase?: number };
 export default function IssueActions(props: Props) {
@@ -54,31 +49,6 @@ function IssueActionsInner({ refId, title, signedIn = false, meTooBase = 0 }: Pr
     onSuccess: (now) => toast("info", now ? t.isFollowToast : t.isUnfollowToast),
     onError: (e) => toast("error", e instanceof ApiError && e.code === "rule_not_met" ? t.enFollowLimit : t.enActionFail),
   });
-  const complain = useMutation({
-    mutationFn: () => reportContent("issue", refId, reason as ReportReason, note),
-    onSuccess: () => { close(); toast("info", t.isReportThanks); },
-    onError: (e) => toast("error", e instanceof ApiError && e.status === 409 ? t.isReportAlready : t.enActionFail),
-  });
-  const [open, setOpen] = useState(false);
-  const [reason, setReason] = useState("");
-  const [note, setNote] = useState("");
-  const [error, setError] = useState("");
-
-  const reasonLabel: Record<(typeof REASONS)[number], string> = {
-    Spam: t.isReasonSpam, Abuse: t.isReasonAbuse, Private: t.isReasonPrivate, False: t.isReasonFalse, Other: t.isReasonOther,
-  };
-
-  function close() {
-    setOpen(false);
-    setReason("");
-    setNote("");
-    setError("");
-  }
-
-  function send() {
-    if (!reason) { setError(t.isReasonRequired); return; }
-    complain.mutate();
-  }
 
   return (
     <>
@@ -121,32 +91,10 @@ function IssueActionsInner({ refId, title, signedIn = false, meTooBase = 0 }: Pr
           </div>
           <ShareButtons path={`/issue/${refId}`} text={`${t.shText} ${title}`} />
           <p className="text-sm text-muted">{t.isShareHint}</p>
-          <Button variant="ghost" onClick={() => setOpen(true)}>{t.isReportContent}</Button>
+          <ReportContent type="issue" refId={refId} signedIn={signedIn} next={`/issue/${refId}`} />
         </div>
       </Card>
 
-      <Dialog
-        open={open}
-        onClose={close}
-        title={t.isReportTitle}
-        description={t.isReportBody}
-        actions={
-          <>
-            <Button variant="ghost" onClick={close}>{t.isReportCancel}</Button>
-            <Button variant="danger" loading={complain.isPending} onClick={send}>{t.isReportSend}</Button>
-          </>
-        }
-      >
-        <RadioGroup
-          legend={t.isReasonLegend}
-          name="report-reason"
-          value={reason}
-          onChange={(v) => { setReason(v); setError(""); }}
-          error={error}
-          options={REASONS.map((r) => ({ value: r, label: reasonLabel[r] }))}
-        />
-        <Textarea label={t.isReasonNote} optional rows={3} maxLength={500} value={note} onChange={(e) => setNote(e.target.value)} />
-      </Dialog>
     </>
   );
 }
