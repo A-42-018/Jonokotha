@@ -22,6 +22,9 @@ export async function POST(req: Request, ctx: RouteContext<"/api/cases/[ref]/app
   if (!issue) return NextResponse.json({ error: "not_found" }, { status: 404 });
   const action = body.data.action === "refer" ? "forward" : "acknowledge";
   if (!can(actor, action, { constituencyId: issue.constituency_id, assignedTo: issue.assigned_to })) return NextResponse.json({ error: "forbidden" }, { status: 403 });
-  const ok = await advance(sb, ref, body.data.action === "refer" ? "referred" : "acknowledged");
-  return ok ? NextResponse.json({ ok: true }) : NextResponse.json({ error: "not_found" }, { status: 404 });
+  const r = await advance(sb, ref, body.data.action === "refer" ? "referred" : "acknowledged");
+  if (r.ok) return NextResponse.json({ ok: true });
+  // The state machine (database) decides; map its refusals to HTTP.
+  const status = { not_found: 404, forbidden: 403, invalid_transition: 409, rule_not_met: 409, missing_field: 422, error: 500 }[r.code];
+  return NextResponse.json({ error: r.code, ...(r.field ? { field: r.field } : {}) }, { status });
 }

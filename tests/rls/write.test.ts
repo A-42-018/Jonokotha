@@ -35,15 +35,27 @@ describe("RLS write rules", () => {
 
   it("only the owning office can change status; citizens, other offices and moderators cannot", () => withClient((c) => tx(c, async () => {
     const w = await buildWorld(c);
-    const upd = (who: Who, id: string) => as(c, w, who, () => attempt(c, "update issues set status='acknowledged' where id=$1", [id]));
+    const ack = (who: Who, id: string) => as(c, w, who, () => attempt(c, "select transition_issue($1, 'acknowledged')", [id]));
+    // Citizens (even the owner), other offices and moderators are refused; issues they cannot see look like "not found".
     for (const who of ["anon", "citizenA", "citizenB", "officeB", "moderator"] as Who[]) {
-      const r = await upd(who, w.issueA.id);
-      expect(r.ok ? r.rowCount : 0, `${who} updating issue A`).toBe(0);
+      expect((await ack(who, w.issueA.id)).ok, `${who} acknowledging issue A`).toBe(false);
     }
-    expect(await upd("officeA", w.issueA.id)).toMatchObject({ ok: true, rowCount: 1 });
-    expect(await upd("officeA", w.issueB.id)).toMatchObject({ ok: true, rowCount: 0 });
-    expect(await upd("admin", w.issueB.id)).toMatchObject({ ok: true, rowCount: 1 });
+    expect(await ack("officeA", w.issueA.id)).toMatchObject({ ok: true, rowCount: 1 });
+    expect(await ack("officeA", w.issueB.id)).toMatchObject({ ok: false, code: "JK404" });
+    expect(await ack("admin", w.issueB.id)).toMatchObject({ ok: true, rowCount: 1 });
     expect(await scalar(c, "select status::text from issues where id=$1", [w.issueA.id])).toBe("acknowledged");
+  })));
+
+  it("status and workflow columns cannot be edited directly, even by the owning office or admin", () => withClient((c) => tx(c, async () => {
+    const w = await buildWorld(c);
+    for (const who of ["officeA", "admin"] as Who[]) {
+      for (const set of ["status='acknowledged'", `assigned_to='${w.officeA}'`, "resolution_note='x'", "resolved_at=now()", "appeal_route='x'"]) {
+        const r = await as(c, w, who, () => attempt(c, `update issues set ${set} where id=$1`, [w.issueA.id]));
+        expect(r, `${who} ${set}`).toMatchObject({ ok: false, code: RLS });
+      }
+    }
+    // Not even the trusted server may skip the state machine for status.
+    expect(await attempt(c, "update issues set status='closed' where id=$1", [w.issueA.id])).toMatchObject({ ok: false, code: RLS });
   })));
 
   it("nobody rewrites the content of a report through a user session", () => withClient((c) => tx(c, async () => {
@@ -56,15 +68,15 @@ describe("RLS write rules", () => {
     }
   })));
 
-  it("case officers, MPs and agency liaisons cannot change status (manager actions only, until the state machine)", () => withClient((c) => tx(c, async () => {
+  it("case officers, MPs and agency liaisons cannot acknowledge (a manager action), even on their own assigned issue", () => withClient((c) => tx(c, async () => {
     const w = await buildWorld(c);
     for (const role of ["case_officer", "mp", "agency_liaison"]) {
       const u = await createUser(c, "staff"); await addMember(c, u, w.A, role);
       await c.query("update issues set assigned_to=$1 where id=$2", [u, w.issueA.id]);
       await actAs(c, u);
-      const r = await attempt(c, "update issues set status='acknowledged' where id=$1", [w.issueA.id]);
+      const r = await attempt(c, "select transition_issue($1, 'acknowledged')", [w.issueA.id]);
       await actAsOwner(c);
-      expect(r.ok ? r.rowCount : 0, role).toBe(0);
+      expect(r.ok, role).toBe(false);
     }
   })));
 

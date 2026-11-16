@@ -8,11 +8,11 @@ import { withClient } from "../db/helpers";
  */
 const COVERED = [
   "agencies", "ai_runs", "ai_suggestions", "app_settings", "audit_logs", "consents", "constituencies", "graph_edges",
-  "issue_agency_referrals", "issue_assignments", "issue_categories", "issue_embeddings", "issue_events", "issue_media", "issues",
+  "issue_agency_referrals", "issue_assignments", "issue_categories", "issue_embeddings", "issue_events", "issue_media", "issue_transitions", "issues",
   "knowledge_chunks", "knowledge_sources", "notifications", "office_members", "office_permissions", "profiles",
   "representative_constituencies", "representatives", "user_preferences",
 ];
-const ANON_READABLE = ["agencies", "constituencies", "issue_categories", "knowledge_sources", "office_permissions", "representative_constituencies", "representatives"];
+const ANON_READABLE = ["agencies", "constituencies", "issue_categories", "issue_transitions", "knowledge_sources", "office_permissions", "representative_constituencies", "representatives"];
 
 describe("RLS coverage guard", () => {
   it("every public table has RLS enabled and RLS tests", () => withClient(async (c) => {

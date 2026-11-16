@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { AGENCIES } from "./demo-data";
-import type { Agency, CaseRecord, IntakeDraft, Status } from "./types";
+import { FROM_LEGACY } from "./transitions";
+import type { Agency, CaseRecord, IntakeDraft, IssueStatus, Status } from "./types";
 
 const tokens = (s: string) => new Set(s.toLowerCase().split(/[\s,।.]+/).filter((w) => w.length > 2));
 
@@ -25,19 +26,19 @@ export function pickAgency(agencies: Agency[], category: string) {
 type Row = {
   ref: string; title: string; category: IntakeDraft["category"]; description: string; area: string | null;
   status: Status; created_at: string; ai_summary: string | null; ai_agency: string | null; ai_confidence: number | null;
-  ai_similar: string[]; constituency_key: string;
+  ai_similar: string[]; constituency_key: string; status_detail?: IssueStatus;
 };
 type EventRow = { case_ref: string; status: Status; created_at: string; note: string | null };
 
 const toRecord = (r: Row, events: EventRow[]): CaseRecord => ({
   ref: r.ref, title: r.title, category: r.category, description: r.description, area: r.area ?? "",
-  constituencyId: r.constituency_key, status: r.status, createdAt: r.created_at,
+  constituencyId: r.constituency_key, status: r.status, statusDetail: r.status_detail, createdAt: r.created_at,
   timeline: events.filter((e) => e.case_ref === r.ref).sort((a, b) => a.created_at.localeCompare(b.created_at)).map((e) => ({ status: e.status, at: e.created_at, note: e.note ?? undefined })),
   ai: { summary: r.ai_summary ?? "", similarRefs: r.ai_similar, agencyId: r.ai_agency ?? "ag-office", confidence: Number(r.ai_confidence ?? 0.7) },
 });
 
 // Public reads use views that omit reporter_id and actor ids (migration 0003).
-const COLS = "ref,title,category,description,area,status,created_at,ai_summary,ai_agency,ai_confidence,ai_similar,constituency_key";
+const COLS = "ref,title,category,description,area,status,created_at,ai_summary,ai_agency,ai_confidence,ai_similar,constituency_key,status_detail";
 
 async function eventsFor(sb: SupabaseClient, refs: string[]) {
   if (!refs.length) return [] as EventRow[];
@@ -70,13 +71,28 @@ export async function getCase(sb: SupabaseClient, ref: string) {
   return data ? toRecord(data as unknown as Row, await eventsFor(sb, [ref])) : undefined;
 }
 
-/** Legacy 4-state UI status -> 13-state model (masterplan §9). Mirrors legacy_to_issue_status() in migration 0005. */
-export const LEGACY_TO_ISSUE_STATUS: Record<Status, string> = {
-  received: "submitted", acknowledged: "acknowledged", referred: "referred_to_authority", resolved: "resolved",
-};
+export type TransitionFailure = "not_found" | "forbidden" | "invalid_transition" | "missing_field" | "rule_not_met" | "error";
+export type TransitionResult = { ok: true; status: IssueStatus } | { ok: false; code: TransitionFailure; field?: string };
 
-/** Returns false if the row was not updated (not staff, or no such case). RLS enforces staff-only. */
-export async function advance(sb: SupabaseClient, ref: string, status: Status) {
-  const { data } = await sb.from("issues").update({ status: LEGACY_TO_ISSUE_STATUS[status] }).eq("ref", ref).select("ref");
-  return (data?.length ?? 0) > 0;
+/** The only way to change an issue's status: the database function transition_issue() validates the transition, the actor and the required fields. */
+export async function transitionIssue(sb: SupabaseClient, issueId: string, to: IssueStatus, fields: Record<string, unknown> = {}, requestId?: string): Promise<TransitionResult> {
+  const { data, error } = await sb.rpc("transition_issue", { p_issue: issueId, p_to: to, p_fields: fields, p_request_id: requestId ?? null });
+  if (!error) return { ok: true, status: (data as { status: IssueStatus }).status };
+  const map: Record<string, TransitionFailure> = { JK404: "not_found", "42501": "forbidden", JK001: "invalid_transition", JK002: "missing_field", JK003: "rule_not_met" };
+  return { ok: false, code: map[error.code] ?? "error", field: error.details || undefined };
+}
+
+/**
+ * Legacy two-button approval used by the current office UI: "acknowledge" or "refer".
+ * "Refer" sends the issue to the agency the routing suggested and the staff member just approved.
+ */
+export async function advance(sb: SupabaseClient, ref: string, status: Status): Promise<TransitionResult> {
+  const { data: issue } = await sb.from("issues").select("id,agency_id").eq("ref", ref).maybeSingle();
+  if (!issue) return { ok: false, code: "not_found" };
+  let fields: Record<string, unknown> = {};
+  if (status === "referred") {
+    const { data: a } = issue.agency_id ? await sb.from("agencies").select("id,name_bn,url,source").eq("id", issue.agency_id).maybeSingle() : { data: null };
+    if (a) fields = { agency_id: a.id, agency_name: a.name_bn, contact_channel: a.url ?? a.source };
+  }
+  return transitionIssue(sb, issue.id as string, FROM_LEGACY[status], fields);
 }

@@ -3,7 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 /** Platform roles (profiles.role). Office roles live in office_members.office_role and apply per constituency. */
 export type PlatformRole = "citizen" | "staff" | "moderator" | "admin";
 export type OfficeRole = "case_officer" | "office_manager" | "mp" | "agency_liaison";
-export type OfficeAction = "view" | "acknowledge" | "assign" | "request_information" | "forward" | "update" | "resolve" | "close" | "view_analytics";
+export type OfficeAction = "view" | "acknowledge" | "assign" | "request_information" | "forward" | "update" | "resolve" | "close" | "decide" | "view_analytics";
 
 export interface Membership { constituencyId: string; constituencyKey: string; officeRole: OfficeRole }
 export interface Actor { id: string; role: PlatformRole; offices: Membership[]; aal: "aal1" | "aal2" }
@@ -16,7 +16,7 @@ export const OFFICE_PERMISSIONS: Record<OfficeRole, Partial<Record<OfficeAction,
   office_manager: {
     view: { assignedOnly: false }, acknowledge: { assignedOnly: false }, assign: { assignedOnly: false },
     request_information: { assignedOnly: false }, forward: { assignedOnly: false }, update: { assignedOnly: false },
-    resolve: { assignedOnly: false }, close: { assignedOnly: false }, view_analytics: { assignedOnly: false },
+    resolve: { assignedOnly: false }, close: { assignedOnly: false }, decide: { assignedOnly: false }, view_analytics: { assignedOnly: false },
   },
   mp: { view: { assignedOnly: false }, view_analytics: { assignedOnly: false } },
   case_officer: { view: { assignedOnly: true }, request_information: { assignedOnly: true }, update: { assignedOnly: true } },

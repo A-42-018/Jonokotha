@@ -23,13 +23,20 @@ const refs = [];
 for (const [i, d] of demo.entries()) {
   const { dupOf, status, ...row } = d;
   const similar = dupOf !== undefined ? [refs[dupOf]] : [];
-  const { data, error } = await sb.from("issues").insert({ ...base, ...row, ai_similar: similar, ai_confidence: similar.length ? 0.85 : 0.7, ai_summary: "নমুনা তথ্য — বাস্তব অভিযোগ নয়।" }).select("ref").single();
+  const { data, error } = await sb.from("issues").insert({ ...base, ...row, ai_similar: similar, ai_confidence: similar.length ? 0.85 : 0.7, ai_summary: "নমুনা তথ্য — বাস্তব অভিযোগ নয়।" }).select("id,ref,agency_id").single();
   if (error) { console.error(`Insert ${i} failed:`, error.message); process.exit(1); }
   refs.push(data.ref);
-  // Walk the status forward so the public timeline shows real events (the trigger logs each change).
+  // Walk the status forward through the state machine so the public timeline shows real events.
+  // The service role is the trusted server, so no staff account is needed; required fields are still enforced.
+  const { data: ag } = await sb.from("agencies").select("id,name_bn,url,source").eq("id", data.agency_id).maybeSingle();
+  const steps = {
+    acknowledged: { to: "acknowledged", fields: {} },
+    referred: { to: "referred_to_authority", fields: { agency_id: ag?.id, agency_name: ag?.name_bn, contact_channel: ag?.url ?? ag?.source ?? "—" } },
+    resolved: { to: "resolved", fields: { resolution_note: "[নমুনা] নমুনা তথ্য: সমাধানের বিবরণ।" } },
+  };
   const path = { received: [], acknowledged: ["acknowledged"], referred: ["acknowledged", "referred"], resolved: ["acknowledged", "referred", "resolved"] }[status];
   for (const st of path) {
-    const { error: e2 } = await sb.from("issues").update({ status: ({ received: "submitted", referred: "referred_to_authority" })[st] ?? st }).eq("ref", data.ref);
+    const { error: e2 } = await sb.rpc("transition_issue", { p_issue: data.id, p_to: steps[st].to, p_fields: steps[st].fields });
     if (e2) { console.error(`Status ${st} failed:`, e2.message); process.exit(1); }
   }
 }

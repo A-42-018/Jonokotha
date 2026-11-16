@@ -60,7 +60,7 @@ describe("RLS read matrix: citizen A/B, office A/B, moderator, admin, anonymous"
   it("reference data and the permission matrix are public", () => withClient((c) => tx(c, async () => {
     const w = await buildWorld(c);
     for (const who of WHO) {
-      for (const t of ["constituencies", "agencies", "issue_categories", "office_permissions", "knowledge_sources", "representative_constituencies"]) {
+      for (const t of ["constituencies", "agencies", "issue_categories", "office_permissions", "issue_transitions", "knowledge_sources", "representative_constituencies"]) {
         await actAs(c, userOf(w, who));
         const r = await attempt(c, `select 1 from ${t} limit 1`);
         await actAsOwner(c);

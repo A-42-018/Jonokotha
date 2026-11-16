@@ -30,6 +30,7 @@ The database is the authority (functions `office_can`, `office_scope`, RLS in st
 | update (progress, internal notes) | yes | | assigned | assigned |
 | resolve | yes | | | |
 | close | yes | | | |
+| decide (reject, duplicate, out of jurisdiction, office reopen) | yes | | | |
 | view_analytics | yes | yes | | |
 
 Case officers recommend forwarding or resolution; the office manager performs it (§5.4). The MP views, sees analytics and (Phase 2) publishes announcements; the MP does not change case status. Changing this table is a migration plus an edit to `OFFICE_PERMISSIONS`, never an ad-hoc SQL update.
@@ -78,6 +79,6 @@ Rules that hold across tables:
 
 ## Known gaps (tracked)
 - **AI fields at insert.** `issues.ai_summary`, `ai_agency`, `ai_similar` and `ai_confidence` are written by the citizen's own session during submission, so a determined citizen could forge them through the API. Impact: advisory fields shown to staff. Fix: step 8/9 moves them into server-written `ai_suggestions`, after which the insert policy rejects them.
-- **Status changes by non-manager roles.** Only manager-grade office roles (and admin) can update an issue today. Case officers, assigned liaisons and the MP use the state machine and office-action endpoints (steps 4 and 5), which will run as controlled transitions.
+- **Status changes** go only through `transition_issue()` / `assign_issue()` (see `docs/state-machine.md`); direct edits of status and workflow columns are refused for everyone.
 - **Citizen sees `assigned_to` on own issues** (a staff user id, no name). Acceptable for now; the office-actions API will expose a display name instead.
 - **MFA is not enforced yet** (see above).

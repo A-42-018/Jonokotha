@@ -4,7 +4,7 @@ import { actAs, actAsOwner, addMember, attempt, createConstituency, createIssue,
 import { withClient } from "./helpers";
 
 const ROLES: OfficeRole[] = ["case_officer", "office_manager", "mp", "agency_liaison"];
-const ACTIONS: OfficeAction[] = ["view", "acknowledge", "assign", "request_information", "forward", "update", "resolve", "close", "view_analytics"];
+const ACTIONS: OfficeAction[] = ["view", "acknowledge", "assign", "request_information", "forward", "update", "resolve", "close", "decide", "view_analytics"];
 
 describe("roles and scopes (migration 0006)", () => {
   it("DB permission matrix equals the TypeScript matrix", () => withClient(async (c) => {
