@@ -56,3 +56,8 @@ Server-only settings, all optional; a feature without its setting says `unavaila
 Local tests: the storage container must be running (`npx supabase start` without excluding storage; CI already does this). Test suites set the local keys themselves; nothing contacts a real provider (providers are faked in the tests).
 
 Frontend contract notes: push is sent without a payload, so the service worker must fetch `GET /api/v1/me/notifications?unread=true` when a push wakes it; `x-unread-count` carries the badge number. Public issue items gained `affected_count` and `location`.
+
+## Phase 3 (migrations 0021–0023)
+Applied to the local stack. Live project state is written below when applied. Daily job: `/api/internal/maintenance` (scheduled by `vercel.json`; Vercel sends `CRON_SECRET` as a bearer token when the variable is set). Notification delivery needs a scheduler every minute or few minutes; the Free/Hobby Vercel plan only allows daily crons, so use an external scheduler (for example a GitHub Actions schedule or cron-job.org) calling `/api/internal/notifications/deliver` with the bearer token.
+
+New optional settings: `SENTRY_DSN`, `ALERT_WEBHOOK_URL`, `CSP_MODE` (`enforce` after a week of report-only with no violations), and the §26 aliases (`AI_MODEL`, `EMBEDDING_ENDPOINT`, `EMBEDDING_MODEL`, `STT_*`). Release gate: `npm run check:release` (`--skip-db` without a local Supabase).

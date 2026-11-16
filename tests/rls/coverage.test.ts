@@ -10,7 +10,7 @@ const COVERED = [
   "agencies", "ai_runs", "ai_suggestions", "app_settings", "audit_logs", "consents", "constituencies", "graph_edges", "idempotency_keys", "issue_feedback", "issue_affected", "follows", "analytics_reports", "office_invitations", "moderation_reports", "ai_eval_runs", "notification_deliveries", "push_subscriptions", "announcements", "projects", "project_milestones", "representative_fields", "ideas", "idea_supports", "questions", "question_messages", "rate_limits",
   "issue_agency_referrals", "issue_assignments", "issue_categories", "issue_embeddings", "issue_events", "issue_media", "issue_transitions", "issues",
   "knowledge_chunks", "knowledge_sources", "notifications", "office_members", "office_permissions", "profiles",
-  "representative_constituencies", "representatives", "user_preferences", "sla_policies", "issue_sla", "issue_sla_pauses",
+  "representative_constituencies", "representatives", "user_preferences", "sla_policies", "issue_sla", "issue_sla_pauses", "deletion_requests",
 ];
 const PUBLIC_VIEWS = ["public_analytics_reports", "public_announcements", "public_case_events", "public_cases", "public_ideas", "public_project_milestones", "public_projects", "public_question_messages", "public_questions"];
 const ANON_READABLE = ["agencies", "constituencies", "issue_categories", "issue_transitions", "knowledge_sources", "office_permissions", "representative_constituencies", "representative_fields", "representatives"];
