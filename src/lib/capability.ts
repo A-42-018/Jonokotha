@@ -50,6 +50,17 @@ export const FEATURES = {
   liaisonAcknowledge: { status: "planned", backend: "B5.2" },
   liaisonReference: { status: "planned", backend: "B5.2" },
   liaisonClose: { status: "planned", backend: "B5.2" },
+  adminUserList: { status: "planned", backend: "B5.3" },
+  adminAreaRecords: { status: "planned", backend: "B5.3" },
+  adminCategories: { status: "planned", backend: "B5.3" },
+  adminSla: { status: "planned", backend: "B5.3" },
+  adminAppeals: { status: "planned", backend: "B5.3" },
+  adminHealthDetail: { status: "planned", backend: "B5.3" },
+  adminAlerts: { status: "planned", backend: "B5.3" },
+  adminIntegrations: { status: "planned", backend: "B5.3" },
+  adminFlags: { status: "planned", backend: "B5.3" },
+  adminKnowledgeManage: { status: "planned", backend: "B5.3" },
+  adminDemo: { status: "planned", backend: "B5.3" },
 } as const satisfies Record<string, { status: DataStatus; backend: string }>;
 
 export type FeatureKey = keyof typeof FEATURES;
