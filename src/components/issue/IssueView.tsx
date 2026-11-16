@@ -2,10 +2,13 @@ import Link from "next/link";
 import ResolutionFeedback from "@/components/issue/ResolutionFeedback";
 import IssueActions from "@/components/issue/IssueActions";
 import OfficialResponse from "@/components/issue/OfficialResponse";
+import MoreInfo from "@/components/issue/MoreInfo";
+import ProgressEvidence from "@/components/issue/ProgressEvidence";
 import ReferralStatus from "@/components/issue/ReferralStatus";
 import StatusTimeline from "@/components/issue/StatusTimeline";
 import Badge from "@/components/ui/Badge";
 import Card from "@/components/ui/Card";
+import PlannedPanel from "@/components/ui/PlannedPanel";
 import StatusChip from "@/components/ui/StatusChip";
 import { fmtDate, type Dict, type Lang } from "@/lib/i18n";
 import type { ReferralInfo } from "@/lib/referral";
@@ -34,6 +37,8 @@ export default function IssueView({ c, t, lang, signedIn = false, referral = nul
           </Card>
           <OfficialResponse t={t} lang={lang} />
           <ReferralStatus timeline={c.timeline} referral={referral} t={t} lang={lang} />
+          <ProgressEvidence refId={c.ref} signedIn={signedIn} />
+          {c.statusDetail === "needs_information" && <MoreInfo refId={c.ref} signedIn={signedIn} />}
           {c.status === "referred" && <p role="note" className="rounded-xl border border-amber/60 bg-amber/10 p-3 text-sm">{t.isReferredNote}</p>}
           {c.status === "resolved" && signedIn && <ResolutionFeedback refId={c.ref} />}
         </div>
@@ -42,6 +47,7 @@ export default function IssueView({ c, t, lang, signedIn = false, referral = nul
             <StatusTimeline steps={steps} t={t} lang={lang} />
           </Card>
           <IssueActions refId={c.ref} title={c.title} signedIn={signedIn} />
+          {signedIn && <PlannedPanel as="h3" title={t.rxStillTitle} body={t.rxStillBody} />}
           <p className="text-sm text-muted">{t.isOfficialNote}</p>
         </div>
       </div>

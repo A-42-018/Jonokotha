@@ -7,6 +7,7 @@ import { MAX_CAPTION, MAX_PHOTOS } from "@/lib/report";
 import Button from "../ui/Button";
 import Card from "../ui/Card";
 import Input from "../ui/Input";
+import PlannedPanel from "../ui/PlannedPanel";
 import { useToast } from "../ui/Toast";
 
 export type Photo = { id: string; url: string; kb: number; caption: string; blob: Blob };
@@ -64,6 +65,8 @@ export default function EvidenceStep({ t, lang, photos, onChange }: {
       <Button variant="secondary" icon={<span aria-hidden>📷</span>} loading={busy} disabled={photos.length >= MAX_PHOTOS} onClick={() => input.current?.click()}>
         {busy ? t.evCompressing : t.evAdd}
       </Button>
+
+      <PlannedPanel as="h3" title={t.rxVideoTitle} body={t.rxVideoBody} />
 
       {photos.length === 0 ? (
         <p className="text-muted">{t.evNone}</p>
