@@ -19,14 +19,14 @@ import Dialog from "./ui/Dialog";
 import Input from "./ui/Input";
 import Stepper from "./ui/Stepper";
 import Textarea from "./ui/Textarea";
+import { appendTranscript } from "@/lib/speech";
+import { useSpeech } from "./report/useSpeech";
 import LocationPicker from "./report/LocationPicker";
 import type { Pin } from "@/lib/places";
 import { useToast } from "./ui/Toast";
 import { useKeyboardInset } from "./ui/useKeyboardInset";
 
 export { hasPersonalNumber };
-
-type SR = { new (): { lang: string; onresult: ((e: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null; onend: (() => void) | null; onerror: (() => void) | null; start(): void } };
 
 type Saved = { quick?: string; values?: Partial<ReportValues>; ai?: ReportField[]; edited?: ReportField[]; step?: number; pin?: Pin };
 
@@ -67,8 +67,8 @@ export default function ReportForm({ t, lang, constituencyId }: { t: Dict; lang:
   const [restored, setRestored] = useState(false);
   const [confirmDiscard, setConfirmDiscard] = useState(false);
   const [busy, setBusy] = useState<"" | "draft" | "submit">("");
-  const [listening, setListening] = useState(false);
   const [quickDone, setQuickDone] = useState(false);
+  const speech = useSpeech(lang === "bn" ? "bn-BD" : "en-US", (text) => setQuick((q) => appendTranscript(q, text)));
   const loaded = useRef(false);
   const heading = useRef<HTMLHeadingElement>(null);
   const stepMounted = useRef(false);
@@ -149,19 +149,6 @@ export default function ReportForm({ t, lang, constituencyId }: { t: Dict; lang:
     photos.forEach((p) => URL.revokeObjectURL(p.url));
     reset({ title: "", description: "", area: "" });
     setQuick(""); setAi([]); setEdited([]); setPhotos([]); setPin(undefined); setStep(0); setRestored(false); setQuickDone(false);
-  }
-
-  function speak() {
-    const w = window as unknown as { SpeechRecognition?: SR; webkitSpeechRecognition?: SR };
-    const Rec = w.SpeechRecognition ?? w.webkitSpeechRecognition;
-    if (!Rec) { toast("info", t.speakUnsupported); return; }
-    const r = new Rec();
-    r.lang = lang === "bn" ? "bn-BD" : "en-US";
-    r.onresult = (e) => setQuick((p) => `${p} ${e.results[0][0].transcript}`.trim());
-    r.onend = () => setListening(false);
-    r.onerror = () => setListening(false);
-    setListening(true);
-    r.start();
   }
 
   async function makeDraft() {
@@ -253,12 +240,26 @@ export default function ReportForm({ t, lang, constituencyId }: { t: Dict; lang:
             />
             {warn && hasPersonalNumber(quick) && <PrivacyWarning t={t} />}
             <div className="flex flex-wrap gap-3">
-              <Button variant="secondary" icon={<span aria-hidden>🎤</span>} onClick={speak}>{listening ? t.listening : t.speak}</Button>
+              {speech.listening
+                ? <Button variant="danger" icon={<span aria-hidden>⏹</span>} onClick={speech.stop}>{t.vStop}</Button>
+                : <Button variant="secondary" icon={<span aria-hidden>🎤</span>} onClick={speech.start}>{t.speak}</Button>}
               <Button loading={busy === "draft"} disabled={quick.trim().length < 3 || busy !== ""} onClick={() => void makeDraft()}>
                 {busy === "draft" ? t.drafting : t.draft}
               </Button>
             </div>
             <p role="status" className="sr-only">{busy === "draft" ? t.drafting : ""}</p>
+            {speech.listening && (
+              <div role="status" aria-live="polite" className="rounded-xl border border-civic/30 bg-white p-3 text-sm">
+                <p className="font-medium text-civic"><span aria-hidden>🎤 </span>{t.listening} {t.vLive}</p>
+                <p className="mt-1 min-h-6 text-foreground">{speech.interim || t.vLiveEmpty}</p>
+              </div>
+            )}
+            {speech.problem && (
+              <p role="alert" className="rounded-xl border border-amber/60 bg-amber/10 p-3 text-sm">
+                {speech.problem === "unsupported" ? t.speakUnsupported : speech.problem === "denied" ? t.vDenied : speech.problem === "silence" ? t.vSilence : speech.problem === "network" ? t.vNetwork : t.vOther}
+              </p>
+            )}
+            {!speech.problem && <p className="text-sm text-muted">{t.vHint}</p>}
             {quickDone && <p role="status" className="text-sm font-medium text-leaf-strong">✓ {t.quickDone}</p>}
             {ai.length > 0 && <p className="text-sm text-muted">{t.aiNote}</p>}
           </Card>
