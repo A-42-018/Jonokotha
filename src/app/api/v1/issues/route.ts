@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { ApiError, parse, run } from "@/lib/api";
+import { detectEmergency, flagEmergency } from "@/lib/emergency";
 import { assertConstituency, listPublic, PublicFilters, submitIssue } from "@/lib/issues-service";
 import { Lat, Lng, lookupByPoint } from "@/lib/geo";
 import { PageQuery } from "@/lib/pagination";
@@ -34,7 +35,9 @@ export async function POST(req: Request) {
     await assertConstituency(c.sb, input.constituencyId);
     try {
       const ref = await submitIssue(c.sb, c.user!.id, input);
-      return { status: 201, data: { ref, status: "submitted" } };
+      const emergency = detectEmergency(`${input.title}\n${input.description}`);
+      if (emergency) await flagEmergency(c.sb, "issue", ref);
+      return { status: 201, data: { ref, status: "submitted", ...(emergency ? { emergency } : {}) } };
     } catch (e) {
       if (e instanceof ApiError) throw e;
       throw new ApiError("internal_error", "The report could not be saved.");

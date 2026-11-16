@@ -6,7 +6,12 @@ const need = [
   ["TRANSCRIBE_BASE_URL", false], ["TRANSCRIBE_API_KEY", false], ["TRANSCRIBE_MODEL", false], ["MALWARE_SCAN_URL", false],
   ["VAPID_PUBLIC_KEY", false], ["VAPID_PRIVATE_KEY", false], ["VAPID_SUBJECT", false], ["EMAIL_PROVIDER", false], ["EMAIL_API_KEY", false], ["EMAIL_FROM", false],
   ["CRON_SECRET", false], ["NEXT_PUBLIC_APP_URL", false],
+  // Phase 3
+  ["SENTRY_DSN", false], ["ALERT_WEBHOOK_URL", false], ["EMBEDDINGS_MODEL", false],
 ];
+// Masterplan §26 names accepted as aliases (keep equal to src/lib/env-aliases.ts; tests/unit/env-aliases.test.ts checks it).
+const ALIASES = { AI_MODEL: "ANTHROPIC_MODEL", EMBEDDING_MODEL: "EMBEDDINGS_MODEL", EMBEDDING_ENDPOINT: "EMBEDDINGS_BASE_URL", EMBEDDING_API_KEY: "EMBEDDINGS_API_KEY", STT_API_KEY: "TRANSCRIBE_API_KEY", STT_ENDPOINT: "TRANSCRIBE_BASE_URL", STT_MODEL: "TRANSCRIBE_MODEL" };
+for (const [a, c] of Object.entries(ALIASES)) if (process.env[a] && !process.env[c]) process.env[c] = process.env[a];
 let bad = 0;
 const row = (ok, name, note = "") => { console.log(`${ok ? "OK     " : "FAIL   "} ${name}${note ? " — " + note : ""}`); if (!ok) bad++; };
 const env = process.env;

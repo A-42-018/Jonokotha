@@ -1,0 +1,33 @@
+name: Nightly database backup
+# Interim backup while the Supabase project is on the Free plan (no scheduled backups). Dumps the public and auth schemas,
+# encrypts with a passphrase, and keeps the file as a workflow artifact for 14 days. Needs repository secrets:
+#   SUPABASE_DB_URL      Dashboard > Connect > session pooler connection string (read access is enough)
+#   BACKUP_PASSPHRASE    long random string, also stored in the team password manager (without it a backup cannot be read)
+# Move to Supabase's own daily backups and point-in-time recovery on a paid plan (docs/aibc/restore-drill.md).
+on:
+  schedule: [{ cron: "23 20 * * *" }]   # 02:23 Bangladesh time
+  workflow_dispatch:
+jobs:
+  dump:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install matching PostgreSQL client
+        run: |
+          sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+          wget -qO- https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo tee /etc/apt/trusted.gpg.d/pgdg.asc >/dev/null
+          sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client-17
+      - name: Dump and encrypt
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          test -n "$SUPABASE_DB_URL" && test -n "$BACKUP_PASSPHRASE" || { echo "::error::secrets missing"; exit 1; }
+          /usr/lib/postgresql/17/bin/pg_dump "$SUPABASE_DB_URL" --no-owner --no-privileges --schema=public --schema=auth -Fc -f backup.dump
+          gpg --batch --yes --pinentry-mode loopback --passphrase "$BACKUP_PASSPHRASE" --symmetric --cipher-algo AES256 -o "jonokotha-$(date -u +%Y%m%d).dump.gpg" backup.dump
+          rm backup.dump
+      - uses: actions/upload-artifact@v4
+        with:
+          name: db-backup
+          path: "*.dump.gpg"
+          retention-days: 14
+          if-no-files-found: error

@@ -165,3 +165,32 @@ Everything below needs an `Idempotency-Key` only where stated; POSTs accept one 
 | `POST /admin/representatives/{id}/verify`, `PUT /admin/representatives/{id}/fields`, `POST /admin/accounts/{id}` | Admins. Verification needs an official source link; each field a source and check date; role or suspension changes need a reason and not on yourself. Audited. |
 | `GET /admin/ai/runs`, `GET/POST /admin/ai/evals`, `GET /admin/audit` | Admins. Reading the run log or the audit trail is itself audited (`admin.access`). |
 | `POST /admin/constituencies/import` `{source, geojson}`, `POST /admin/knowledge/ingest` `{rules?}` | Boundary import from a sourced file (closed rings inside Bangladesh, source name, URL, licence and fetch date required); knowledge index rebuild (idempotent). |
+
+## Phase 3 (migrations 0021–0023)
+
+All routes follow the common rules (session identity, Zod validation, rate limit, structured errors, `request_id`). A browser request that changes data and carries an `Origin` header for another site gets 403 `cross_site`. On `/admin/*` and `/office/*`, MPs, moderators and admins on a password-only session get 403 `mfa_required` once `enforce_mfa` is true.
+
+| Method and path | Public or private | Audit | Notes |
+|---|---|---|---|
+| `GET /me/profile` | private | no | Own profile and `deletion_requested_at`. |
+| `PATCH /me/profile` `{display_name?, preferred_language?: bn\|en}` | private | `privacy.profile_corrected` (before and after) | Strict body; unknown fields are 422. 10 per minute. |
+| `GET /me/export` | private | `privacy.export` | Everything the person gave or caused, as a JSON download (`Content-Disposition: attachment`, `no-store`). Excludes role, staff notes and other people's data. 3 per minute. |
+| `POST /me/deletion-request` | private | `privacy.deletion_requested` | 202. Repeating is harmless. Erasure runs in the daily job after 14 days. |
+| `DELETE /me/deletion-request` | private | `privacy.deletion_cancelled` | `{cancelled: boolean}`. |
+| `GET /me/consents`, `POST /me/consents` `{consent_type, policy_version, granted}` | private | `privacy.consent_granted` / `_withdrawn` | One open row per type; withdrawing stamps `withdrawn_at`. |
+| `GET /office/kpis?constituency=&days=30` | private | no | Office manager or MP (`view_analytics`). Every metric has `definition`; groups under 5 are `null` with `suppressed: true`. Metrics: received, unassigned workload, median hours to first response, forwarding rate, reopen rate, median hours in each status, handling time with versus without an accepted copilot draft (an association, not proof of effect), AI acceptance per agent. |
+| `GET /admin/kpis?days=30` | private | no | Administrators. New accounts, active reporters, issues submitted, abuse report rate, content hidden, notification delivery and dead letters, AI error rate, AI cost. |
+| `GET /api/health` | public | no | `{ok}` only; 503 when the database is unreachable. For uptime checks. |
+| `POST\|GET /api/internal/maintenance` | internal | `privacy.retention_run` | `Authorization: Bearer $CRON_SECRET`. Daily: deletes expired idempotency keys, rate-limit rows, notifications, AI runs and old deliveries; erases accounts past the 14-day grace; removes their photos from Storage; checks queue and AI health and posts alerts to `ALERT_WEBHOOK_URL`. |
+
+Imminent-harm fields (no new route): `POST /ai/intake` may return `source: "emergency"` and an `emergency` object; `POST /issues` and `POST /questions` may return the same `emergency` object next to their normal result. Shape: `{kind: self_harm|violence|child_in_danger, guidance: {bn, en}, numbers: ["999", ...]}` (type `Emergency` in `src/lib/types.ts`). The UI must show `guidance` prominently and must not replace it with model text. The item is flagged in the moderators' queue as `unsafe` (automatic).
+
+Error codes added: `forbidden` with `field_errors._` = `cross_site` or `mfa_required`.
+
+### Frontend handoff for Phase 3 (backend cannot do these)
+
+1. **TOTP enrolment and challenge** (`supabase.auth.mfa.enroll / challenge / verify`) for MP, moderator and admin sign-in. When it ships, backend sets `enforce_mfa` to true. Until then a 403 with `field_errors._ = "mfa_required"` on `/admin/*` or `/office/*` should route the person to the challenge screen.
+2. **Privacy notice and terms pages** from `docs/aibc/privacy-notice.md` and `docs/aibc/terms.md` (Bangla first, drafts until counsel signs off). Record acceptance with `POST /me/consents`.
+3. **"আমার তথ্য" and "অ্যাকাউন্ট মুছুন"** in settings: `GET /me/export`, `POST` and `DELETE /me/deletion-request`, date from `GET /me/profile`.
+4. **Emergency guidance**: when `source === "emergency"` or an `emergency` object is returned, show `guidance[lang]` and the numbers prominently, above any other result.
+5. **Report-only CSP**: open the app with the browser console and report any `Content-Security-Policy-Report-Only` violation; backend switches `CSP_MODE=enforce` when a week passes clean.

@@ -36,3 +36,8 @@ export interface CaseRecord extends IntakeDraft {
 }
 
 export interface Agency { id: string; nameBn: string; nameEn: string; categories: Category[]; source: string; url?: string; checkedAt?: string }
+
+/** Imminent-harm result (Phase 3, backend M.8). Returned by POST /ai/intake (`source: "emergency"`), POST /issues and POST /questions.
+ *  The UI shows `guidance` prominently, in the user's language, and never replaces it with model text. Wording is a draft pending review. */
+export type EmergencyKind = "self_harm" | "violence" | "child_in_danger";
+export interface Emergency { kind: EmergencyKind; guidance: { bn: string; en: string }; numbers: string[] }

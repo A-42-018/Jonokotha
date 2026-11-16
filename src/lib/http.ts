@@ -29,3 +29,9 @@ export async function readJson(req: Request, maxBytes = MAX_BODY_BYTES): Promise
     return { ok: false, res: NextResponse.json({ error: "invalid" }, { status: 400 }) };
   }
 }
+
+/** True when there is no Origin header, or it names the same host the request was sent to. */
+export function sameOrigin(origin: string | null, host: string): boolean {
+  if (!origin) return true;
+  try { return new URL(origin).host === host; } catch { return false; }
+}

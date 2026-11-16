@@ -112,6 +112,27 @@ Exit: all §4.2 features work end to end against the frontend on staging.
 
 Exit: security checklist signed, eval results published, restore drill passed.
 
+**Status 2026-11-16 (Phase 3 built; exit criteria NOT all met):**
+
+| Item | State | Where |
+|---|---|---|
+| 1 Security review | Done as a self-review; open findings listed | `docs/aibc/security-review.md`. Built: security headers (CSP report-only), CSRF origin check, MFA gate with stable error, 0 audit findings |
+| 2 AI evaluation | Run and published with limitations; several measures **not measured** (embeddings, copilot quality, citations, Bangla speech) | `docs/aibc/eval-results.md`; offline gate `npm run eval:gate` in CI |
+| 3 Backups and restore drill | Script and interim nightly backup workflow built; **no production drill done; backups not running until secrets are set; Free plan has no Supabase backups** | `docs/aibc/restore-drill.md` |
+| 4 Monitoring | Sentry hook and alert webhook built (inactive until `SENTRY_DSN`, `ALERT_WEBHOOK_URL` are set); `/api/health` for an uptime check (the uptime service itself is not set up); dead-letter state already existed for deliveries; health counts in the daily job | `src/lib/monitor.ts` |
+| 5 Runbooks | Written, names and numbers blank | `docs/aibc/runbooks/` |
+| 6 Performance | `EXPLAIN` on 50,000 issues; filtered lists and the office list were scanning (5 to 35 ms, growing); migration 0022 adds matching indexes (office list 5 ms to 0.05 ms). Similarity and feed queries were not load-tested | migration 0022 |
+| 7 Privacy | Export, correction, deletion with 14-day grace, consent records, retention sweep, PIA, notice and terms drafts (counsel review pending) | migration 0021, `docs/aibc/pia.md` |
+| 8 Docs | Backend-owned documents above written with evidence; items still needing people are listed in each file | `docs/aibc/` |
+| M.6 MFA | Enforcement tested; **flag still off** until TOTP screens exist | `security-review.md` |
+| M.8 Emergency path | Rules, fixed guidance, moderator flag, tests; wording needs native and counsel review | `docs/aibc/runbooks/imminent-harm.md` |
+| M.10 Eval in CI | Offline floors fail the build on regression; live-model measures stay manual | `.github/workflows/ci.yml` |
+| M.11 KPIs | Office and admin KPI queries with definitions and suppression (migration 0023) | `docs/api-v1.md` |
+| M.12 Release gate | `npm run check:release` (automatable items) | `scripts/check-release.mjs` |
+| M.13 Env names | §26 aliases accepted; `check:env` lists the new settings | `src/lib/env-aliases.ts` |
+
+Not done and needing people: independent penetration test, restore drill on real backups, TOTP enrolment screens then `enforce_mfa=true`, counsel review of privacy notice and terms, native-Bangla review of emergency wording, Sentry project and uptime monitor, a shared IP rate limiter, malware scanner, Storage backup. M.7 quarantine bucket not built. M.9 notice and PIA exist as drafts; the frontend still has to render them.
+
 ---
 
 ## Phase 4 — Freeze and rehearse (21–25 Dec)

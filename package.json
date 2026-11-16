@@ -17,7 +17,10 @@
     "test:db": "vitest run --config vitest.db.config.mts",
     "test:rls": "vitest run --config vitest.db.config.mts tests/rls",
     "test:api": "vitest run --config vitest.db.config.mts tests/api",
-    "eval": "vitest run --config vitest.eval.config.mts"
+    "eval": "vitest run --config vitest.eval.config.mts",
+    "eval:gate": "node scripts/eval-gate.mjs",
+    "check:release": "node scripts/check-release.mjs",
+    "drill:restore": "bash scripts/restore-drill.sh"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.8.0",

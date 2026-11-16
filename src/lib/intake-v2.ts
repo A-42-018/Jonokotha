@@ -2,6 +2,7 @@ import { z } from "zod";
 import { runAgent } from "./ai/run";
 import { INTAKE_V2, TRANSLATE_V1 } from "./ai/prompts";
 import { heuristicDraft, type AiContext } from "./intake";
+import { detectEmergency, type Emergency } from "./emergency";
 import { redactPii, type PiiKind } from "./pii";
 import { CATEGORIES } from "./types";
 
@@ -37,13 +38,21 @@ const Out = z.object({
 
 export interface IntakeV2 {
   title: string; category: string; description: string; area_hint: string;
-  urgency: Urgency; urgency_guidance: string; language: Language; pii_warnings: PiiKind[]; source: "ai" | "fallback";
+  urgency: Urgency; urgency_guidance: string; language: Language; pii_warnings: PiiKind[]; source: "ai" | "fallback" | "emergency";
+  /** Set when the text suggests danger to life. The citizen sees fixed guidance and no model is called. */
+  emergency?: Emergency;
 }
 
 /** Drafts a report from free text. It never submits anything; the citizen reviews and submits. */
 export async function draftIntakeV2(raw: string, requested: Language | "auto", ctx: AiContext = {}): Promise<IntakeV2> {
   const { text, found } = redactPii(raw);
   const language = chooseLanguage(raw, requested);
+  // Imminent harm: rules decide, no model is called, and the answer is fixed text with emergency numbers (never an AI reply).
+  const emergency = detectEmergency(raw);
+  if (emergency) {
+    const h = heuristicDraft(text);
+    return { title: h.title.length >= 3 ? h.title : "সমস্যা", category: h.category, description: h.description, area_hint: "", urgency: "urgent", urgency_guidance: emergency.guidance[language], language, pii_warnings: found, source: "emergency", emergency };
+  }
   const out = await runAgent({
     agent: "intake", prompt: INTAKE_V2, schema: Out, input: `OUTPUT_LANGUAGE: ${language}\n---\n${text.slice(0, 3000)}`, maxTokens: 700, ...ctx,
     tool: { name: "submit_draft", description: "Return the drafted civic report." },

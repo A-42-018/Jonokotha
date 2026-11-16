@@ -2,9 +2,10 @@ import { createHash, randomUUID } from "node:crypto";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import type { ZodType } from "zod";
-import type { Actor } from "./auth";
-import { clientIp } from "./http";
+import { mfaRequired, type Actor } from "./auth";
+import { clientIp, sameOrigin } from "./http";
 import { rateLimit } from "./rate-limit";
+import { captureError } from "./monitor";
 import { currentUser } from "./supabase/server";
 
 /**
@@ -122,6 +123,15 @@ export async function run(req: Request, params: Record<string, string>, opts: Op
     const { data: body, raw } = opts.rawBody ? { data: {}, raw: "" } : await readBody(req, opts.maxBytes ?? 16 * 1024);
     const { sb, user, actor } = await currentUser(rid);
     actorId = user?.id;
+    // CSRF, second layer (the first is SameSite=Lax on the session cookie): a browser request that changes data must come from this site.
+    // Requests without an Origin header (server-to-server, tests, curl) are not browser cross-site requests and carry no ambient cookies of a victim.
+    if (req.method !== "GET" && req.method !== "HEAD" && !sameOrigin(req.headers.get("origin"), url.host)) throw new ApiError("forbidden", "Cross-site requests are not allowed.", { _: "cross_site" });
+    // MFA gate (masterplan §14): MPs, moderators and admins need a TOTP (aal2) session on privileged routes once `enforce_mfa` is on.
+    // The database enforces the same rule in every policy; this turns it into a clear 403 with a stable code.
+    if (actor && actor.aal !== "aal2" && mfaRequired(actor) && /^\/api\/v1\/(admin|office)(\/|$)/.test(url.pathname)) {
+      const { data: ok } = await sb.rpc("mfa_ok");
+      if (ok === false) throw new ApiError("forbidden", "Two-factor sign-in is required for this account.", { _: "mfa_required" });
+    }
     if (opts.auth === "required" && !user) throw new ApiError("unauthenticated", "Sign in to continue.");
 
     if (user && opts.limit?.user) {
@@ -156,7 +166,10 @@ export async function run(req: Request, params: Record<string, string>, opts: Op
   } catch (e) {
     if (idem) await idem.sb.rpc("idempotency_release", { p_key: idem.key, p_endpoint: opts.name }).then(() => null, () => null);
     const err = e instanceof ApiError ? e : null;
-    if (!err) log({ level: "error", request_id: rid, route: opts.name, error: (e as Error)?.name ?? "Error", detail: String((e as Error)?.message ?? e).slice(0, 200) });
+    if (!err) {
+      log({ level: "error", request_id: rid, route: opts.name, error: (e as Error)?.name ?? "Error", detail: String((e as Error)?.message ?? e).slice(0, 200) });
+      await captureError(e, { route: opts.name, request_id: rid });
+    }
     const api = err ?? new ApiError("internal_error", "Something went wrong. Quote the request_id if you contact support.");
     status = ERROR_STATUS[api.code];
     return problem(api, rid);

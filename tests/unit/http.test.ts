@@ -31,3 +31,13 @@ describe("limited", () => {
     expect(res?.headers.get("Retry-After")).toBeTruthy();
   });
 });
+
+import { sameOrigin } from "@/lib/http";
+describe("sameOrigin (CSRF second layer)", () => {
+  it("accepts no Origin and the same host, refuses others and garbage", () => {
+    expect(sameOrigin(null, "jonokotha.vercel.app")).toBe(true);
+    expect(sameOrigin("https://jonokotha.vercel.app", "jonokotha.vercel.app")).toBe(true);
+    expect(sameOrigin("https://evil.example", "jonokotha.vercel.app")).toBe(false);
+    expect(sameOrigin("null", "jonokotha.vercel.app")).toBe(false);
+  });
+});

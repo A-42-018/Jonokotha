@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
+import { detectEmergency, flagEmergency } from "./emergency";
 import { ApiError, fromDbError, parse, rpc, type Ctx, type Result } from "./api";
 import { afterCursor, decodeCursor, PageQuery, toPage } from "./pagination";
 import { redactPii } from "./pii";
@@ -92,7 +93,9 @@ export async function askQuestion(c: Ctx): Promise<Result> {
   const b = parse(Ask, c.body);
   const t = clean(b.title), d = clean(b.body);
   const data = await rpc<{ ref: string }>(c.sb, "ask_question", { p_constituency: b.constituency, p_visibility: b.visibility, p_title: t.text, p_body: d.text });
-  return { status: 201, data: { ...data, pii_removed: [...new Set([...t.found, ...d.found])] } };
+  const emergency = detectEmergency(`${b.title}\n${b.body}`);
+  if (emergency) await flagEmergency(c.sb, "question", data.ref);
+  return { status: 201, data: { ...data, pii_removed: [...new Set([...t.found, ...d.found])], ...(emergency ? { emergency } : {}) } };
 }
 
 const Q_COLS = "ref,constituency_key,title,body,status,created_at,last_message_at,message_count,is_demo";
