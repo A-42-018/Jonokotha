@@ -53,4 +53,16 @@ test.describe("phase 2 public pages", () => {
     await page.getByRole("tab", { name: "মানচিত্র" }).click();
     await expect(page.getByRole("region", { name: /সমস্যার মানচিত্র/ })).toBeVisible();
   });
+
+  test("ideas: sample banner, tabs switch, support needs sign-in, new idea needs sign-in", async ({ page }) => {
+    await page.goto("/ideas");
+    await expect(page.getByText("নমুনা: এখানকার আইডিয়া").first()).toBeVisible();
+    await expect(page.getByRole("link", { name: /সমর্থন জানাতে সাইন ইন/ }).first()).toBeVisible();
+    await page.getByRole("tab", { name: "বিবেচনায়" }).click();
+    await expect(page.getByRole("tabpanel").filter({ hasText: "বিবেচনায় আছে" }).first()).toBeVisible();
+    await page.getByLabel("আইডিয়া খুঁজুন").fill("zzzz");
+    await expect(page.getByRole("heading", { name: "কিছু মেলেনি" })).toBeVisible();
+    await page.goto("/ideas/new");
+    await expect(page.getByRole("link", { name: "সাইন ইন" }).first()).toBeVisible();
+  });
 });
