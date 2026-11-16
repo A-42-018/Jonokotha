@@ -21,10 +21,11 @@ import { push } from "./push";
 import { referral } from "./referral";
 import { reportExtras } from "./reportExtras";
 import { security } from "./security";
+import { refresh } from "./refresh";
 import { share } from "./share";
 import { voice } from "./voice";
 
-const parts = [explore, location, voice, ideas, mp, engage, ask, feed, share, pages, office, admin, offline, security, mfa, emergency, legal, metrics, push, community, capability, referral, reportExtras, nav, home];
+const parts = [explore, location, voice, ideas, mp, engage, ask, feed, share, pages, office, admin, offline, security, mfa, emergency, legal, metrics, push, community, capability, referral, reportExtras, refresh, nav, home];
 
 type UnionToIntersection<U> = (U extends unknown ? (x: U) => void : never) extends (x: infer I) => void ? I : never;
 type Bn = UnionToIntersection<(typeof parts)[number]["bn"]>;

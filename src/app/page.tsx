@@ -1,15 +1,16 @@
 import Link from "next/link";
 import OnboardingCard from "@/components/citizen/OnboardingCard";
+import AreaNews from "@/components/citizen/AreaNews";
 import FollowedFeed from "@/components/citizen/FollowedFeedLazy";
 import HomeFooter from "@/components/citizen/HomeFooter";
-import IdeaCtaCard from "@/components/citizen/IdeaCtaCard";
-import RecentIssues from "@/components/citizen/RecentIssues";
-import ReportCtaCard from "@/components/citizen/ReportCtaCard";
+import ActionCards from "@/components/citizen/ActionCards";
+import HomeHero from "@/components/citizen/HomeHero";
 import { ActivePolls, AreaRepCard, ExploreLinks, HomeSnapshot, PopularIdeas } from "@/components/citizen/HomeBlocks";
 import { findConstituency } from "@/lib/constituency";
 import { getConstituencyId } from "@/lib/constituency-server";
 import { DEMO_CONSTITUENCY } from "@/lib/demo-data";
 import { dict, getLang } from "@/lib/i18n";
+import { nowMs } from "@/lib/explore";
 import { loadAreaRep, loadPopularIdeas, loadSnapshot, type HomeRep, type HomeIdea, type Loaded, type Snapshot } from "@/lib/home-data";
 import { listCases } from "@/lib/store";
 import { currentUser } from "@/lib/supabase/server";
@@ -19,6 +20,7 @@ export default async function Home() {
   const lang = await getLang();
   const t = dict[lang];
   const area = findConstituency(await getConstituencyId()) ?? DEMO_CONSTITUENCY;
+  const areaName = lang === "bn" ? area.nameBn : area.nameEn;
 
   let cases: CaseRecord[] = [];
   let failed = false;
@@ -38,25 +40,23 @@ export default async function Home() {
   }
 
   return (
-    <div className="space-y-8">
-      <div className="space-y-2">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img fetchPriority="high" decoding="async" width={2432} height={1792} src="/illustrations/hero-mobile.svg" alt="" className="mx-auto w-full max-w-md rounded-2xl" />
-        <h1 className="text-center text-2xl font-semibold text-civic sm:text-3xl">{t.tagline}</h1>
-      </div>
+    <div className="space-y-6 lg:space-y-8">
+      <HomeHero t={t} />
       <OnboardingCard />
-      <div className="grid gap-4 sm:grid-cols-2">
-        <ReportCtaCard t={t} />
-        <IdeaCtaCard t={t} />
+      <ActionCards t={t} />
+      <HomeSnapshot t={t} lang={lang} snap={snap} areaName={areaName} sample={"sample" in area && !!area.sample} />
+      <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+        <div className="space-y-8">
+          {signedIn ? <FollowedFeed signedIn /> : <AreaNews t={t} lang={lang} cases={cases} failed={failed} now={nowMs()} />}
+          <PopularIdeas t={t} lang={lang} ideas={ideas} />
+        </div>
+        <div className="space-y-6">
+          <AreaRepCard t={t} lang={lang} rep={rep} areaName={areaName} />
+          <ActivePolls t={t} />
+          <ExploreLinks t={t} />
+          {isStaff && <Link href="/office" className="inline-flex min-h-11 items-center text-civic underline">{t.officeCta}</Link>}
+        </div>
       </div>
-      <HomeSnapshot t={t} lang={lang} snap={snap} areaName={lang === "bn" ? area.nameBn : area.nameEn} sample={"sample" in area && !!area.sample} />
-      <FollowedFeed signedIn={signedIn} />
-      <RecentIssues t={t} lang={lang} cases={cases} failed={failed} />
-      <PopularIdeas t={t} lang={lang} ideas={ideas} />
-      <AreaRepCard t={t} lang={lang} rep={rep} areaName={lang === "bn" ? area.nameBn : area.nameEn} />
-      <ActivePolls t={t} />
-      <ExploreLinks t={t} />
-      {isStaff && <Link href="/office" className="inline-flex min-h-11 items-center text-civic underline">{t.officeCta}</Link>}
       <HomeFooter t={t} />
     </div>
   );
