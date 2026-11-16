@@ -20,7 +20,8 @@
     "eval": "vitest run --config vitest.eval.config.mts",
     "eval:gate": "node scripts/eval-gate.mjs",
     "check:release": "node scripts/check-release.mjs",
-    "drill:restore": "bash scripts/restore-drill.sh"
+    "drill:restore": "bash scripts/restore-drill.sh",
+    "backup:local": "bash scripts/backup-local.sh"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.8.0",

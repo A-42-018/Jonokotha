@@ -34,3 +34,9 @@ Photos in the private `issue-media` bucket are not covered by the database dump.
 | 2026-11-16 | **production**, read-only `supabase db dump --remote` (schema, then data), restored into a scratch database in the local container | 1 s (tiny data: 3 profiles, 1 issue) | 11 tables compared, all match; 283 functions and 57 policies restored | **public schema restores.** Not covered: the `auth` schema (scratch used a stub `auth.users`, so sign-in accounts were not restored or checked), Storage objects, extensions on a real new project. Dump files were deleted afterwards (they held emails) |
 
 Drill result: PARTIAL (public schema restored and counted; auth, Storage and a restore into a real Supabase project not yet done)
+
+## Free backup without GitHub Actions (added after the Actions budget block)
+
+`npm run backup:local` (`scripts/backup-local.sh`) dumps the linked project with the Supabase CLI (schema, then data including auth users), encrypts it with AES-256 using `~/.jonokotha-backup-passphrase` (created on first run, never printed; copy it to the password manager), and keeps the newest 30 files in `~/jonokotha-backups/`. Decrypt with `scripts/backup-local.sh --decrypt <file> <outdir>`. It needs this Mac to be on and logged in to the Supabase CLI; copy the folder off the Mac (external disk or a cloud drive; the files are encrypted). To run it daily on macOS: `crontab -e` and add `17 21 * * * cd /Users/alifmahmud/Projects/jonokotha && npm run backup:local >> ~/jonokotha-backups/backup.log 2>&1` (a sleeping Mac skips runs). Not covered: Storage objects, Auth settings.
+
+The `.github/workflows/backup.yml` workflow stays in the repo for when the GitHub Actions budget is fixed.

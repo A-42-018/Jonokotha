@@ -1,8 +1,9 @@
 name: Scheduled jobs
 # Notification delivery every 5 minutes (GitHub's shortest schedule; Vercel Hobby crons are daily only). The daily maintenance
 # job runs from vercel.json. Needs repository secret CRON_SECRET (same value as in Vercel) and variable APP_URL.
+# The schedule is switched off while GitHub Actions is blocked by the account budget (it would only send failure emails).
+# To switch it back on, add under "on:":   schedule: [{ cron: "*/5 * * * *" }]   (jobs) or "*/15 * * * *" (uptime).
 on:
-  schedule: [{ cron: "*/5 * * * *" }]
   workflow_dispatch:
 jobs:
   deliver:

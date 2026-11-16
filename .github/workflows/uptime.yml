@@ -2,8 +2,9 @@ name: Uptime check
 # Calls /api/health every 15 minutes; a failed run emails the repository watchers (GitHub's default for failed scheduled workflows).
 # Set the repository variable APP_URL to the production URL (Settings > Secrets and variables > Actions > Variables).
 # Not a substitute for a paid uptime service, but it needs no account. GitHub may delay or skip scheduled runs under load.
+# The schedule is switched off while GitHub Actions is blocked by the account budget (it would only send failure emails).
+# To switch it back on, add under "on:":   schedule: [{ cron: "*/5 * * * *" }]   (jobs) or "*/15 * * * *" (uptime).
 on:
-  schedule: [{ cron: "*/15 * * * *" }]
   workflow_dispatch:
 jobs:
   health:
