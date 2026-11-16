@@ -4,6 +4,7 @@ import { useState } from "react";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import { Checkbox } from "@/components/ui/Choice";
+import DataRights from "@/components/me/DataRights";
 import Dialog from "@/components/ui/Dialog";
 import { useToast } from "@/components/ui/Toast";
 import { useLang } from "@/components/ui/useLang";
@@ -36,6 +37,7 @@ export default function SettingsPanel({ email, role }: { email: string | null; r
           <div className="space-y-2"><p className="text-muted">{t.stSignedOut}</p><Link href="/login" className="inline-flex min-h-11 items-center text-civic underline">{t.signIn}</Link></div>
         )}
       </Card>
+      <DataRights signedIn={!!email} />
       <Card title={t.stData}>
         <p className="mb-3 text-muted">{t.stDataBody}</p>
         <Button variant="danger" onClick={() => setConfirm(true)}>{t.stClear}</Button>
@@ -44,6 +46,8 @@ export default function SettingsPanel({ email, role }: { email: string | null; r
         <ul className="space-y-1">
           <li><Link href="/help" className="inline-flex min-h-11 items-center text-civic underline">{t.hpTitle}</Link></li>
           <li><Link href="/privacy" className="inline-flex min-h-11 items-center text-civic underline">{t.hpPrivacyLink}</Link></li>
+          <li><Link href="/terms" className="inline-flex min-h-11 items-center text-civic underline">{t.lgToTerms}</Link></li>
+          <li><Link href="/challenge" className="inline-flex min-h-11 items-center text-civic underline">{t.lgToChallenge}</Link></li>
         </ul>
       </Card>
       <Dialog open={confirm} onClose={() => setConfirm(false)} title={t.stClearTitle} description={t.stClearBody}

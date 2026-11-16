@@ -2,6 +2,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import PublicNotice from "@/components/PublicNotice";
 import Button, { buttonClass } from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import { Checkbox } from "@/components/ui/Choice";
@@ -118,6 +119,7 @@ function NewIdeaInner({ constituency, signedIn }: { constituency: string; signed
       <Select label={t.idFCost} optional hint={t.idFCostHint} value={f.cost} onChange={(e) => set("cost", e.target.value)}
         options={[{ value: "", label: t.idCostNone }, { value: "s", label: t.idCostS }, { value: "m", label: t.idCostM }, { value: "l", label: t.idCostL }]} />
       <Checkbox label={t.idFAck} checked={f.ack} error={errors.ack} onChange={(e) => set("ack", e.target.checked)} />
+      <PublicNotice kind="idea" />
       <Button type="submit" size="lg" full loading={post.isPending}>{post.isPending ? t.idPublishing : t.idPublish}</Button>
     </form>
   );

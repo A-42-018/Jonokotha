@@ -12,6 +12,7 @@ import {
 import { CATEGORIES, type Category } from "@/lib/categories";
 import CategoryPicker from "./report/CategoryPicker";
 import EvidenceStep, { type Photo } from "./report/EvidenceStep";
+import PublicNotice from "@/components/PublicNotice";
 import PrivacyWarning from "./report/PrivacyWarning";
 import ReportSuccess from "./ReportSuccess";
 import ReportQueued from "./offline/ReportQueued";
@@ -338,6 +339,7 @@ function ReportFormInner({ t, lang, constituencyId }: { t: Dict; lang: Lang; con
         <div className="space-y-4">
           <p className="text-muted">{t.reviewHint}</p>
           {warn && <PrivacyWarning t={t} />}
+          <PublicNotice kind="issue" />
           {ai.length > 0 && <p className="text-sm text-muted">{t.aiNote}</p>}
           <ReviewRow t={t} label={t.fCategory} badge={badge("category")} onEdit={() => setStep(0)}>
             {category ? (

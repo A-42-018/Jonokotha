@@ -7,6 +7,7 @@ import QueryProvider from "@/components/QueryProvider";
 import { ApiError } from "@/lib/api-client";
 import { askBody, askQuestion, type Asked } from "@/lib/ask-api";
 import { newId } from "@/lib/offline-queue";
+import PublicNotice from "@/components/PublicNotice";
 import Button, { buttonClass } from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import { RadioGroup } from "@/components/ui/Choice";
@@ -83,6 +84,7 @@ function AskInner({ signedIn, constituency }: { signedIn: boolean; constituency:
       <Textarea label={t.askMessage} rows={6} maxLength={2000} value={message} error={errs.message ? t.askErrMessage : undefined} onChange={(e) => setMessage(e.target.value)} />
       <p className="text-sm text-muted">{t.askGuidance}</p>
       <p className="text-sm text-muted">{t.askRateNote}</p>
+      {kind === "public" && <PublicNotice kind="question" />}
       <Button type="submit" size="lg" full loading={send.isPending}>{t.askSend}</Button>
       {sent && (
         <div aria-live="polite" className="space-y-2">
