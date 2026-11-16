@@ -194,3 +194,80 @@ Error codes added: `forbidden` with `field_errors._` = `cross_site` or `mfa_requ
 3. **"আমার তথ্য" and "অ্যাকাউন্ট মুছুন"** in settings: `GET /me/export`, `POST` and `DELETE /me/deletion-request`, date from `GET /me/profile`.
 4. **Emergency guidance**: when `source === "emergency"` or an `emergency` object is returned, show `guidance[lang]` and the numbers prominently, above any other result.
 5. **Report-only CSP**: open the app with the browser console and report any `Content-Security-Policy-Report-Only` violation; backend switches `CSP_MODE=enforce` when a week passes clean.
+
+## Phase 6 (migrations 0060–0062): pilot readiness and operations
+
+All routes follow the common rules (session identity, strict Zod bodies, rate limit, structured errors, `request_id`, CSRF origin check, MFA gate on `/admin/*` and `/office/*`). Admin routes need an administrator; everything is also enforced by the database (RLS and function checks), so a missing UI check never opens a hole. Error details come as `field_errors._`: `licence_not_checked`, `second_person`, `consent_required`, `already_offered`, `already_held`, `severity_blocks_acceptance`. Design notes and procedures: `docs/aibc/pilot/`.
+
+### Public (no sign-in)
+| Method and path | Notes |
+|---|---|
+| `GET /helplines` | Verified, in-date helplines only: `key, number, name_bn, name_en, purpose_*, source_url, verified_at, review_due_at, is_demo`. Cached 5 min. Never shows who verified |
+| `GET /data-sources` | Enabled, licence-checked sources: `key, name, kind, url, license, attribution, is_demo, last_run_at`. Show the attribution (ODbL) where OSM data is used |
+| `GET /retention-policies` | `data_class, description, retain_days, action, status (enforced\|proposed), counsel_reviewed` |
+| `GET /service-notices` | Active notices now: `severity (info\|maintenance\|degraded\|outage), title_bn/en, body_bn/en, starts_at, ends_at`. Cached 30 s. For the status banner |
+| `GET /kpi-baselines?constituency=` | Published baselines only: `metric_key, value, n, suppressed, period_*, definition, method, published_at, is_sample`. Value and n are null when suppressed (fewer than 5) |
+
+### Citizen
+| Method and path | Body | Audit | Notes |
+|---|---|---|---|
+| `POST /me/eval-examples` | `{issue_ref, language?: bn\|en\|mixed}` | `eval.example_submitted` | Offers one of the caller's own non-demo reports as an AI evaluation example. Needs the open consent `ai_eval_example` (`POST /me/consents`), else 409 `consent_required`; once per report (409 `already_offered`). Text is redacted again before storing. 5 per minute |
+| `GET /me/eval-examples` | | | Own offers: `id, status, language, created_at, reviewed_at` (never the text) |
+| `DELETE /me/eval-examples/{id}` | | `eval.example_withdrawn` | Blanks the text. Withdrawing the consent or deleting the account does the same |
+
+### Office
+| Method and path | Body | Notes |
+|---|---|---|
+| `POST /office/kpi-baselines/snapshot` | `{constituency, days: 7..365}` | Office manager or MP of that office (or admin): stores **draft** baselines computed by `office_kpis()`: received, median hours to first response, forwarding and reopen rates, handling hours with and without copilot, north-star outcomes per month. 404 for other offices |
+
+### Administrator: data ingestion and helplines (B6.2)
+| Method and path | Body | Notes |
+|---|---|---|
+| `GET\|POST /admin/ingestion/sources` | `{key, name, kind, url (https), license, attribution?, refresh_hours?, min_interval_ms? (>=1000), max_bytes?, is_demo?}` | Register (disabled). Unknown keys such as `personal_data` are 422; robots and personal data rules cannot be switched |
+| `POST /admin/ingestion/sources/{key}/licence` | `{license_ok, checked_on?, enable?}` | Record the licence reading; only then can the source be enabled. Audited |
+| `POST /admin/ingestion/sources/{key}/toggle` | `{enabled}` | 409 `licence_not_checked` when enabling an unchecked source |
+| `POST /admin/ingestion/sources/{key}/run` | `{}` | Run now (3 per minute): polite fetch, lineage, staging. Returns `{status: ok\|unchanged\|blocked_robots\|http_error\|too_large\|error, staged, rejected}` |
+| `GET /admin/ingestion/runs?source=&limit=`, `GET /admin/ingestion/sources/{key}/records?status=` | | Run history; staged records (payload, status, `pii_flags`) |
+| `GET\|POST /admin/helplines` | `{key, number: 3-6 digits, name_bn, name_en, purpose_*?, source_url? (https), is_demo?}` | Propose (status `pending`, hidden). Changing number, names or source resets to pending |
+| `POST /admin/helplines/{key}/verify` | `{decision: verified\|rejected, method (10+ chars), evidence_checksum?, valid_days: 7..365 = 90}` | A **different** administrator than the proposer (409 `second_person`). Shown publicly until `review_due_at`; then hidden and marked stale by the daily job |
+| `POST\|GET /api/internal/ingest` | | `Authorization: Bearer $CRON_SECRET`. Refresh due sources and expire stale helplines. The daily `/api/internal/maintenance` does the same and reports `ingestion` and `pilot` in its output |
+
+### Administrator: governance, operations, pen-test (B6.3, B6.4, B6.7)
+| Method and path | Body | Notes |
+|---|---|---|
+| `GET\|POST /admin/legal-holds` | `{subject_type: user\|issue, subject_id (user id or issue ref), reason (10+), authority_ref}` | One open hold per subject (409 `already_held`). Blocks erasure of the account (and of anyone who filed a held report); audited |
+| `POST /admin/legal-holds/{id}/release` | `{reason}` | 404 when already released |
+| `POST /admin/service-notices` | `{severity, title_bn, title_en, body_*?, starts_at?, ends_at?}` | Publishes a notice (see public `GET /service-notices`) |
+| `POST /admin/service-notices/{id}/resolve` | `{}` | |
+| `GET\|POST /admin/pentest` | `{title, severity: critical\|high\|medium\|low\|info, reported_by, category?, affected?, description?, round?, reported_on?}` | GET returns `{summary: {total, by_status, blocking_launch, rounds}, findings}`. POST gives `ref` like `PT-001` |
+| `POST /admin/pentest/{ref}` | `{status, fix_ref?, retest_by?, retest_note?, acceptance_reason?}` | Transitions: open -> fix_in_progress -> fixed_pending_retest (needs `fix_ref`) -> retest_passed or retest_failed (needs `retest_by` and a note). Critical and high cannot be `accepted_risk` (409). Illegal jumps 409 `invalid_transition` |
+
+### Administrator: pilot (B6.1)
+| Method and path | Body | Notes |
+|---|---|---|
+| `GET /admin/pilot?month=YYYY-MM-DD` | | `{sites, budget, cost_report}`; the report gives per line budget, actual, variance, `over_budget`, totals and `actual_per_site_usd`. AI inference actuals come from `ai_runs` |
+| `POST /admin/pilot/sites` | `{constituency, status: planning\|onboarding\|live\|paused\|ended, categories[], support_contact?, escalation_contact?, office_verified_at?, starts_on?, notes?}` | `live` needs a verified office date, contacts and at least one known category (422 otherwise) |
+| `PUT /admin/pilot/budget` | `{line, monthly_budget_usd, basis}` | Lines: hosting_app, hosting_database, ai_inference, speech, email_sms, support, moderation, security_testing, other |
+| `POST /admin/pilot/costs` | `{month, line, amount_usd, note?, source_ref?}` | |
+
+### Administrator: AI on real use and KPI baselines (B6.5, B6.6)
+| Method and path | Body | Notes |
+|---|---|---|
+| `GET /admin/ai/eval-examples` | | Pending offers with their text (through a function; the column is not granted to anyone) |
+| `POST /admin/ai/eval-examples/{id}/review` | `{decision: approve\|reject, category?, expected_agency_key?, language?, note?, pii_checked, text_override?}` | Approval needs a known category and `pii_checked: true` |
+| `GET /admin/ai/eval-set` | | Approved examples as `{generated_at, examples[]}` for `EVAL_REAL_EXPORT`. `no-store`, audited. Keep the file out of git |
+| `GET /admin/ai/routing-accuracy?days=90&include_demo=false` | | AI routing suggestion vs the office's first referral, overall and by confidence band; small bands suppressed |
+| `GET\|POST /admin/ai/thresholds` | `{key: duplicate_min_score\|routing_min_confidence\|stt_min_confidence, value: 0..1, basis: {n >= 30, metric, method, measured_on, ...}}` | 422 without evidence. Audited with before and after. Not yet read by the running code (see `docs/aibc/pilot/ai-real-use.md`) |
+| `GET\|POST /admin/ai/speech-tests` | `{provider, language?, district, age_band, environment, samples, word_error_rate, participants_consented: true, notes?}` | Aggregates only. GET gives sample-weighted WER by environment, age band and district |
+| `GET /admin/kpi-baselines?constituency=` | | Drafts and published rows with method |
+| `POST /admin/kpi-baselines/manual` | `{constituency, metric, value, n, method, definition, period_start, period_end}` | Metrics: accessibility_task_completion_pct, copilot_time_study_with_minutes, copilot_time_study_without_minutes, citizen_satisfaction_pct, report_completion_rate_pct |
+| `POST /admin/kpi-baselines/publish` | `{constituency, period_end}` | Makes the drafts public; replaces earlier published values of the same metrics |
+| `POST /admin/kpi-baselines/withdraw` | `{constituency, period_end, reason}` | |
+
+### Frontend handoff for Phase 6 (backend cannot do these)
+1. Service-notice banner from `GET /service-notices` on every page.
+2. Emergency block: render `GET /helplines` (999, 333 when verified); until verified show only what the app already hardcodes, labelled as unverified in code review, not in the UI.
+3. Attribution line (ODbL and any other licence) from `GET /data-sources` wherever its data is used (map).
+4. Optional switch "use my report to test the AI" calling `POST /me/consents {consent_type: "ai_eval_example"}` and `POST /me/eval-examples`; plain Bangla copy that it is optional, redacted, reviewed by a person and removable.
+5. Public "how we measure" page from `GET /kpi-baselines` and `GET /retention-policies`, with definitions and method visible.
+6. Admin screens for the registers above (sources, helplines, holds, notices, pen-test, pilot, eval review, thresholds) can wait; every action works over the API.
