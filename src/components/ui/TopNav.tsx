@@ -25,7 +25,7 @@ export default function TopNav({ isStaff, picker, account }: { isStaff: boolean;
   ];
   return (
     <header className="bg-white shadow-sm">
-      <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center gap-x-2 gap-y-1 px-4 py-2 lg:flex-nowrap lg:gap-x-3">
+      <div className="mx-auto flex w-full max-w-[120rem] flex-wrap items-center gap-x-2 gap-y-1 px-4 py-2 sm:px-6 lg:px-8 lg:flex-nowrap lg:gap-x-3">
         <Link href="/" className={cx("-ms-1 flex min-h-11 shrink-0 items-center gap-2 rounded-lg px-1 font-heading text-xl font-semibold text-civic", focusRing)}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/illustrations/logo-mark.svg" alt="" className="size-8" />
@@ -57,7 +57,7 @@ export default function TopNav({ isStaff, picker, account }: { isStaff: boolean;
           <NotificationBell />
           <div className="hidden shrink-0 lg:block"><Link href="/report" className={buttonClass()}>{t.reportCta}</Link></div>
           {/* Route handler (sets the cookie, redirects back), so a plain anchor is intended. */}
-          <a href="/lang" aria-label={t.navLangSwitch} className={cx("inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg px-2 font-medium text-civic underline", focusRing)}>
+          <a href="/lang" aria-label={t.navLangSwitch} className={cx("inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-slate-300 px-3 text-sm font-medium text-foreground hover:bg-slate-50", focusRing)}>
             {t.switchLang}
           </a>
           {account}

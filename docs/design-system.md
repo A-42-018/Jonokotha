@@ -56,3 +56,9 @@ Review every primitive and state at `/dev/ui` (bn and en side by side). The page
 - Offline queue UI: `components/offline/` (`QueueSync`, `QueuedReports`, `ReportQueued`); logic in `lib/offline-queue.ts`.
 - Audit-only demo screens: `/dev/screens/<name>` (see `docs/frontend.md`, Phase 3 status).
 - Reduced motion is handled globally in `globals.css`; maps use `mapAnimate()`.
+
+## UI refresh (inspired by the "Your MP" mockups)
+
+- Home: `HomeHero` (blue banner over `public/illustrations/hero-citizens.svg`), `StatTiles` (issues, resolved, in progress, counted from the area's real cases), `ActionCards` (report red, idea green, ask your MP purple; text carries the meaning, tint is decoration). Strings: `strings/refresh.ts`.
+- Icons: `ui/TileIcons.tsx`, two-tone 48px vector icons, decorative only, always beside a printed label.
+- Office and admin: `ui/PanelSidebar` (navy menu from lg, scroll strip on phones) via `app/office/layout.tsx` and `app/admin/layout.tsx`; `AdminShell` no longer draws its own pill menu. Charts: `charts/Donut`, `charts/ColumnChart` (every value printed, SVG donut has a text summary), data from `lib/office-charts.ts`; `OfficeCharts` shows category, status and most reported areas from real counts. No invented numbers; tiles without backend data still say so.

@@ -1,0 +1,1747 @@
+{
+ "checked_at": "2026-11-16",
+ "dry": true,
+ "ok": [
+  {
+   "seat": 1,
+   "name": "Panchagarh-1",
+   "path": "bd-001.jpg",
+   "bytes": 14699
+  },
+  {
+   "seat": 2,
+   "name": "Panchagarh-2",
+   "path": "bd-002.jpg",
+   "bytes": 10170
+  },
+  {
+   "seat": 3,
+   "name": "Thakurgaon-1",
+   "path": "bd-003.jpg",
+   "bytes": 11296
+  },
+  {
+   "seat": 4,
+   "name": "Thakurgaon-2",
+   "path": "bd-004.jpg",
+   "bytes": 9947
+  },
+  {
+   "seat": 8,
+   "name": "Dinajpur-3",
+   "path": "bd-008.jpg",
+   "bytes": 8662
+  },
+  {
+   "seat": 9,
+   "name": "Dinajpur-4",
+   "path": "bd-009.jpg",
+   "bytes": 8659
+  },
+  {
+   "seat": 12,
+   "name": "Nilphamari-1",
+   "path": "bd-012.jpg",
+   "bytes": 8791
+  },
+  {
+   "seat": 14,
+   "name": "Nilphamari-3",
+   "path": "bd-014.jpg",
+   "bytes": 9421
+  },
+  {
+   "seat": 15,
+   "name": "Nilphamari-4",
+   "path": "bd-015.jpg",
+   "bytes": 6829
+  },
+  {
+   "seat": 16,
+   "name": "Lalmonirhat-1",
+   "path": "bd-016.jpg",
+   "bytes": 9544
+  },
+  {
+   "seat": 17,
+   "name": "Lalmonirhat-2",
+   "path": "bd-017.jpg",
+   "bytes": 10139
+  },
+  {
+   "seat": 18,
+   "name": "Lalmonirhat-3",
+   "path": "bd-018.jpg",
+   "bytes": 9180
+  },
+  {
+   "seat": 19,
+   "name": "Rangpur-1",
+   "path": "bd-019.jpg",
+   "bytes": 7377
+  },
+  {
+   "seat": 20,
+   "name": "Rangpur-2",
+   "path": "bd-020.jpg",
+   "bytes": 9609
+  },
+  {
+   "seat": 21,
+   "name": "Rangpur-3",
+   "path": "bd-021.jpg",
+   "bytes": 8456
+  },
+  {
+   "seat": 22,
+   "name": "Rangpur-4",
+   "path": "bd-022.jpg",
+   "bytes": 8891
+  },
+  {
+   "seat": 23,
+   "name": "Rangpur-5",
+   "path": "bd-023.jpg",
+   "bytes": 7737
+  },
+  {
+   "seat": 24,
+   "name": "Rangpur-6",
+   "path": "bd-024.jpg",
+   "bytes": 13209
+  },
+  {
+   "seat": 25,
+   "name": "Kurigram-1",
+   "path": "bd-025.jpg",
+   "bytes": 8658
+  },
+  {
+   "seat": 27,
+   "name": "Kurigram-3",
+   "path": "bd-027.jpg",
+   "bytes": 10138
+  },
+  {
+   "seat": 28,
+   "name": "Kurigram-4",
+   "path": "bd-028.jpg",
+   "bytes": 10050
+  },
+  {
+   "seat": 29,
+   "name": "Gaibandha-1",
+   "path": "bd-029.jpg",
+   "bytes": 13087
+  },
+  {
+   "seat": 30,
+   "name": "Gaibandha-2",
+   "path": "bd-030.jpg",
+   "bytes": 8969
+  },
+  {
+   "seat": 31,
+   "name": "Gaibandha-3",
+   "path": "bd-031.jpg",
+   "bytes": 11114
+  },
+  {
+   "seat": 33,
+   "name": "Gaibandha-5",
+   "path": "bd-033.jpg",
+   "bytes": 11777
+  },
+  {
+   "seat": 46,
+   "name": "Naogaon-1",
+   "path": "bd-046.jpg",
+   "bytes": 10532
+  },
+  {
+   "seat": 48,
+   "name": "Naogaon-3",
+   "path": "bd-048.jpg",
+   "bytes": 10625
+  },
+  {
+   "seat": 49,
+   "name": "Naogaon-4",
+   "path": "bd-049.jpg",
+   "bytes": 10280
+  },
+  {
+   "seat": 50,
+   "name": "Naogaon-5",
+   "path": "bd-050.jpg",
+   "bytes": 10656
+  },
+  {
+   "seat": 52,
+   "name": "Rajshahi-1",
+   "path": "bd-052.jpg",
+   "bytes": 9017
+  },
+  {
+   "seat": 53,
+   "name": "Rajshahi-2",
+   "path": "bd-053.jpg",
+   "bytes": 10095
+  },
+  {
+   "seat": 54,
+   "name": "Rajshahi-3",
+   "path": "bd-054.jpg",
+   "bytes": 8909
+  },
+  {
+   "seat": 55,
+   "name": "Rajshahi-4",
+   "path": "bd-055.jpg",
+   "bytes": 10071
+  },
+  {
+   "seat": 56,
+   "name": "Rajshahi-5",
+   "path": "bd-056.jpg",
+   "bytes": 12850
+  },
+  {
+   "seat": 58,
+   "name": "Natore-1",
+   "path": "bd-058.jpg",
+   "bytes": 11705
+  },
+  {
+   "seat": 61,
+   "name": "Natore-4",
+   "path": "bd-061.jpg",
+   "bytes": 11775
+  },
+  {
+   "seat": 62,
+   "name": "Sirajganj-1",
+   "path": "bd-062.jpg",
+   "bytes": 8989
+  },
+  {
+   "seat": 63,
+   "name": "Sirajganj-2",
+   "path": "bd-063.jpg",
+   "bytes": 8292
+  },
+  {
+   "seat": 64,
+   "name": "Sirajganj-3",
+   "path": "bd-064.jpg",
+   "bytes": 12619
+  },
+  {
+   "seat": 65,
+   "name": "Sirajganj-4",
+   "path": "bd-065.jpg",
+   "bytes": 8921
+  },
+  {
+   "seat": 66,
+   "name": "Sirajganj-5",
+   "path": "bd-066.jpg",
+   "bytes": 9665
+  },
+  {
+   "seat": 67,
+   "name": "Sirajganj-6",
+   "path": "bd-067.jpg",
+   "bytes": 9047
+  },
+  {
+   "seat": 68,
+   "name": "Pabna-1",
+   "path": "bd-068.jpg",
+   "bytes": 9150
+  },
+  {
+   "seat": 70,
+   "name": "Pabna-3",
+   "path": "bd-070.jpg",
+   "bytes": 11734
+  },
+  {
+   "seat": 71,
+   "name": "Pabna-4",
+   "path": "bd-071.jpg",
+   "bytes": 8466
+  },
+  {
+   "seat": 73,
+   "name": "Meherpur-1",
+   "path": "bd-073.jpg",
+   "bytes": 9164
+  },
+  {
+   "seat": 74,
+   "name": "Meherpur-2",
+   "path": "bd-074.jpg",
+   "bytes": 9774
+  },
+  {
+   "seat": 76,
+   "name": "Kushtia-2",
+   "path": "bd-076.jpg",
+   "bytes": 14676
+  },
+  {
+   "seat": 77,
+   "name": "Kushtia-3",
+   "path": "bd-077.jpg",
+   "bytes": 12972
+  },
+  {
+   "seat": 78,
+   "name": "Kushtia-4",
+   "path": "bd-078.jpg",
+   "bytes": 9711
+  },
+  {
+   "seat": 79,
+   "name": "Chuadanga-1",
+   "path": "bd-079.jpg",
+   "bytes": 10092
+  },
+  {
+   "seat": 80,
+   "name": "Chuadanga-2",
+   "path": "bd-080.jpg",
+   "bytes": 9703
+  },
+  {
+   "seat": 81,
+   "name": "Jhenaidah-1",
+   "path": "bd-081.jpg",
+   "bytes": 11238
+  },
+  {
+   "seat": 83,
+   "name": "Jhenaidah-3",
+   "path": "bd-083.jpg",
+   "bytes": 10815
+  },
+  {
+   "seat": 92,
+   "name": "Magura-2",
+   "path": "bd-092.jpg",
+   "bytes": 9996
+  },
+  {
+   "seat": 93,
+   "name": "Narail-1",
+   "path": "bd-093.jpg",
+   "bytes": 12349
+  },
+  {
+   "seat": 94,
+   "name": "Narail-2",
+   "path": "bd-094.jpg",
+   "bytes": 13364
+  },
+  {
+   "seat": 95,
+   "name": "Bagerhat-1",
+   "path": "bd-095.jpg",
+   "bytes": 10354
+  },
+  {
+   "seat": 96,
+   "name": "Bagerhat-2",
+   "path": "bd-096.png",
+   "bytes": 64788
+  },
+  {
+   "seat": 97,
+   "name": "Bagerhat-3",
+   "path": "bd-097.jpg",
+   "bytes": 12046
+  },
+  {
+   "seat": 98,
+   "name": "Bagerhat-4",
+   "path": "bd-098.jpg",
+   "bytes": 13048
+  },
+  {
+   "seat": 100,
+   "name": "Khulna-2",
+   "path": "bd-100.jpg",
+   "bytes": 9008
+  },
+  {
+   "seat": 101,
+   "name": "Khulna-3",
+   "path": "bd-101.jpg",
+   "bytes": 9779
+  },
+  {
+   "seat": 103,
+   "name": "Khulna-5",
+   "path": "bd-103.jpg",
+   "bytes": 11250
+  },
+  {
+   "seat": 104,
+   "name": "Khulna-6",
+   "path": "bd-104.jpg",
+   "bytes": 9035
+  },
+  {
+   "seat": 106,
+   "name": "Satkhira-2",
+   "path": "bd-106.jpg",
+   "bytes": 10857
+  },
+  {
+   "seat": 110,
+   "name": "Barguna-2",
+   "path": "bd-110.jpg",
+   "bytes": 10211
+  },
+  {
+   "seat": 112,
+   "name": "Patuakhali-2",
+   "path": "bd-112.jpg",
+   "bytes": 8598
+  },
+  {
+   "seat": 113,
+   "name": "Patuakhali-3",
+   "path": "bd-113.jpg",
+   "bytes": 11590
+  },
+  {
+   "seat": 115,
+   "name": "Bhola-1",
+   "path": "bd-115.jpg",
+   "bytes": 9198
+  },
+  {
+   "seat": 116,
+   "name": "Bhola-2",
+   "path": "bd-116.jpg",
+   "bytes": 11353
+  },
+  {
+   "seat": 117,
+   "name": "Bhola-3",
+   "path": "bd-117.jpg",
+   "bytes": 11680
+  },
+  {
+   "seat": 118,
+   "name": "Bhola-4",
+   "path": "bd-118.jpg",
+   "bytes": 9874
+  },
+  {
+   "seat": 128,
+   "name": "Pirojpur-2",
+   "path": "bd-128.jpg",
+   "bytes": 11980
+  },
+  {
+   "seat": 129,
+   "name": "Pirojpur-3",
+   "path": "bd-129.jpg",
+   "bytes": 12201
+  },
+  {
+   "seat": 131,
+   "name": "Tangail-2",
+   "path": "bd-131.jpg",
+   "bytes": 9300
+  },
+  {
+   "seat": 132,
+   "name": "Tangail-3",
+   "path": "bd-132.jpg",
+   "bytes": 8925
+  },
+  {
+   "seat": 133,
+   "name": "Tangail-4",
+   "path": "bd-133.jpg",
+   "bytes": 9532
+  },
+  {
+   "seat": 134,
+   "name": "Tangail-5",
+   "path": "bd-134.jpg",
+   "bytes": 11030
+  },
+  {
+   "seat": 135,
+   "name": "Tangail-6",
+   "path": "bd-135.jpg",
+   "bytes": 8947
+  },
+  {
+   "seat": 136,
+   "name": "Tangail-7",
+   "path": "bd-136.jpg",
+   "bytes": 11353
+  },
+  {
+   "seat": 138,
+   "name": "Jamalpur-1",
+   "path": "bd-138.jpg",
+   "bytes": 10661
+  },
+  {
+   "seat": 139,
+   "name": "Jamalpur-2",
+   "path": "bd-139.jpg",
+   "bytes": 12141
+  },
+  {
+   "seat": 140,
+   "name": "Jamalpur-3",
+   "path": "bd-140.jpg",
+   "bytes": 12082
+  },
+  {
+   "seat": 141,
+   "name": "Jamalpur-4",
+   "path": "bd-141.jpg",
+   "bytes": 13134
+  },
+  {
+   "seat": 142,
+   "name": "Jamalpur-5",
+   "path": "bd-142.jpg",
+   "bytes": 9912
+  },
+  {
+   "seat": 143,
+   "name": "Sherpur-1",
+   "path": "bd-143.jpg",
+   "bytes": 9624
+  },
+  {
+   "seat": 144,
+   "name": "Sherpur-2",
+   "path": "bd-144.jpg",
+   "bytes": 11176
+  },
+  {
+   "seat": 148,
+   "name": "Mymensingh-3",
+   "path": "bd-148.jpg",
+   "bytes": 10808
+  },
+  {
+   "seat": 150,
+   "name": "Mymensingh-5",
+   "path": "bd-150.jpg",
+   "bytes": 10499
+  },
+  {
+   "seat": 151,
+   "name": "Mymensingh-6",
+   "path": "bd-151.jpg",
+   "bytes": 10604
+  },
+  {
+   "seat": 154,
+   "name": "Mymensingh-9",
+   "path": "bd-154.jpg",
+   "bytes": 10997
+  },
+  {
+   "seat": 156,
+   "name": "Mymensingh-11",
+   "path": "bd-156.jpg",
+   "bytes": 8853
+  },
+  {
+   "seat": 157,
+   "name": "Netrokona-1",
+   "path": "bd-157.jpg",
+   "bytes": 10083
+  },
+  {
+   "seat": 158,
+   "name": "Netrokona-2",
+   "path": "bd-158.jpg",
+   "bytes": 10618
+  },
+  {
+   "seat": 160,
+   "name": "Netrokona-4",
+   "path": "bd-160.jpg",
+   "bytes": 8807
+  },
+  {
+   "seat": 162,
+   "name": "Kishoreganj-1",
+   "path": "bd-162.jpg",
+   "bytes": 9216
+  },
+  {
+   "seat": 163,
+   "name": "Kishoreganj-2",
+   "path": "bd-163.jpg",
+   "bytes": 9356
+  },
+  {
+   "seat": 165,
+   "name": "Kishoreganj-4",
+   "path": "bd-165.jpg",
+   "bytes": 9986
+  },
+  {
+   "seat": 167,
+   "name": "Kishoreganj-6",
+   "path": "bd-167.jpg",
+   "bytes": 8908
+  },
+  {
+   "seat": 168,
+   "name": "Manikganj-1",
+   "path": "bd-168.jpg",
+   "bytes": 8295
+  },
+  {
+   "seat": 169,
+   "name": "Manikganj-2",
+   "path": "bd-169.jpg",
+   "bytes": 8886
+  },
+  {
+   "seat": 170,
+   "name": "Manikganj-3",
+   "path": "bd-170.jpg",
+   "bytes": 13735
+  },
+  {
+   "seat": 171,
+   "name": "Munshiganj-1",
+   "path": "bd-171.jpg",
+   "bytes": 9557
+  },
+  {
+   "seat": 172,
+   "name": "Munshiganj-2",
+   "path": "bd-172.jpg",
+   "bytes": 9901
+  },
+  {
+   "seat": 175,
+   "name": "Dhaka-2",
+   "path": "bd-175.jpg",
+   "bytes": 11542
+  },
+  {
+   "seat": 178,
+   "name": "Dhaka-5",
+   "path": "bd-178.jpg",
+   "bytes": 11995
+  },
+  {
+   "seat": 179,
+   "name": "Dhaka-6",
+   "path": "bd-179.jpg",
+   "bytes": 9831
+  },
+  {
+   "seat": 180,
+   "name": "Dhaka-7",
+   "path": "bd-180.jpg",
+   "bytes": 9263
+  },
+  {
+   "seat": 181,
+   "name": "Dhaka-8",
+   "path": "bd-181.jpg",
+   "bytes": 10017
+  },
+  {
+   "seat": 182,
+   "name": "Dhaka-9",
+   "path": "bd-182.jpg",
+   "bytes": 9274
+  },
+  {
+   "seat": 183,
+   "name": "Dhaka-10",
+   "path": "bd-183.jpg",
+   "bytes": 8863
+  },
+  {
+   "seat": 184,
+   "name": "Dhaka-11",
+   "path": "bd-184.jpg",
+   "bytes": 11125
+  },
+  {
+   "seat": 185,
+   "name": "Dhaka-12",
+   "path": "bd-185.jpg",
+   "bytes": 10015
+  },
+  {
+   "seat": 186,
+   "name": "Dhaka-13",
+   "path": "bd-186.jpg",
+   "bytes": 8167
+  },
+  {
+   "seat": 188,
+   "name": "Dhaka-15",
+   "path": "bd-188.jpg",
+   "bytes": 8495
+  },
+  {
+   "seat": 189,
+   "name": "Dhaka-16",
+   "path": "bd-189.jpg",
+   "bytes": 10052
+  },
+  {
+   "seat": 190,
+   "name": "Dhaka-17",
+   "path": "bd-190.jpg",
+   "bytes": 10634
+  },
+  {
+   "seat": 193,
+   "name": "Dhaka-20",
+   "path": "bd-193.jpg",
+   "bytes": 10069
+  },
+  {
+   "seat": 194,
+   "name": "Gazipur-1",
+   "path": "bd-194.jpg",
+   "bytes": 11835
+  },
+  {
+   "seat": 195,
+   "name": "Gazipur-2",
+   "path": "bd-195.jpg",
+   "bytes": 10210
+  },
+  {
+   "seat": 196,
+   "name": "Gazipur-3",
+   "path": "bd-196.jpg",
+   "bytes": 10207
+  },
+  {
+   "seat": 199,
+   "name": "Narsingdi-1",
+   "path": "bd-199.jpg",
+   "bytes": 8861
+  },
+  {
+   "seat": 200,
+   "name": "Narsingdi-2",
+   "path": "bd-200.jpg",
+   "bytes": 10836
+  },
+  {
+   "seat": 203,
+   "name": "Narsingdi-5",
+   "path": "bd-203.jpg",
+   "bytes": 9650
+  },
+  {
+   "seat": 204,
+   "name": "Narayanganj-1",
+   "path": "bd-204.jpg",
+   "bytes": 9537
+  },
+  {
+   "seat": 205,
+   "name": "Narayanganj-2",
+   "path": "bd-205.jpg",
+   "bytes": 9366
+  },
+  {
+   "seat": 206,
+   "name": "Narayanganj-3",
+   "path": "bd-206.jpg",
+   "bytes": 11467
+  },
+  {
+   "seat": 207,
+   "name": "Narayanganj-4",
+   "path": "bd-207.jpg",
+   "bytes": 7641
+  },
+  {
+   "seat": 208,
+   "name": "Narayanganj-5",
+   "path": "bd-208.jpg",
+   "bytes": 9695
+  },
+  {
+   "seat": 211,
+   "name": "Faridpur-1",
+   "path": "bd-211.jpg",
+   "bytes": 10025
+  },
+  {
+   "seat": 212,
+   "name": "Faridpur-2",
+   "path": "bd-212.jpg",
+   "bytes": 13418
+  },
+  {
+   "seat": 213,
+   "name": "Faridpur-3",
+   "path": "bd-213.jpg",
+   "bytes": 15153
+  },
+  {
+   "seat": 218,
+   "name": "Madaripur-1",
+   "path": "bd-218.jpg",
+   "bytes": 8464
+  },
+  {
+   "seat": 220,
+   "name": "Madaripur-3",
+   "path": "bd-220.jpg",
+   "bytes": 9172
+  },
+  {
+   "seat": 221,
+   "name": "Shariatpur-1",
+   "path": "bd-221.jpg",
+   "bytes": 9486
+  },
+  {
+   "seat": 224,
+   "name": "Sunamganj-1",
+   "path": "bd-224.jpg",
+   "bytes": 8180
+  },
+  {
+   "seat": 226,
+   "name": "Sunamganj-3",
+   "path": "bd-226.jpg",
+   "bytes": 11018
+  },
+  {
+   "seat": 227,
+   "name": "Sunamganj-4",
+   "path": "bd-227.jpg",
+   "bytes": 9219
+  },
+  {
+   "seat": 228,
+   "name": "Sunamganj-5",
+   "path": "bd-228.jpg",
+   "bytes": 11461
+  },
+  {
+   "seat": 229,
+   "name": "Sylhet-1",
+   "path": "bd-229.jpg",
+   "bytes": 11625
+  },
+  {
+   "seat": 233,
+   "name": "Sylhet-5",
+   "path": "bd-233.jpg",
+   "bytes": 9535
+  },
+  {
+   "seat": 234,
+   "name": "Sylhet-6",
+   "path": "bd-234.jpg",
+   "bytes": 9205
+  },
+  {
+   "seat": 239,
+   "name": "Habiganj-1",
+   "path": "bd-239.jpg",
+   "bytes": 10509
+  },
+  {
+   "seat": 241,
+   "name": "Habiganj-3",
+   "path": "bd-241.jpg",
+   "bytes": 10183
+  },
+  {
+   "seat": 242,
+   "name": "Habiganj-4",
+   "path": "bd-242.jpg",
+   "bytes": 9954
+  },
+  {
+   "seat": 243,
+   "name": "Brahmanbaria-1",
+   "path": "bd-243.jpg",
+   "bytes": 10678
+  },
+  {
+   "seat": 244,
+   "name": "Brahmanbaria-2",
+   "path": "bd-244.jpg",
+   "bytes": 13489
+  },
+  {
+   "seat": 246,
+   "name": "Brahmanbaria-4",
+   "path": "bd-246.jpg",
+   "bytes": 13031
+  },
+  {
+   "seat": 247,
+   "name": "Brahmanbaria-5",
+   "path": "bd-247.jpg",
+   "bytes": 11116
+  },
+  {
+   "seat": 248,
+   "name": "Brahmanbaria-6",
+   "path": "bd-248.jpg",
+   "bytes": 9122
+  },
+  {
+   "seat": 260,
+   "name": "Chandpur-1",
+   "path": "bd-260.jpg",
+   "bytes": 9657
+  },
+  {
+   "seat": 261,
+   "name": "Chandpur-2",
+   "path": "bd-261.jpg",
+   "bytes": 9420
+  },
+  {
+   "seat": 263,
+   "name": "Chandpur-4",
+   "path": "bd-263.jpg",
+   "bytes": 8959
+  },
+  {
+   "seat": 265,
+   "name": "Feni-1",
+   "path": "bd-265.jpg",
+   "bytes": 9567
+  },
+  {
+   "seat": 267,
+   "name": "Feni-3",
+   "path": "bd-267.jpg",
+   "bytes": 10036
+  },
+  {
+   "seat": 268,
+   "name": "Noakhali-1",
+   "path": "bd-268.jpg",
+   "bytes": 10441
+  },
+  {
+   "seat": 269,
+   "name": "Noakhali-2",
+   "path": "bd-269.jpg",
+   "bytes": 9383
+  },
+  {
+   "seat": 270,
+   "name": "Noakhali-3",
+   "path": "bd-270.jpg",
+   "bytes": 8093
+  },
+  {
+   "seat": 271,
+   "name": "Noakhali-4",
+   "path": "bd-271.jpg",
+   "bytes": 16625
+  },
+  {
+   "seat": 272,
+   "name": "Noakhali-5",
+   "path": "bd-272.jpg",
+   "bytes": 11474
+  },
+  {
+   "seat": 273,
+   "name": "Noakhali-6",
+   "path": "bd-273.jpg",
+   "bytes": 8862
+  },
+  {
+   "seat": 285,
+   "name": "Chattogram-8",
+   "path": "bd-285.jpg",
+   "bytes": 10540
+  },
+  {
+   "seat": 299,
+   "name": "Rangamati",
+   "path": "bd-299.jpg",
+   "bytes": 10356
+  }
+ ],
+ "no_photo": [
+  {
+   "seat": 34,
+   "name": "Joypurhat-1"
+  },
+  {
+   "seat": 35,
+   "name": "Joypurhat-2"
+  },
+  {
+   "seat": 36,
+   "name": "Bogura-1"
+  },
+  {
+   "seat": 37,
+   "name": "Bogura-2"
+  },
+  {
+   "seat": 38,
+   "name": "Bogura-3"
+  },
+  {
+   "seat": 39,
+   "name": "Bogura-4"
+  },
+  {
+   "seat": 40,
+   "name": "Bogura-5"
+  },
+  {
+   "seat": 41,
+   "name": "Bogura-6"
+  },
+  {
+   "seat": 42,
+   "name": "Bogura-7"
+  },
+  {
+   "seat": 43,
+   "name": "Chapai Nawabganj-1"
+  },
+  {
+   "seat": 44,
+   "name": "Chapai Nawabganj-2"
+  },
+  {
+   "seat": 45,
+   "name": "Chapai Nawabganj-3"
+  },
+  {
+   "seat": 72,
+   "name": "Pabna-5"
+  },
+  {
+   "seat": 85,
+   "name": "Jashore-1"
+  },
+  {
+   "seat": 86,
+   "name": "Jashore-2"
+  },
+  {
+   "seat": 87,
+   "name": "Jashore-3"
+  },
+  {
+   "seat": 88,
+   "name": "Jashore-4"
+  },
+  {
+   "seat": 89,
+   "name": "Jashore-5"
+  },
+  {
+   "seat": 90,
+   "name": "Jashore-6"
+  },
+  {
+   "seat": 119,
+   "name": "Barishal-1"
+  },
+  {
+   "seat": 120,
+   "name": "Barishal-2"
+  },
+  {
+   "seat": 121,
+   "name": "Barishal-3"
+  },
+  {
+   "seat": 122,
+   "name": "Barishal-4"
+  },
+  {
+   "seat": 123,
+   "name": "Barishal-5"
+  },
+  {
+   "seat": 124,
+   "name": "Barishal-6"
+  },
+  {
+   "seat": 125,
+   "name": "Jhalokati-1"
+  },
+  {
+   "seat": 126,
+   "name": "Jhalokati-2"
+  },
+  {
+   "seat": 215,
+   "name": "Gopalganj-1"
+  },
+  {
+   "seat": 216,
+   "name": "Gopalganj-2"
+  },
+  {
+   "seat": 217,
+   "name": "Gopalganj-3"
+  },
+  {
+   "seat": 235,
+   "name": "Moulvibazar-1"
+  },
+  {
+   "seat": 236,
+   "name": "Moulvibazar-2"
+  },
+  {
+   "seat": 237,
+   "name": "Moulvibazar-3"
+  },
+  {
+   "seat": 238,
+   "name": "Moulvibazar-4"
+  },
+  {
+   "seat": 249,
+   "name": "Cumilla-1"
+  },
+  {
+   "seat": 250,
+   "name": "Cumilla-2"
+  },
+  {
+   "seat": 251,
+   "name": "Cumilla-3"
+  },
+  {
+   "seat": 252,
+   "name": "Cumilla-4"
+  },
+  {
+   "seat": 253,
+   "name": "Cumilla-5"
+  },
+  {
+   "seat": 254,
+   "name": "Cumilla-6"
+  },
+  {
+   "seat": 255,
+   "name": "Cumilla-7"
+  },
+  {
+   "seat": 256,
+   "name": "Cumilla-8"
+  },
+  {
+   "seat": 257,
+   "name": "Cumilla-9"
+  },
+  {
+   "seat": 258,
+   "name": "Cumilla-10"
+  },
+  {
+   "seat": 259,
+   "name": "Cumilla-11"
+  },
+  {
+   "seat": 274,
+   "name": "Lakshmipur-1"
+  },
+  {
+   "seat": 275,
+   "name": "Lakshmipur-2"
+  },
+  {
+   "seat": 276,
+   "name": "Lakshmipur-3"
+  },
+  {
+   "seat": 277,
+   "name": "Lakshmipur-4"
+  },
+  {
+   "seat": 278,
+   "name": "Chattogram-1"
+  },
+  {
+   "seat": 279,
+   "name": "Chattogram-2"
+  },
+  {
+   "seat": 280,
+   "name": "Chattogram-3"
+  },
+  {
+   "seat": 282,
+   "name": "Chattogram-5"
+  },
+  {
+   "seat": 283,
+   "name": "Chattogram-6"
+  },
+  {
+   "seat": 284,
+   "name": "Chattogram-7"
+  },
+  {
+   "seat": 286,
+   "name": "Chattogram-9"
+  },
+  {
+   "seat": 287,
+   "name": "Chattogram-10"
+  },
+  {
+   "seat": 288,
+   "name": "Chattogram-11"
+  },
+  {
+   "seat": 289,
+   "name": "Chattogram-12"
+  },
+  {
+   "seat": 290,
+   "name": "Chattogram-13"
+  },
+  {
+   "seat": 291,
+   "name": "Chattogram-14"
+  },
+  {
+   "seat": 292,
+   "name": "Chattogram-15"
+  },
+  {
+   "seat": 293,
+   "name": "Chattogram-16"
+  },
+  {
+   "seat": 294,
+   "name": "Cox's Bazar-1"
+  },
+  {
+   "seat": 295,
+   "name": "Cox's Bazar-2"
+  },
+  {
+   "seat": 296,
+   "name": "Cox's Bazar-3"
+  },
+  {
+   "seat": 297,
+   "name": "Cox's Bazar-4"
+  },
+  {
+   "seat": 298,
+   "name": "Khagrachari"
+  }
+ ],
+ "name_mismatch": [
+  {
+   "seat": 5,
+   "name": "Thakurgaon-3",
+   "page_names": [
+    "Md Jahidur Rahaman"
+   ]
+  },
+  {
+   "seat": 6,
+   "name": "Dinajpur-1",
+   "page_names": [
+    "Md Monjurul Islam"
+   ]
+  },
+  {
+   "seat": 7,
+   "name": "Dinajpur-2",
+   "page_names": [
+    "Md Sadique Reaz"
+   ]
+  },
+  {
+   "seat": 10,
+   "name": "Dinajpur-5",
+   "page_names": [
+    "A, Z, M, Rezwanul Haque"
+   ]
+  },
+  {
+   "seat": 11,
+   "name": "Dinajpur-6",
+   "page_names": [
+    "Abu Zafar Md. Zahid Hossain"
+   ]
+  },
+  {
+   "seat": 13,
+   "name": "Nilphamari-2",
+   "page_names": [
+    "Al Faruq Abdul Latif"
+   ]
+  },
+  {
+   "seat": 26,
+   "name": "Kurigram-2",
+   "page_names": [
+    "Atiqur Rahman Mujahid"
+   ]
+  },
+  {
+   "seat": 32,
+   "name": "Gaibandha-4",
+   "page_names": [
+    "Mohammad Shamim Kaiser"
+   ]
+  },
+  {
+   "seat": 47,
+   "name": "Naogaon-2",
+   "page_names": [
+    "Md. Anamul Haque"
+   ]
+  },
+  {
+   "seat": 51,
+   "name": "Naogaon-6",
+   "page_names": [
+    "Sk. Md. Rejaul Islam"
+   ]
+  },
+  {
+   "seat": 57,
+   "name": "Rajshahi-6",
+   "page_names": [
+    "Md. Abu Sayed Chad"
+   ]
+  },
+  {
+   "seat": 59,
+   "name": "Natore-2",
+   "page_names": [
+    "M. Ruhul Quddus Talukder Dulu"
+   ]
+  },
+  {
+   "seat": 60,
+   "name": "Natore-3",
+   "page_names": [
+    "Md Anwar - ul - Islam"
+   ]
+  },
+  {
+   "seat": 69,
+   "name": "Pabna-2",
+   "page_names": [
+    "A. K. M. Selim Reza Habib"
+   ]
+  },
+  {
+   "seat": 75,
+   "name": "Kushtia-1",
+   "page_names": [
+    "Reza Ahammed"
+   ]
+  },
+  {
+   "seat": 82,
+   "name": "Jhenaidah-2",
+   "page_names": [
+    "Ali Azam Md. Abu Bakr"
+   ]
+  },
+  {
+   "seat": 84,
+   "name": "Jhenaidah-4",
+   "page_names": [
+    "Md. Abu Taleb"
+   ]
+  },
+  {
+   "seat": 91,
+   "name": "Magura-1",
+   "page_names": [
+    "Md. Monowar Hosen"
+   ]
+  },
+  {
+   "seat": 99,
+   "name": "Khulna-1",
+   "page_names": [
+    "Amir Azez Khan"
+   ]
+  },
+  {
+   "seat": 102,
+   "name": "Khulna-4",
+   "page_names": [
+    "SK Azizul Baree"
+   ]
+  },
+  {
+   "seat": 105,
+   "name": "Satkhira-1",
+   "page_names": [
+    "Md. Izzatullah"
+   ]
+  },
+  {
+   "seat": 107,
+   "name": "Satkhira-3",
+   "page_names": [
+    "Hafez Muhammad Rabiul Bashar"
+   ]
+  },
+  {
+   "seat": 108,
+   "name": "Satkhira-4",
+   "page_names": [
+    "G. M. Nazrul Islam"
+   ]
+  },
+  {
+   "seat": 109,
+   "name": "Barguna-1",
+   "page_names": [
+    "Md. Oli Ullah"
+   ]
+  },
+  {
+   "seat": 111,
+   "name": "Patuakhali-1",
+   "page_names": [
+    "Altaf Hossain Choudhury"
+   ]
+  },
+  {
+   "seat": 114,
+   "name": "Patuakhali-4",
+   "page_names": [
+    "A B M Mosharrof Hossain"
+   ]
+  },
+  {
+   "seat": 127,
+   "name": "Pirojpur-1",
+   "page_names": [
+    "Masood Sayedee"
+   ]
+  },
+  {
+   "seat": 130,
+   "name": "Tangail-1",
+   "page_names": [
+    "FAQIR MAHBUB ANAM"
+   ]
+  },
+  {
+   "seat": 137,
+   "name": "Tangail-8",
+   "page_names": [
+    "AHMED AAZAM KHAN"
+   ]
+  },
+  {
+   "seat": 145,
+   "name": "Sherpur-3",
+   "page_names": [
+    "MD. MAHMUDUL HOQUE RUBEL"
+   ]
+  },
+  {
+   "seat": 146,
+   "name": "Mymensingh-1",
+   "page_names": [
+    "MOHAMMAD SALMAN OMER",
+    "Mohammed Akteruzzaman",
+    "FAKHAR UDDIN AHMED"
+   ]
+  },
+  {
+   "seat": 147,
+   "name": "Mymensingh-2",
+   "page_names": [
+    "MOHAMMAD ULLAH"
+   ]
+  },
+  {
+   "seat": 149,
+   "name": "Mymensingh-4",
+   "page_names": [
+    "MD. ABU WAHAB AKANDA WAHID"
+   ]
+  },
+  {
+   "seat": 152,
+   "name": "Mymensingh-7",
+   "page_names": [
+    "DR. MD. MAHBUBUR RAHMAN"
+   ]
+  },
+  {
+   "seat": 153,
+   "name": "Mymensingh-8",
+   "page_names": [
+    "LUTHFULLAHEL MAZED"
+   ]
+  },
+  {
+   "seat": 155,
+   "name": "Mymensingh-10",
+   "page_names": [
+    "Mohammed Akteruzzaman"
+   ]
+  },
+  {
+   "seat": 159,
+   "name": "Netrokona-3",
+   "page_names": [
+    "Rafiqul Islam Hilaly"
+   ]
+  },
+  {
+   "seat": 161,
+   "name": "Netrokona-5",
+   "page_names": [
+    "Masum Mustafa"
+   ]
+  },
+  {
+   "seat": 164,
+   "name": "Kishoreganj-3",
+   "page_names": [
+    "DR. MUHAMMAD OSMAN FARRUK"
+   ]
+  },
+  {
+   "seat": 166,
+   "name": "Kishoreganj-5",
+   "page_names": [
+    "SK. MOZIBUR RAHMAN IQBAL"
+   ]
+  },
+  {
+   "seat": 173,
+   "name": "Munshiganj-3",
+   "page_names": [
+    "MD. QUAMRUZZAMAN"
+   ]
+  },
+  {
+   "seat": 174,
+   "name": "Dhaka-1",
+   "page_names": [
+    "Khondoker Abu Ashfaque",
+    "Shaikh Rabiul Alam",
+    "MD. NAHID ISLAM",
+    "Md Saiful Alam",
+    "Bobby Hajjaj",
+    "Mir Ahmad Binquasem",
+    "DR MD SHAFIQUR RAHMAN",
+    "Md Abdul Baten",
+    "TARIQUE RAHMAN",
+    "S. M. Jahangir Hossain"
+   ]
+  },
+  {
+   "seat": 176,
+   "name": "Dhaka-3",
+   "page_names": [
+    "Goyasawar Chandra Roy"
+   ]
+  },
+  {
+   "seat": 177,
+   "name": "Dhaka-4",
+   "page_names": [
+    "Syed Joynul Abedin"
+   ]
+  },
+  {
+   "seat": 187,
+   "name": "Dhaka-14",
+   "page_names": [
+    "Mir Ahmad Binquasem"
+   ]
+  },
+  {
+   "seat": 191,
+   "name": "Dhaka-18",
+   "page_names": [
+    "S. M. Jahangir Hossain"
+   ]
+  },
+  {
+   "seat": 192,
+   "name": "Dhaka-19",
+   "page_names": [
+    "Dewan Mohammod Salahuddin"
+   ]
+  },
+  {
+   "seat": 197,
+   "name": "Gazipur-4",
+   "page_names": [
+    "Salah Uddin"
+   ]
+  },
+  {
+   "seat": 198,
+   "name": "Gazipur-5",
+   "page_names": [
+    "A. K. M. Fazlul Haque Milan"
+   ]
+  },
+  {
+   "seat": 201,
+   "name": "Narsingdi-3",
+   "page_names": [
+    "MONJUR ELAHI"
+   ]
+  },
+  {
+   "seat": 202,
+   "name": "Narsingdi-4",
+   "page_names": [
+    "SARDAR MD. SAKHAWAT HUSAIN"
+   ]
+  },
+  {
+   "seat": 209,
+   "name": "Rajbari-1",
+   "page_names": [
+    "Ali Newaz Mahmood Khyom"
+   ]
+  },
+  {
+   "seat": 210,
+   "name": "Rajbari-2",
+   "page_names": [
+    "Md. Harun-Or- Rashid"
+   ]
+  },
+  {
+   "seat": 214,
+   "name": "Faridpur-4",
+   "page_names": [
+    "MD. SHOHIDUL ISLAM"
+   ]
+  },
+  {
+   "seat": 219,
+   "name": "Madaripur-2",
+   "page_names": [
+    "MD JAHANDER ALI MIHA"
+   ]
+  },
+  {
+   "seat": 222,
+   "name": "Shariatpur-2",
+   "page_names": [
+    "Md. Shafiqur Rahman (Kiron)"
+   ]
+  },
+  {
+   "seat": 223,
+   "name": "Shariatpur-3",
+   "page_names": [
+    "MIAH NURUDDIN AHMAD APU"
+   ]
+  },
+  {
+   "seat": 225,
+   "name": "Sunamganj-2",
+   "page_names": [
+    "Md Nasir Chowdhury"
+   ]
+  },
+  {
+   "seat": 230,
+   "name": "Sylhet-2",
+   "page_names": [
+    "Mst.Tahsina Rushdir"
+   ]
+  },
+  {
+   "seat": 231,
+   "name": "Sylhet-3",
+   "page_names": [
+    "MOHAMMED ABDUL MALIQUE"
+   ]
+  },
+  {
+   "seat": 232,
+   "name": "Sylhet-4",
+   "page_names": [
+    "Ariful Haque Choudhury"
+   ]
+  },
+  {
+   "seat": 240,
+   "name": "Habiganj-2",
+   "page_names": [
+    "ABU MANSUR SAKHAWAT HASSAN"
+   ]
+  },
+  {
+   "seat": 245,
+   "name": "Brahmanbaria-3",
+   "page_names": [
+    "Md. Khaled Hossain Mahboob"
+   ]
+  },
+  {
+   "seat": 262,
+   "name": "Chandpur-3",
+   "page_names": [
+    "Sk Farid Ahmed"
+   ]
+  },
+  {
+   "seat": 264,
+   "name": "Chandpur-5",
+   "page_names": [
+    "Md Maminul Haque"
+   ]
+  },
+  {
+   "seat": 266,
+   "name": "Feni-2",
+   "page_names": [
+    "JOYNAL ABDIN"
+   ]
+  },
+  {
+   "seat": 300,
+   "name": "Bandarban",
+   "page_names": [
+    "Saching Prue"
+   ]
+  }
+ ],
+ "errors": []
+}

@@ -1,12 +1,14 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
 import Card from "@/components/ui/Card";
 import { buttonClass } from "@/components/ui/Button";
+import { IdeasIcon, IssuesIcon, ProgressIcon, ResolvedIcon, AlertIcon } from "@/components/ui/TileIcons";
 import { fmtNum, type Dict, type Lang } from "@/lib/i18n";
 import type { Overview as O } from "@/lib/office";
 
 /** Dashboard tiles. Real counts where the API has the data; tiles without data say so instead of inventing a number. */
 export default function Overview({ o, t, lang }: { o: O; t: Dict; lang: Lang }) {
-  const real: [string, number][] = [[t.odNew, o.newReports], [t.odWaiting, o.waiting], [t.odForwarded, o.forwarded], [t.odResolvedMonth, o.resolvedThisMonth], [t.odTotal, o.total]];
+  const real: [string, number, ReactNode][] = [[t.odNew, o.newReports, <AlertIcon key="a" className="size-9" />], [t.odWaiting, o.waiting, <ProgressIcon key="b" className="size-9" />], [t.odForwarded, o.forwarded, <IdeasIcon key="c" className="size-9" />], [t.odResolvedMonth, o.resolvedThisMonth, <ResolvedIcon key="d" className="size-9" />], [t.odTotal, o.total, <IssuesIcon key="e" className="size-9" />]];
   const missing = [t.odUnassigned, t.odHighPriority, t.odOverdue, t.odSatisfaction];
   return (
     <section aria-labelledby="od-h" className="space-y-3">
@@ -18,10 +20,10 @@ export default function Overview({ o, t, lang }: { o: O; t: Dict; lang: Lang }) 
         </div>
       </div>
       <p className="text-sm text-muted">{t.odOverviewNote}</p>
-      <dl className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-5">
-        {real.map(([k, v]) => (
+      <dl className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
+        {real.map(([k, v, icon]) => (
           <Card key={k} padded={false} className="p-3">
-            <dt className="text-sm text-muted">{k}</dt>
+            <dt className="flex items-center gap-2 text-sm text-muted">{icon}{k}</dt>
             <dd className="text-3xl font-semibold text-civic">{fmtNum(v, lang)}</dd>
           </Card>
         ))}

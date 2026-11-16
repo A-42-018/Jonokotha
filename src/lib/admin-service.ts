@@ -131,6 +131,19 @@ export async function importConstituencies(c: Ctx): Promise<Result> {
   return { status: 201, data: await rpc(c.sb, "import_constituencies", { p_source: b.source, p_items: items }) };
 }
 
+const Txt = (n: number) => z.string().trim().min(1).max(n);
+const SeatMp = z.strictObject({ name_en: Txt(120), name_bn: Txt(120), party_en: Txt(120), party_bn: Txt(120), elected_how: z.enum(["general", "by_election", "rescheduled"]), elected_on: z.iso.date(),
+  role_note: z.string().trim().max(200).nullable().optional(), profile_url: z.url({ protocol: /^https?$/ }).max(500) });
+const Seat = z.strictObject({ seat_no: z.number().int().min(1).max(300), key: z.string().regex(/^bd-\d{3}$/), name_en: Txt(120), name_bn: Txt(120), aliases_en: z.array(Txt(120)).max(5).default([]),
+  division_en: Txt(80), division_bn: Txt(80), district_en: Txt(80), district_bn: Txt(80), status: z.enum(["serving", "vacant"]), note: z.string().trim().max(600).nullable().optional(),
+  mp: SeatMp.nullable(), review: z.array(z.string().max(300)).max(10).default([]) });
+export async function importRepresentatives(c: Ctx): Promise<Result> {
+  requireAdmin(c);
+  const b = parse(z.strictObject({ source: z.strictObject({ name: z.string().trim().min(3).max(200), url: z.url({ protocol: /^https?$/ }).max(500), license: z.string().trim().min(2).max(200), fetched_at: z.iso.date() }),
+    items: z.array(Seat).min(1).max(100) }), c.body);
+  return { status: 201, data: await rpc(c.sb, "import_representatives", { p_source: b.source, p_items: b.items }) };
+}
+
 export async function ingestKnowledgeAdmin(c: Ctx): Promise<Result> {
   requireAdmin(c);
   const b = parse(z.strictObject({ rules: z.array(KnowledgeRule).max(50).default([]) }), c.body);
