@@ -1,7 +1,7 @@
 // npm run check:env — reports which settings are set and probes each service. Never prints secret values.
 const need = [
   ["NEXT_PUBLIC_SUPABASE_URL", true], ["NEXT_PUBLIC_SUPABASE_ANON_KEY", true], ["ANTHROPIC_API_KEY", true],
-  ["ANTHROPIC_MODEL", false], ["SUPABASE_SERVICE_ROLE_KEY", false],
+  ["ANTHROPIC_MODEL", false], ["AI_BASE_URL", false], ["SUPABASE_SERVICE_ROLE_KEY", false],
 ];
 let bad = 0;
 const row = (ok, name, note = "") => { console.log(`${ok ? "OK     " : "FAIL   "} ${name}${note ? " — " + note : ""}`); if (!ok) bad++; };
@@ -19,9 +19,16 @@ async function probe(name, fn) {
 }
 
 if (env.ANTHROPIC_API_KEY) {
+  // Same settings the app uses: explicit key, optional gateway base URL. A tiny real request, since gateways may not list models.
   await probe("Anthropic key", async () => {
-    const r = await fetch("https://api.anthropic.com/v1/models", { headers: { "x-api-key": env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" } });
-    return [r.ok, r.ok ? `valid; model ${env.ANTHROPIC_MODEL ?? "claude-opus-5-5"}` : `HTTP ${r.status} (key rejected or no access)`];
+    const base = (env.AI_BASE_URL || "https://api.anthropic.com").replace(/\/$/, "");
+    const model = env.ANTHROPIC_MODEL ?? "claude-opus-5-5";
+    const r = await fetch(`${base}/v1/messages`, {
+      method: "POST",
+      headers: { "x-api-key": env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json" },
+      body: JSON.stringify({ model, max_tokens: 5, messages: [{ role: "user", content: "hi" }] }),
+    });
+    return [r.ok, r.ok ? `valid via ${new URL(base).host}; model ${model}` : `HTTP ${r.status} via ${new URL(base).host} (key rejected, wrong base URL or model)`];
   });
 }
 

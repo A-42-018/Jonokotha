@@ -8,3 +8,6 @@
 6. `npm run seed:demo` for the video data.
 7. Supabase → Authentication → URL configuration: set Site URL and redirect URLs to the staging URL.
 8. Work through `docs/aibc/auth-test-log.md`.
+
+## Staging (2026-11-16)
+Vercel project `jonokotha` (team devalif), production branch `backend`: https://jonokotha.vercel.app. Supabase redirect URLs include its `/auth/callback`. Env vars set in Vercel: Supabase URL and anon key, Anthropic key and model. While the Anthropic key is invalid, `/api/intake` returns `source: "fallback"`.
