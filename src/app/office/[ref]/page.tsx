@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import AiPanel from "@/components/office/AiPanel";
+import Copilot from "@/components/office/Copilot";
+import NotesAndAssign from "@/components/office/NotesAndAssign";
 import AuditList from "@/components/office/AuditList";
 import OfficeActions from "@/components/office/OfficeActions";
 import StatusChip from "@/components/ui/StatusChip";
@@ -40,12 +41,18 @@ export default async function Case({ params }: PageProps<"/office/[ref]">) {
         <p className="whitespace-pre-wrap break-words">{c.description}</p>
       </section>
       <AuditList entries={auditFromTimeline(c.timeline)} t={t} lang={lang} />
+      <NotesAndAssign cref={c.ref} />
       </div>
       <div className="lg:sticky lg:top-4">
-      <AiPanel c={c} agency={agency} t={t} lang={lang}>
-        {/* Only acknowledge and refer exist in the backend today; request_info and resolve need it (see task notes). */}
-        <OfficeActions cref={c.ref} status={c.status} enabled={["acknowledge", "refer"]} />
-      </AiPanel>
+      <div className="space-y-4">
+        <Copilot c={c} agency={agency} />
+        <section aria-labelledby="act-h" className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+          <h2 id="act-h" className="font-medium">{t.ofActions}</h2>
+          <p className="text-xs text-amber-800">{t.humanOnly}</p>
+          {/* Only acknowledge and refer exist in the backend today; request_info and resolve need it (see task notes). */}
+          <OfficeActions cref={c.ref} status={c.status} enabled={["acknowledge", "refer"]} />
+        </section>
+      </div>
       </div>
       </div>
     </div>

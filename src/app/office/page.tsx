@@ -1,7 +1,10 @@
-import CaseQueue from "@/components/office/CaseQueue";
+import CaseTable from "@/components/office/CaseTable";
+import Overview from "@/components/office/Overview";
 import NoAccess from "@/components/ui/NoAccess";
 import State from "@/components/ui/State";
 import { dict, getLang } from "@/lib/i18n";
+import { nowMs } from "@/lib/explore";
+import { overviewStats } from "@/lib/office";
 import { listCases } from "@/lib/store";
 import { guardStaff } from "@/lib/guard";
 
@@ -13,8 +16,9 @@ export default async function Office() {
   const cases = await listCases(sb);
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold text-civic">{t.queue}</h1>
-      {cases.length === 0 ? <State kind="officeEmpty" title={t.emptyQueue} as="h2" /> : <CaseQueue cases={cases} t={t} lang={lang} />}
+      <h1 className="text-2xl font-semibold text-civic">{t.odOverview}</h1>
+      <Overview o={overviewStats(cases, nowMs())} t={t} lang={lang} />
+      {cases.length === 0 ? <State kind="officeEmpty" title={t.emptyQueue} as="h2" /> : <CaseTable cases={cases} />}
     </div>
   );
 }
