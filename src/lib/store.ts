@@ -5,7 +5,7 @@ import type { Agency, CaseRecord, IntakeDraft, IssueStatus, Status } from "./typ
 
 const tokens = (s: string) => new Set(s.toLowerCase().split(/[\s,।.]+/).filter((w) => w.length > 2));
 
-function similarity(a: string, b: string) {
+export function similarity(a: string, b: string) {
   const A = tokens(a), B = tokens(b);
   let n = 0;
   A.forEach((w) => B.has(w) && n++);

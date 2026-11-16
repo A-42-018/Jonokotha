@@ -47,7 +47,7 @@ Exit: golden path on staging; keys safe; nothing public leaks personal data.
 
 ## Phase 1 — Foundation hardening (21 Nov – 1 Dec)
 
-**Status 2026-11-16:** items 1–9, 11 and 12 are done (migrations 0004–0013; 0011–0013 applied locally only; 1.8 uses hosted BGE-M3, provider chosen by env, Bangla retrieval test still to run once a key is set). CI now has a `database` job (all DB/RLS/API tests on a local Supabase) and a `security` job (gitleaks, npm audit). Open: 10 eval set v0 (also tunes the duplicate threshold) and an index back-fill for existing issues.
+**Status 2026-11-16:** items 1–12 are done (migrations 0004–0013; 0011–0013 applied locally only; 1.8 uses hosted BGE-M3, provider chosen by env, Bangla retrieval test still to run once a key is set). CI now has a `database` job (all DB/RLS/API tests on a local Supabase) and a `security` job (gitleaks, npm audit). Item 10 is done: 118-case dataset, `npm run eval`, baseline in `docs/aibc/eval-baseline.md` (keyword fallback and AI drafting measured; embedding duplicate precision/recall not measured until `EMBEDDINGS_*` is set, which also tunes the 0.80 threshold). Open: an index back-fill for existing issues.
 
 Goal: secure core with tested permissions and first AI metrics (§24).
 
