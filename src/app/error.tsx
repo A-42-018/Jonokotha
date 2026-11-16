@@ -2,11 +2,10 @@
 import Link from "next/link";
 import { useEffect } from "react";
 import State, { btnPrimary, btnSecondary } from "@/components/ui/State";
-import { useLang } from "@/components/ui/useLang";
-import { dict } from "@/lib/i18n";
+import { useT } from "@/components/ui/useT";
 
 export default function ErrorPage({ error, retry }: { error: unknown; retry: () => void }) {
-  const t = dict[useLang()];
+  const t = useT();
   useEffect(() => { console.error(error); }, [error]);
   return (
     <State kind="error" title={t.stErrorTitle} body={t.stErrorBody} live="assertive">

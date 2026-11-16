@@ -1,7 +1,7 @@
 /** Shared navigation rules for TopNav, BottomTabBar and MainShell. */
 
 /** Routes where the phone tab bar is hidden: typing flows, where it would ride up over the keyboard. */
-const TAB_BAR_HIDDEN = ["/report", "/login"];
+const TAB_BAR_HIDDEN = ["/report", "/login", "/dev/screens/report"]; // last one: audit-only demo of the wizard
 
 export function isActivePath(path: string, href: string): boolean {
   return href === "/" ? path === "/" : path === href || path.startsWith(`${href}/`);

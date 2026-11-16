@@ -1,22 +1,24 @@
-import { redirect } from "next/navigation";
-import CaseQueue from "@/components/office/CaseQueue";
+import CaseTable from "@/components/office/CaseTable";
+import Overview from "@/components/office/Overview";
 import NoAccess from "@/components/ui/NoAccess";
 import State from "@/components/ui/State";
 import { dict, getLang } from "@/lib/i18n";
+import { nowMs } from "@/lib/explore";
+import { overviewStats } from "@/lib/office";
 import { listCases } from "@/lib/store";
-import { currentUser } from "@/lib/supabase/server";
+import { guardStaff } from "@/lib/guard";
 
 export default async function Office() {
   const lang = await getLang();
   const t = dict[lang];
-  const { sb, user, isStaff } = await currentUser();
-  if (!user) redirect("/login?expired=1");
-  if (!isStaff) return <NoAccess t={t} />;
+  const { sb, denied } = await guardStaff("/office");
+  if (denied) return <NoAccess t={t} email={denied.email} role={denied.role} next="/office" />;
   const cases = await listCases(sb);
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold text-civic">{t.queue}</h1>
-      {cases.length === 0 ? <State kind="officeEmpty" title={t.emptyQueue} as="h2" /> : <CaseQueue cases={cases} t={t} lang={lang} />}
+      <h1 className="text-2xl font-semibold text-civic">{t.odOverview}</h1>
+      <Overview o={overviewStats(cases, nowMs())} t={t} lang={lang} />
+      {cases.length === 0 ? <State kind="officeEmpty" title={t.emptyQueue} as="h2" /> : <CaseTable cases={cases} />}
     </div>
   );
 }

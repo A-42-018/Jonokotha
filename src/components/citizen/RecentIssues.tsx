@@ -11,7 +11,7 @@ export default function RecentIssues({ t, lang, cases, failed }: { t: Dict; lang
       ) : cases.length === 0 ? (
         <div className="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-4">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/illustrations/empty-no-reports.svg" alt="" className="h-20 w-20 shrink-0" />
+          <img loading="lazy" decoding="async" src="/illustrations/empty-no-reports.svg" alt="" className="h-20 w-20 shrink-0" />
           <p className="text-slate-600">{t.homeRecentEmpty}</p>
         </div>
       ) : (
@@ -20,7 +20,7 @@ export default function RecentIssues({ t, lang, cases, failed }: { t: Dict; lang
             <li key={c.ref}>
               <Link href={`/issue/${c.ref}`} className="flex min-h-14 items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-civic">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={`/illustrations/cat-${c.category}.svg`} alt="" className="h-12 w-12 shrink-0" />
+                <img loading="lazy" decoding="async" src={`/illustrations/cat-${c.category}.svg`} alt="" className="h-12 w-12 shrink-0" />
                 <span className="min-w-0 flex-1">
                   <span className="block truncate font-medium text-slate-800">{c.title}</span>
                   <span className="block truncate text-sm text-slate-600">{t.cats[c.category]}{c.area && ` · ${c.area}`} · {fmtDate(c.createdAt, lang)}</span>

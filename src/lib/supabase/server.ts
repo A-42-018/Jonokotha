@@ -13,10 +13,13 @@ export async function supabaseServer() {
   });
 }
 
+export type Role = "citizen" | "staff" | "admin";
+
 export async function currentUser() {
   const sb = await supabaseServer();
   const { data } = await sb.auth.getUser();
-  if (!data.user) return { sb, user: null, isStaff: false };
+  if (!data.user) return { sb, user: null, role: null, isStaff: false };
   const { data: p } = await sb.from("profiles").select("role").eq("id", data.user.id).maybeSingle();
-  return { sb, user: data.user, isStaff: p?.role === "staff" || p?.role === "admin" };
+  const role: Role = p?.role === "admin" ? "admin" : p?.role === "staff" ? "staff" : "citizen";
+  return { sb, user: data.user, role, isStaff: role !== "citizen" };
 }

@@ -2,16 +2,20 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
-import { fillNum, type Dict, type Lang } from "@/lib/i18n";
+import { fillNum } from "@/lib/format";
+import { type Dict, type Lang } from "@/lib/i18n";
 import {
   DRAFT_KEY, FIELDS, LEGACY_DRAFT_KEY, STEP_FIELDS, hasPersonalNumber, reportSchema,
   type ReportData, type ReportField, type ReportValues,
 } from "@/lib/report";
-import { CATEGORIES, type Category } from "@/lib/types";
+import { CATEGORIES, type Category } from "@/lib/categories";
 import CategoryPicker from "./report/CategoryPicker";
 import EvidenceStep, { type Photo } from "./report/EvidenceStep";
 import PrivacyWarning from "./report/PrivacyWarning";
 import ReportSuccess from "./ReportSuccess";
+import ReportQueued from "./offline/ReportQueued";
+import { readQueue, writeQueue } from "./offline/queue-store";
+import { enqueue, newId, sendReport } from "@/lib/offline-queue";
 import Badge from "./ui/Badge";
 import Button from "./ui/Button";
 import Card from "./ui/Card";
@@ -19,14 +23,16 @@ import Dialog from "./ui/Dialog";
 import Input from "./ui/Input";
 import Stepper from "./ui/Stepper";
 import Textarea from "./ui/Textarea";
+import { appendTranscript } from "@/lib/speech";
+import { useSpeech } from "./report/useSpeech";
+import LocationPicker from "./report/LocationPicker";
+import type { Pin } from "@/lib/places";
 import { useToast } from "./ui/Toast";
 import { useKeyboardInset } from "./ui/useKeyboardInset";
 
 export { hasPersonalNumber };
 
-type SR = { new (): { lang: string; onresult: ((e: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null; onend: (() => void) | null; onerror: (() => void) | null; start(): void } };
-
-type Saved = { quick?: string; values?: Partial<ReportValues>; ai?: ReportField[]; edited?: ReportField[]; step?: number };
+type Saved = { quick?: string; values?: Partial<ReportValues>; ai?: ReportField[]; edited?: ReportField[]; step?: number; pin?: Pin };
 
 const LAST = 4;
 const isCategory = (v: unknown): v is Category => typeof v === "string" && (CATEGORIES as readonly string[]).includes(v);
@@ -59,13 +65,15 @@ export default function ReportForm({ t, lang, constituencyId }: { t: Dict; lang:
   const [quick, setQuick] = useState("");
   const [ai, setAi] = useState<ReportField[]>([]);
   const [edited, setEdited] = useState<ReportField[]>([]);
+  const [pin, setPin] = useState<Pin>();
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [sentRef, setSentRef] = useState("");
+  const [queued, setQueued] = useState(false);
   const [restored, setRestored] = useState(false);
   const [confirmDiscard, setConfirmDiscard] = useState(false);
   const [busy, setBusy] = useState<"" | "draft" | "submit">("");
-  const [listening, setListening] = useState(false);
   const [quickDone, setQuickDone] = useState(false);
+  const speech = useSpeech(lang === "bn" ? "bn-BD" : "en-US", (text) => setQuick((q) => appendTranscript(q, text)));
   const loaded = useRef(false);
   const heading = useRef<HTMLHeadingElement>(null);
   const stepMounted = useRef(false);
@@ -87,6 +95,7 @@ export default function ReportForm({ t, lang, constituencyId }: { t: Dict; lang:
           setQuick(d.quick ?? "");
           setAi(d.ai ?? []);
           setEdited(d.edited ?? []);
+          setPin(d.pin);
           setStep(Math.min(Math.max(d.step ?? 0, 0), LAST));
           setRestored(true);
         }
@@ -97,13 +106,13 @@ export default function ReportForm({ t, lang, constituencyId }: { t: Dict; lang:
   }, [reset]);
 
   useEffect(() => {
-    if (!loaded.current || sentRef) return;
+    if (!loaded.current || sentRef || queued) return;
     try {
       const empty = !quick && !values.title && !values.description && !values.area && !values.category;
       if (empty) localStorage.removeItem(DRAFT_KEY);
-      else localStorage.setItem(DRAFT_KEY, JSON.stringify({ quick, values, ai, edited, step } satisfies Saved));
+      else localStorage.setItem(DRAFT_KEY, JSON.stringify({ quick, values, ai, edited, step, pin } satisfies Saved));
     } catch { /* ignore */ }
-  }, [quick, values, ai, edited, step, sentRef]);
+  }, [quick, values, ai, edited, step, pin, sentRef, queued]);
 
   // Move focus to the new step's heading (not on first load).
   useEffect(() => {
@@ -144,20 +153,7 @@ export default function ReportForm({ t, lang, constituencyId }: { t: Dict; lang:
   function clearDraft() {
     photos.forEach((p) => URL.revokeObjectURL(p.url));
     reset({ title: "", description: "", area: "" });
-    setQuick(""); setAi([]); setEdited([]); setPhotos([]); setStep(0); setRestored(false); setQuickDone(false);
-  }
-
-  function speak() {
-    const w = window as unknown as { SpeechRecognition?: SR; webkitSpeechRecognition?: SR };
-    const Rec = w.SpeechRecognition ?? w.webkitSpeechRecognition;
-    if (!Rec) { toast("info", t.speakUnsupported); return; }
-    const r = new Rec();
-    r.lang = lang === "bn" ? "bn-BD" : "en-US";
-    r.onresult = (e) => setQuick((p) => `${p} ${e.results[0][0].transcript}`.trim());
-    r.onend = () => setListening(false);
-    r.onerror = () => setListening(false);
-    setListening(true);
-    r.start();
+    setQuick(""); setAi([]); setEdited([]); setPhotos([]); setPin(undefined); setStep(0); setRestored(false); setQuickDone(false);
   }
 
   async function makeDraft() {
@@ -190,14 +186,18 @@ export default function ReportForm({ t, lang, constituencyId }: { t: Dict; lang:
 
   async function submit(data: ReportData) {
     setBusy("submit");
-    try {
-      const res = await fetch("/api/cases", { method: "POST", body: JSON.stringify({ ...data, constituencyId }) });
-      if (!res.ok) throw new Error("submit failed");
-      const { ref } = (await res.json()) as { ref: string };
+    const item = { id: newId(), body: { ...data, constituencyId, ...(pin ? { lat: pin.lat, lng: pin.lng } : {}) } };
+    const result = navigator.onLine === false ? ({ kind: "network" } as const) : await sendReport(item);
+    if (result.kind === "sent") {
       try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
-      setSentRef(ref);
-    } catch {
-      toast("error", t.submitFail);
+      setSentRef(result.ref);
+    } else if (result.kind === "network") {
+      // No signal: keep the report on the phone; QueueSync sends it when the connection returns.
+      writeQueue(enqueue(readQueue(), item.body, new Date(), item.id));
+      try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
+      setQueued(true);
+    } else {
+      toast("error", result.kind === "unauth" ? t.qSignInToSend : t.submitFail);
     }
     setBusy("");
   }
@@ -213,6 +213,7 @@ export default function ReportForm({ t, lang, constituencyId }: { t: Dict; lang:
   const steps = [t.wizSteps.category, t.wizSteps.describe, t.wizSteps.location, t.wizSteps.evidence, t.wizSteps.review];
   const titles = [t.stCategory, t.stDescribe, t.stLocation, t.stEvidence, t.stReview];
 
+  if (queued) return <ReportQueued t={t} onAnother={() => { setQueued(false); clearDraft(); }} />;
   if (sentRef) return <ReportSuccess t={t} refId={sentRef} onAnother={() => { setSentRef(""); clearDraft(); }} />;
 
   const isLast = step === LAST;
@@ -249,11 +250,26 @@ export default function ReportForm({ t, lang, constituencyId }: { t: Dict; lang:
             />
             {warn && hasPersonalNumber(quick) && <PrivacyWarning t={t} />}
             <div className="flex flex-wrap gap-3">
-              <Button variant="secondary" icon={<span aria-hidden>🎤</span>} onClick={speak}>{listening ? t.listening : t.speak}</Button>
+              {speech.listening
+                ? <Button variant="danger" icon={<span aria-hidden>⏹</span>} onClick={speech.stop}>{t.vStop}</Button>
+                : <Button variant="secondary" icon={<span aria-hidden>🎤</span>} onClick={speech.start}>{t.speak}</Button>}
               <Button loading={busy === "draft"} disabled={quick.trim().length < 3 || busy !== ""} onClick={() => void makeDraft()}>
                 {busy === "draft" ? t.drafting : t.draft}
               </Button>
             </div>
+            <p role="status" className="sr-only">{busy === "draft" ? t.drafting : ""}</p>
+            {speech.listening && (
+              <div role="status" aria-live="polite" className="rounded-xl border border-civic/30 bg-white p-3 text-sm">
+                <p className="font-medium text-civic"><span aria-hidden>🎤 </span>{t.listening} {t.vLive}</p>
+                <p className="mt-1 min-h-6 text-foreground">{speech.interim || t.vLiveEmpty}</p>
+              </div>
+            )}
+            {speech.problem && (
+              <p role="alert" className="rounded-xl border border-amber/60 bg-amber/10 p-3 text-sm">
+                {speech.problem === "unsupported" ? t.speakUnsupported : speech.problem === "denied" ? t.vDenied : speech.problem === "silence" ? t.vSilence : speech.problem === "network" ? t.vNetwork : t.vOther}
+              </p>
+            )}
+            {!speech.problem && <p className="text-sm text-muted">{t.vHint}</p>}
             {quickDone && <p role="status" className="text-sm font-medium text-leaf-strong">✓ {t.quickDone}</p>}
             {ai.length > 0 && <p className="text-sm text-muted">{t.aiNote}</p>}
           </Card>
@@ -277,7 +293,7 @@ export default function ReportForm({ t, lang, constituencyId }: { t: Dict; lang:
 
       {step === 2 && (
         <div className="space-y-4">
-          <Card tone="info" className="text-sm">{t.locNote}</Card>
+          <LocationPicker pin={pin} onPin={setPin} onArea={(name) => setValue("area", name, { shouldDirty: true, shouldValidate: true })} />
           {withBadge("area", <Input label={t.fArea} hint={t.fAreaHint} placeholder={t.fAreaPlaceholder} maxLength={130} autoComplete="street-address" error={errors.area?.message} {...field("area")} />)}
         </div>
       )}
@@ -293,14 +309,14 @@ export default function ReportForm({ t, lang, constituencyId }: { t: Dict; lang:
             {category ? (
               <span className="flex items-center gap-3">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={`/illustrations/cat-${category}.svg`} alt="" width={40} height={40} className="size-10" />
+                <img loading="lazy" decoding="async" src={`/illustrations/cat-${category}.svg`} alt="" width={40} height={40} className="size-10" />
                 {t.cats[category]}
               </span>
             ) : "—"}
           </ReviewRow>
           <ReviewRow t={t} label={t.fTitle} badge={badge("title")} onEdit={() => setStep(1)}>{getValues("title") || "—"}</ReviewRow>
           <ReviewRow t={t} label={t.fDescription} badge={badge("description")} onEdit={() => setStep(1)}><span className="whitespace-pre-wrap break-words">{getValues("description") || "—"}</span></ReviewRow>
-          <ReviewRow t={t} label={t.fArea} badge={badge("area")} onEdit={() => setStep(2)}>{getValues("area") || "—"}</ReviewRow>
+          <ReviewRow t={t} label={t.fArea} badge={badge("area")} onEdit={() => setStep(2)}>{getValues("area") || "—"}{pin ? ` · ${t.lpPinPlaced}` : ""}</ReviewRow>
           <ReviewRow t={t} label={t.wizSteps.evidence} onEdit={() => setStep(3)}>
             {photos.length === 0 ? <span className="text-muted">{t.evNone}</span> : (
               <div className="space-y-2">

@@ -1,7 +1,8 @@
 "use client";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { fillNum, type Lang } from "@/lib/i18n";
+import { fillNum } from "@/lib/format";
+import { type Lang } from "@/lib/i18n";
 import { cx, focusRing } from "./cx";
 import { useLang } from "./useLang";
 import { useT } from "./useT";

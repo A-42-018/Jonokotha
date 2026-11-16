@@ -8,15 +8,24 @@ import Textarea from "@/components/ui/Textarea";
 import { useToast } from "@/components/ui/Toast";
 import { useShare } from "@/components/ui/useShare";
 import { useT } from "@/components/ui/useT";
+import { useLang } from "@/components/ui/useLang";
+import { useLocalValue } from "@/components/ui/useLocalValue";
+import { fillNum } from "@/lib/format";
+import { FOLLOWS_KEY, isFollowing, NO_FOLLOWS, toggleFollow } from "@/lib/follows";
+import Link from "next/link";
+import ShareButtons from "@/components/ui/ShareButtons";
 
 const REASONS = ["Spam", "Abuse", "Private", "False", "Other"] as const;
 
-/** Citizen actions on an issue. All UI-only until Phase 2: nothing here is sent to the server. */
-export default function IssueActions({ refId, title }: { refId: string; title: string }) {
+/** Citizen actions on an issue. Me-too, follow: device-local until the API exists (nothing is sent). Report-content is UI only. */
+export default function IssueActions({ refId, title, signedIn = false, meTooBase = 0 }: { refId: string; title: string; signedIn?: boolean; meTooBase?: number }) {
   const t = useT();
   const toast = useToast();
   const { copyLink, share } = useShare(t, `/issue/${refId}`, title);
-  const [following, setFollowing] = useState(false);
+  const lang = useLang();
+  const [follows, setFollows] = useLocalValue(FOLLOWS_KEY, NO_FOLLOWS);
+  const following = isFollowing(follows, "issues", refId);
+  const meToo = isFollowing(follows, "meToo", refId);
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState("");
   const [note, setNote] = useState("");
@@ -43,14 +52,26 @@ export default function IssueActions({ refId, title }: { refId: string; title: s
     <>
       <Card title={t.isShareTitle} headingAs="h2">
         <div className="space-y-3">
-          <Button full disabled aria-disabled="true" variant="success" icon={<span aria-hidden>👍</span>}>
-            {t.isMeToo} · {t.isMeTooSoon}
-          </Button>
+          {signedIn ? (
+            <Button
+              full
+              variant={meToo ? "success" : "secondary"}
+              aria-pressed={meToo}
+              icon={<span aria-hidden>👍</span>}
+              onClick={() => { setFollows(toggleFollow(follows, "meToo", refId)); toast("success", meToo ? t.enMeTooRemoved : t.enMeTooAdded); }}
+            >
+              {meToo ? t.enMeTooDone : t.enMeToo}
+            </Button>
+          ) : (
+            <Link href={`/login?need=1&next=${encodeURIComponent(`/issue/${refId}`)}`} className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-civic px-4 font-medium text-civic">{t.enMeToo} · {t.enSignIn}</Link>
+          )}
+          <p className="text-sm" aria-live="polite">{fillNum(t.enMeTooCount, { n: meTooBase + (meToo ? 1 : 0) }, lang)}</p>
+          <p className="text-xs text-muted">{t.enMeTooHint} {t.enMeTooLocal}</p>
           <Button
             full
             variant="secondary"
             aria-pressed={following}
-            onClick={() => { setFollowing(!following); toast("info", following ? t.isUnfollowToast : t.isFollowToast); }}
+            onClick={() => { setFollows(toggleFollow(follows, "issues", refId)); toast("info", following ? t.isUnfollowToast : t.isFollowToast); }}
             icon={<span aria-hidden>{following ? "🔔" : "🔕"}</span>}
           >
             {following ? t.isFollowing : t.isFollow}
@@ -59,6 +80,7 @@ export default function IssueActions({ refId, title }: { refId: string; title: s
             <Button variant="secondary" onClick={() => void copyLink()}>{t.copyLink}</Button>
             <Button variant="secondary" onClick={() => void share()}>{t.shareLink}</Button>
           </div>
+          <ShareButtons path={`/issue/${refId}`} text={`${t.shText} ${title}`} />
           <p className="text-sm text-muted">{t.isShareHint}</p>
           <Button variant="ghost" onClick={() => setOpen(true)}>{t.isReportContent}</Button>
         </div>

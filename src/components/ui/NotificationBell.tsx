@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useState } from "react";
 import Badge from "./Badge";
 import { cx, focusRing } from "./cx";
@@ -6,7 +7,7 @@ import Dialog from "./Dialog";
 import { BellIcon } from "./NavIcons";
 import { useT } from "./useT";
 
-/** Notification bell stub: opens a panel that says the feature is coming. No count until notifications exist. */
+/** Bell: opens a panel linking to the notification centre. No unread count in the header: items are sample data until the API exists. */
 export default function NotificationBell() {
   const t = useT();
   const [open, setOpen] = useState(false);
@@ -25,6 +26,7 @@ export default function NotificationBell() {
         <Badge>{t.comingSoon}</Badge>
         <p className="font-medium">{t.navBellEmpty}</p>
         <p className="text-muted">{t.navBellSoon}</p>
+        <Link href="/notifications" onClick={() => setOpen(false)} className="inline-flex min-h-11 items-center text-civic underline">{t.ntViewAll}</Link>
       </Dialog>
     </>
   );

@@ -1,13 +1,12 @@
-import Link from "next/link";
-import { buttonClass } from "@/components/ui/Button";
-import ComingSoon from "@/components/ui/ComingSoon";
-import { dict, getLang } from "@/lib/i18n";
+import IdeasView from "@/components/ideas/IdeasView";
+import { SAMPLE_IDEAS } from "@/lib/sample";
+import { currentUser } from "@/lib/supabase/server";
 
+export const dynamic = "force-dynamic";
+
+/** Ideas list. No ideas API yet: sample ideas only, labelled. Support is a device-local stub. */
 export default async function Ideas() {
-  const t = dict[await getLang()];
-  return (
-    <ComingSoon art="spot-idea" soonLabel={t.comingSoon} title={t.ideasSoonTitle} body={t.ideasSoonBody}>
-      <Link href="/" className={buttonClass()}>{t.soonBackHome}</Link>
-    </ComingSoon>
-  );
+  let signedIn = false;
+  try { signedIn = !!(await currentUser()).user; } catch { /* treat as signed out */ }
+  return <IdeasView ideas={SAMPLE_IDEAS} signedIn={signedIn} />;
 }

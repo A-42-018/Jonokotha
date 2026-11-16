@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Badge from "@/components/ui/Badge";
 import { buttonClass } from "@/components/ui/Button";
+import QueuedReports from "@/components/offline/QueuedReports";
 import MyReports from "@/components/me/MyReports";
 import Card from "@/components/ui/Card";
 import State from "@/components/ui/State";
@@ -14,12 +15,15 @@ export default async function Me({ searchParams }: PageProps<"/me">) {
   const sp = await searchParams;
   let email: string | null = null;
   let isStaff = false;
+  let role: string | null = null;
   let reports: MyReport[] = [];
   let failed = false;
   try {
-    const { sb, user, isStaff: staff } = await currentUser();
+    const cu = await currentUser();
+    const { sb, user, isStaff: staff } = cu;
     email = user?.email ?? null;
     isStaff = staff;
+    role = cu.role;
     if (user) {
       try { reports = await listMyReports(sb, user.id); } catch { failed = true; }
     }
@@ -35,6 +39,7 @@ export default async function Me({ searchParams }: PageProps<"/me">) {
             <p className="break-all font-medium">{email}</p>
             {isStaff && <Badge tone="teal">{t.staffRole}</Badge>}
             {isStaff && <div><Link href="/office" className={buttonClass({ variant: "secondary" })}>{t.officeCta}</Link></div>}
+            {role === "admin" && <div><Link href="/admin" className={buttonClass({ variant: "secondary" })}>{t.adTitle}</Link></div>}
           </div>
         ) : (
           <div className="space-y-3">
@@ -43,6 +48,8 @@ export default async function Me({ searchParams }: PageProps<"/me">) {
           </div>
         )}
       </Card>
+      <QueuedReports />
+      <Link href="/settings" className="inline-flex min-h-11 items-center text-civic underline">{t.stTitle}</Link>
       <Card title={t.meMyReports}>
         {!email ? (
           <State kind="expired" as="h2" title={t.stExpiredTitle} body={t.stExpiredBody} compact live="polite">

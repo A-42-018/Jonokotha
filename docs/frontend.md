@@ -122,3 +122,54 @@ Home hero: `hero-mobile` / `hero-desktop`. Categories: `cat-*` (12). Report step
 ## Definition of done (every task)
 
 Works at 375px and 1280px, Bangla and English, all relevant states, keyboard and screen-reader usable, no hard-coded strings, no private data in public views, unit test where logic exists, screenshot checked in the browser.
+
+## Phase 1 status (16 Nov)
+
+All nine Phase 1 tasks are built. Checks: `npm run lint`, `npm run typecheck`, `npm test` (Vitest + Testing Library: StatusChip, LoginForm, ReportForm, guard, colour contrast), `npm run test:e2e` (Playwright at 375px and 1280px: smoke, axe serious/critical on public pages, keyboard focus). CI runs all of them (`.github/workflows/ci.yml`).
+
+Not covered yet: screen-reader pass (TalkBack/VoiceOver) and axe on signed-in pages (`/report`, `/office`) — need a test Supabase session; planned for Phase 3.
+
+## Phase 2 status (16 Nov)
+
+All 13 Phase 2 items are built; each commit message ends with its task number. Backend gaps are marked in code and listed here. Everything that stands in for missing backend data is labelled "নমুনা / Sample" or "ডেমো" on screen, and device-local stubs say so.
+
+| # | Built | Real data today | Stub or gap (needs backend) |
+|---|---|---|---|
+| 2.1 | `/area` Explore: list/map tabs, search, category/status/date filters, sort, MapLibre clusters, "data last updated", approximate positions | cases from `listCases` (list only, no coordinates) | public coordinates and "me too" counts on cases; sample rows (12) give the map content |
+| 2.2 | Report location step: area search, tap-to-place pin, current location on click only, manual fallback | area text | `lat`/`lng` are sent in the POST body but `CaseInput` drops them; add them to the schema |
+| 2.3 | Voice intake: live transcript, stop, bn-BD, denied/silence/network/unsupported states | browser speech API | none (server STT is a backend sprint-2 item) |
+| 2.4 | `/ideas`, `/ideas/new`: tabs, search, category, status labels, similar ideas, one support per idea | none | ideas table and endpoints; support and submit are device-local |
+| 2.5 | `/mp` Find your MP, no account | none | verified representative and constituency data per area; sample reps and wards |
+| 2.6 | `/mp/[id]`, `/mp/method` profile and responsiveness | none | verified profiles, announcements, response counts API |
+| 2.7 | me-too with count, follow issue/area/categories, rating, reopen, appeal | none | endpoints for support, follow, rating, reopen, appeal; all device-local |
+| 2.8 | `/ask`, `/ask/inbox` | none | messages API with rate limit; device-local, sample FAQ |
+| 2.9 | Home feed from follows, `/notifications` | none | feed and notifications API; items are sample |
+| 2.10 | WhatsApp/Facebook links, Open Graph metadata, `share-image.png` | case title, category, area | set `NEXT_PUBLIC_SITE_URL` in staging/production |
+| 2.11 | `/welcome` onboarding, `/settings`, `/help`, `/privacy` | none | privacy text is a draft needing legal review |
+| 2.12 | Office overview, case table, copilot, notes/public reply split, assignment, escalation, `/office/announcements` | counts by status and date | priority, assignee, targets, ratings, reply-draft AI, notes/replies/assignment/announcement endpoints |
+| 2.13 | `/admin`, verification, moderation, AI log, `/admin/stats` | counts from real cases | verification/moderation queues, AI run table; admin role is checked by `guardAdmin` |
+
+Shared pieces: Phase 2 strings are in `src/lib/strings/*` (bn and en keys are type-checked equal, plus `tests/unit/i18n.test.ts`); sample data in `src/lib/sample.ts`, `mp.ts`, `admin.ts`; `useLocalValue` (localStorage-backed shared state) powers every device-local stub; the map worker is vendored in `public/vendor` (see its README).
+
+Checks: `npm run lint`, `npm run typecheck`, `npm test` (79 tests), `npm run test:e2e` (mobile 375 and desktop 1280, axe on every new public page). Not covered: axe on signed-in office and admin pages, screen-reader pass (Phase 3).
+
+## Phase 3 status (16 Nov)
+
+All seven Phase 3 items are built; each commit message ends with its task number. Full report and evidence: `docs/aibc/phase3-audit.md`.
+
+| # | Built | Blocked or needs someone |
+|---|---|---|
+| 3.1 | axe WCAG 2.2 AA on 14 screens x bn/en x 375/1280 with zero violations; 200% and 400% reflow; reduced motion; keyboard focus run. Signed-in screens are audited through labelled demo screens at `/dev/screens/<name>` | TalkBack and VoiceOver pass needs a person with devices: `docs/aibc/screen-reader-checklist.md` |
+| 3.2 | First-load JS for `/` 315 to 149 KB gzip; map, Supabase and Zod kept out (tested); Lighthouse mobile 3G 98 to 100 | Margin is 1 KB; default simulated Slow-4G profile scores 86 |
+| 3.3 | Offline report queue (saved on the phone, sent when back online, visible in My Reports), versioned service-worker cache, per-route error boundaries | Backend: idempotency on `POST /api/cases` (key already sent) |
+| 3.4 | Glossary, status and category labels aligned with section 19; automated language tests; Dhaka-time Bangla dates; review sheet | **Native-speaker review not done** (`docs/aibc/language/strings-review.csv`) |
+| 3.5 | Golden path, staff approval, role denial, offline, budget, security suites; 22 visual baselines | Linux CI skips visual tests until baselines are created there (`VISUAL=1 ... --update-snapshots`) |
+| 3.6 | `npm run check:bundle` (in CI), photo type by content and size limit, safe links, XSS test, CSP builder with zero violations | Backend: send the CSP and the other headers (`docs/aibc/security-ui.md`) |
+| 3.7 | Audit report, screenshots, axe and Lighthouse results in `docs/aibc/` | none |
+
+Things to know:
+- **Strings in client components** now come from `I18nProvider` (root layout, `useT()`), not from importing `dict`. Never import `dict` into a client component: it puts both languages (about 29 KB gzip) back into the first-load bundle. Format helpers live in `lib/format.ts`; the category list in `lib/categories.ts` (also re-exported by `types.ts`).
+- `/dev/screens/<name>` (report, issue, issue-long, issue-xss, office, case, case-long, announcements, admin-verification, admin-moderation, no-access-*, boom) needs `NODE_ENV !== production` or `JK_AUDIT=1`. Playwright's own server sets it; never set it in staging or production.
+- Shared files touched: `next.config.ts` (build id for the service-worker cache), `package.json` (`check:bundle`), `.github/workflows/ci.yml` (build and bundle scan before e2e), `src/lib/types.ts` (re-exports `CATEGORIES`). Tell the backend owner.
+- Fixed in the language commit: the I18nProvider introduced in 3.2 crashed English pages (server render asked for the Bangla strings); new tests render every page in both languages.
+- Checks: `npm run lint`, `npm run typecheck`, `npm test`, `npm run test:e2e`, `npm run check:bundle`.

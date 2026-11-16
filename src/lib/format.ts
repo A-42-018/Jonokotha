@@ -1,0 +1,48 @@
+// Number and date formatting. Separate from i18n.ts so client components can use it without bundling the dictionaries.
+import type { Lang } from "./i18n";
+
+/** Formats a number with Bangla digits in bn (e.g. 12 -> ১২). */
+export function fmtNum(n: number, lang: Lang) {
+  return n.toLocaleString(lang === "bn" ? "bn-BD" : "en-GB", { useGrouping: false });
+}
+
+/** Fills `{name}` placeholders; numeric values are formatted for the language. */
+export function fillNum(template: string, values: Record<string, string | number>, lang: Lang) {
+  return template.replace(/\{(\w+)\}/g, (_, k: string) => {
+    const v = values[k];
+    return typeof v === "number" ? fmtNum(v, lang) : String(v ?? "");
+  });
+}
+
+const DHAKA = "Asia/Dhaka";
+
+/** Everyday Bangla day parts (ভোর, সকাল, দুপুর, বিকেল, সন্ধ্যা, রাত) for a 24-hour clock hour. */
+export function bnDayPart(h: number) {
+  if (h < 4) return "রাত";
+  if (h < 6) return "ভোর";
+  if (h < 12) return "সকাল";
+  if (h < 16) return "দুপুর";
+  if (h < 18) return "বিকেল";
+  if (h < 20) return "সন্ধ্যা";
+  return "রাত";
+}
+
+function dhakaParts(iso: string, lang: Lang) {
+  const loc = lang === "bn" ? "bn-BD" : "en-GB";
+  const date = new Date(iso);
+  const day = date.toLocaleDateString(loc, { timeZone: DHAKA, day: "numeric", month: lang === "bn" ? "long" : "short", year: "numeric" });
+  const [h, m] = date.toLocaleTimeString("en-GB", { timeZone: DHAKA, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).split(":").map(Number);
+  return { day, h, m };
+}
+
+/** Date and time in Asia/Dhaka. bn: "১৬ নভেম্বর ২০২৬, রাত ২:৩০" (Bangla digits and day part); en: "16 Nov 2026, 02:30". */
+export function fmtDate(iso: string, lang: Lang) {
+  const { day, h, m } = dhakaParts(iso, lang);
+  if (lang === "en") return `${day}, ${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+  return `${day.replace(/,/g, "")}, ${bnDayPart(h)} ${fmtNum(h % 12 || 12, "bn")}:${fmtNum(m, "bn").padStart(2, "০")}`;
+}
+
+/** Date without time (Asia/Dhaka), Bangla digits in bn: "১৬ নভেম্বর ২০২৬". */
+export function fmtDay(iso: string, lang: Lang) {
+  return dhakaParts(iso, lang).day.replace(/,/g, "");
+}

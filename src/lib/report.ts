@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { CATEGORIES } from "@/lib/types";
+import { CATEGORIES } from "@/lib/categories";
 import type { Dict } from "@/lib/i18n";
 
 export const DRAFT_KEY = "jonokotha:report-draft:v2";

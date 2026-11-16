@@ -10,7 +10,7 @@ import { tabBarHidden } from "./nav";
  */
 export default function MainShell({ children }: { children: ReactNode }) {
   const path = usePathname();
-  const wide = path === "/office" || path.startsWith("/office/");
+  const wide = ["/office", "/admin"].some((p) => path === p || path.startsWith(`${p}/`));
   return (
     <main
       id="main"

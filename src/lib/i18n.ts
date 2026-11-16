@@ -1,3 +1,5 @@
+import { p2 } from "./strings";
+
 export type Lang = "bn" | "en";
 
 export async function getLang(): Promise<Lang> {
@@ -7,7 +9,7 @@ export async function getLang(): Promise<Lang> {
   return c === "en" ? "en" : "bn";
 }
 
-export const dict = {
+const base = {
   bn: {
     appName: "জনকথা",
     tagline: "আপনার এলাকার সমস্যা, সরাসরি জনপ্রতিনিধির কাছে",
@@ -26,7 +28,7 @@ export const dict = {
     cpChoose: "এলাকা বাছুন",
     cpNone: "বাছাই হয়নি",
     cpTitle: "আপনার নির্বাচনী এলাকা বাছুন",
-    cpHint: "আপনার অভিযোগ এই এলাকার অফিসে যাবে। পরে হেডার থেকে বদলাতে পারবেন।",
+    cpHint: "আপনার সমস্যা এই এলাকার অফিসে যাবে। পরে হেডার থেকে বদলাতে পারবেন।",
     cpSample: "নমুনা",
     cpClose: "বন্ধ করুন",
     comingSoon: "শীঘ্রই",
@@ -37,7 +39,7 @@ export const dict = {
     navReportShort: "সমস্যা জানান",
     navBell: "নোটিফিকেশন",
     navBellEmpty: "কোনো নতুন নোটিফিকেশন নেই।",
-    navBellSoon: "অভিযোগের অবস্থা বদলালে এখানে জানানো হবে। এই সুবিধা শীঘ্রই আসছে।",
+    navBellSoon: "সমস্যার অবস্থা বদলালে এখানে জানানো হবে। এই সুবিধা শীঘ্রই আসছে।",
     navLangSwitch: "ভাষা বদলে English করুন",
     areaSoonTitle: "এলাকার পাতা শীঘ্রই আসছে",
     areaSoonBody: "এখানে আপনার এলাকার সমস্যা, মানচিত্র আর জনপ্রতিনিধির তথ্য দেখা যাবে। ততদিন নতুন সমস্যা জানাতে পারেন।",
@@ -45,22 +47,22 @@ export const dict = {
     ideasSoonBody: "এখানে এলাকার জন্য আইডিয়া দিতে আর অন্যের আইডিয়ায় সমর্থন জানাতে পারবেন।",
     soonBackHome: "হোমে ফিরুন",
     meTitle: "আমি",
-    meSignedOut: "সাইন ইন করলে আপনার অভিযোগ আর অ্যাকাউন্ট এখানে দেখা যাবে।",
+    meSignedOut: "সাইন ইন করলে আপনার সমস্যা আর অ্যাকাউন্ট এখানে দেখা যাবে।",
     meSignedInAs: "সাইন ইন করা আছে",
-    meMyReports: "আমার অভিযোগ",
+    meMyReports: "আমার সমস্যাগুলো",
     mrFilterAria: "অবস্থা অনুযায়ী বাছুন",
     mrAll: "সব",
     mrFilterLabel: "{label}: {n}টি",
-    mrListAria: "আমার অভিযোগের তালিকা",
+    mrListAria: "আমার সমস্যাগুলোর তালিকা",
     mrReportedOn: "জানানো হয়েছে",
     mrNoArea: "এলাকা দেওয়া হয়নি",
     mrEmptyTitle: "আপনি এখনো কোনো সমস্যা জানাননি",
     mrEmptyBody: "আপনার এলাকার একটি সমস্যা জানান। জমা দেওয়ার পর এখানে তার অবস্থা দেখতে পাবেন।",
-    mrNoResultsTitle: "এই অবস্থায় কোনো অভিযোগ নেই",
-    mrNoResultsBody: "অন্য একটি অবস্থা বাছুন, অথবা সব অভিযোগ দেখুন।",
-    mrShowAll: "সব অভিযোগ দেখুন",
-    mrError: "আপনার অভিযোগের তালিকা এখন আনা যাচ্ছে না। একটু পরে আবার চেষ্টা করুন।",
-    mrSummary: "মোট {n}টি অভিযোগ",
+    mrNoResultsTitle: "এই অবস্থায় কোনো সমস্যা নেই",
+    mrNoResultsBody: "অন্য একটি অবস্থা বাছুন, অথবা সব সমস্যা দেখুন।",
+    mrShowAll: "সব সমস্যা দেখুন",
+    mrError: "আপনার সমস্যার তালিকা এখন আনা যাচ্ছে না। একটু পরে আবার চেষ্টা করুন।",
+    mrSummary: "মোট {n}টি সমস্যা",
     meLanguage: "ভাষা",
     homeReportTitle: "এলাকার সমস্যা জানান",
     homeReportBody: "বলুন বা লিখুন। আমরা খসড়া করে দেব, আপনি দেখে জমা দেবেন।",
@@ -136,7 +138,7 @@ export const dict = {
     evWarnTitle: "ছবি দেওয়ার আগে খেয়াল রাখুন",
     evWarnBody: "মানুষের মুখ, পরিচয়পত্র, গাড়ির নম্বর বা বাড়ির ভেতরের ছবি এড়িয়ে চলুন। শুধু সমস্যাটি দেখা যায় এমন ছবি দিন।",
     evCompressing: "ছবি ছোট করা হচ্ছে…",
-    evSoon: "ছবি অভিযোগের সঙ্গে পাঠানোর সুবিধা শীঘ্রই আসছে। এখন ছবি শুধু আপনার ফোনে থাকে, পাঠানো হয় না।",
+    evSoon: "ছবি সমস্যার সঙ্গে পাঠানোর সুবিধা শীঘ্রই আসছে। এখন ছবি শুধু আপনার ফোনে থাকে, পাঠানো হয় না।",
     evNone: "কোনো ছবি যোগ করা হয়নি।",
     evSize: "{kb} কেবি",
     evAlt: "ছবি {n}",
@@ -147,20 +149,20 @@ export const dict = {
     discardBody: "এখানকার সব লেখা মুছে যাবে।",
     discardYes: "হ্যাঁ, মুছুন",
     discardNo: "না, থাক",
-    successBody: "অফিস আপনার অভিযোগ দেখবে। এই নম্বর দিয়ে যেকোনো সময় অগ্রগতি দেখতে পারবেন।",
+    successBody: "অফিস আপনার সমস্যা দেখবে। এই নম্বর দিয়ে যেকোনো সময় অগ্রগতি দেখতে পারবেন।",
     copyRef: "নম্বর কপি করুন",
     copyLink: "লিংক কপি করুন",
     copied: "কপি হয়েছে",
     shareLink: "শেয়ার করুন",
-    viewReport: "অভিযোগ দেখুন",
+    viewReport: "সমস্যা দেখুন",
     reportAnother: "আরেকটি জানান",
-    sentTitle: "আপনার অভিযোগ পাঠানো হয়েছে",
-    refId: "রেফারেন্স নম্বর",
+    sentTitle: "আপনার সমস্যা পাঠানো হয়েছে",
+    refId: "সমস্যা নম্বর",
     status: "অবস্থা",
     timeline: "অগ্রগতি",
-    statuses: { received: "গ্রহণ করা হয়েছে", acknowledged: "অফিস দেখেছে", referred: "সংশ্লিষ্ট সংস্থায় পাঠানো হয়েছে", resolved: "সমাধান হয়েছে" },
+    statuses: { received: "পাঠানো হয়েছে", acknowledged: "এমপির অফিস পেয়েছে", referred: "দায়িত্বে থাকা অফিসে পাঠানো হয়েছে", resolved: "সমাধান হয়েছে" },
     isReportedOn: "জানানো হয়েছে",
-    isReportDetails: "অভিযোগের বিবরণ",
+    isReportDetails: "সমস্যার বিবরণ",
     isNoArea: "এলাকা দেওয়া হয়নি",
     isTimelineNow: "সর্বশেষ",
     isResponseTitle: "অফিসের উত্তর",
@@ -169,12 +171,12 @@ export const dict = {
     isResponseFrom: "অফিস, {date}",
     isMeToo: "আমারও একই সমস্যা",
     isMeTooSoon: "শীঘ্রই",
-    isFollow: "অনুসরণ করুন",
-    isFollowing: "অনুসরণ করছেন",
-    isFollowToast: "অনুসরণ চালু হয়েছে। অবস্থা বদলের জানান এখনও চালু হয়নি, শীঘ্রই আসছে।",
-    isUnfollowToast: "অনুসরণ বন্ধ হয়েছে",
+    isFollow: "খবর রাখুন",
+    isFollowing: "খবর রাখছেন",
+    isFollowToast: "খবর রাখা চালু হয়েছে। অবস্থা বদলের জানান এখনও চালু হয়নি, শীঘ্রই আসছে।",
+    isUnfollowToast: "খবর রাখা বন্ধ হয়েছে",
     isReportContent: "বিষয়বস্তু রিপোর্ট করুন",
-    isReportTitle: "এই অভিযোগ রিপোর্ট করুন",
+    isReportTitle: "এই সমস্যা রিপোর্ট করুন",
     isReportBody: "কেন এটি সমস্যাজনক মনে হচ্ছে, জানান। আপনার পরিচয় প্রকাশ হবে না।",
     isReasonLegend: "কারণ",
     isReasonSpam: "স্প্যাম বা বিজ্ঞাপন",
@@ -190,11 +192,11 @@ export const dict = {
     isShareTitle: "আপনি কী করতে পারেন",
     isShareHint: "এই লিংকে যে কেউ অগ্রগতি দেখতে পারবে। আপনার নাম বা যোগাযোগ দেখা যায় না।",
     isBackHome: "হোমে ফিরুন",
-    queue: "আসা অভিযোগ",
-    emptyQueue: "কোনো নতুন অভিযোগ নেই",
+    queue: "আসা সমস্যা",
+    emptyQueue: "কোনো নতুন সমস্যা নেই",
     aiSummary: "এআই সারসংক্ষেপ",
-    similar: "একই ধরনের অভিযোগ",
-    noSimilar: "মিলছে এমন কোনো অভিযোগ নেই",
+    similar: "একই ধরনের সমস্যা",
+    noSimilar: "মিলছে এমন কোনো সমস্যা নেই",
     noAiSummary: "এআই সারসংক্ষেপ চালু নেই (এআই কী যোগ হয়নি)",
     routing: "প্রস্তাবিত সংস্থা",
     source: "সূত্র",
@@ -203,7 +205,7 @@ export const dict = {
     approveRefer: "সংস্থায় রেফার অনুমোদন করুন",
     humanOnly: "কর্মী অনুমোদন না করা পর্যন্ত কিছু পাঠানো হয় না।",
     back: "ফিরুন",
-    ofCount: "মোট অভিযোগ",
+    ofCount: "মোট সমস্যা",
     ofColRef: "নম্বর",
     ofColTitle: "বিষয়",
     ofColCat: "ধরন",
@@ -211,19 +213,19 @@ export const dict = {
     ofColStatus: "অবস্থা",
     ofColDate: "তারিখ",
     ofOpenCase: "খুলুন",
-    ofQueueAria: "অভিযোগের তালিকা",
+    ofQueueAria: "সমস্যার তালিকা",
     ofStaffOnly: "শুধু কর্মীদের জন্য",
     ofStaffOnlyHint: "এই অংশ নাগরিকরা দেখতে পান না।",
     ofAiSuggestion: "এআই-এর প্রস্তাব, চূড়ান্ত সিদ্ধান্ত আপনার।",
-    ofReport: "নাগরিকের অভিযোগ",
+    ofReport: "নাগরিকের সমস্যা",
     ofNoArea: "এলাকা দেওয়া হয়নি",
-    ofSimilarOpen: "মিল আছে এমন অভিযোগ খুলুন",
+    ofSimilarOpen: "মিল আছে এমন সমস্যা খুলুন",
     ofActions: "কর্মীর সিদ্ধান্ত",
     ofDone: "এই ধাপ সম্পন্ন হয়েছে।",
     ofConfirmAckTitle: "স্বীকৃতি পাঠাবেন?",
-    ofConfirmAckBody: "নাগরিক দেখতে পাবেন যে অফিস অভিযোগটি দেখেছে।",
+    ofConfirmAckBody: "নাগরিক দেখতে পাবেন যে অফিস সমস্যাটি দেখেছে।",
     ofConfirmReferTitle: "সংস্থায় পাঠাবেন?",
-    ofConfirmReferBody: "অভিযোগটি প্রস্তাবিত সংস্থায় রেফার হিসেবে চিহ্নিত হবে এবং নাগরিক তা দেখতে পাবেন।",
+    ofConfirmReferBody: "সমস্যাটি প্রস্তাবিত সংস্থায় রেফার হিসেবে চিহ্নিত হবে এবং নাগরিক তা দেখতে পাবেন।",
     ofConfirmYes: "হ্যাঁ, অনুমোদন করুন",
     ofCancel: "বাতিল",
     ofWorking: "হচ্ছে…",
@@ -236,14 +238,14 @@ export const dict = {
     oaRequestInfo: "আরও তথ্য চান",
     oaRefer: "সংস্থায় রেফার করুন",
     oaResolve: "সমাধান হয়েছে",
-    oaTitleAcknowledge: "অভিযোগের স্বীকৃতি দিন",
+    oaTitleAcknowledge: "সমস্যার স্বীকৃতি দিন",
     oaTitleRequestInfo: "নাগরিকের কাছে আরও তথ্য চান",
     oaTitleRefer: "সংস্থায় রেফার করুন",
     oaTitleResolve: "সমাধান হয়েছে বলে চিহ্নিত করুন",
-    oaBodyAcknowledge: "নাগরিক দেখতে পাবেন যে অফিস অভিযোগটি দেখেছে।",
+    oaBodyAcknowledge: "নাগরিক দেখতে পাবেন যে অফিস সমস্যাটি দেখেছে।",
     oaBodyRequestInfo: "কী তথ্য দরকার তা লিখুন। নাগরিক উত্তর না দেওয়া পর্যন্ত অবস্থা একই থাকবে।",
-    oaBodyRefer: "অভিযোগটি রেফার হিসেবে চিহ্নিত হবে এবং নাগরিক তা দেখতে পাবেন।",
-    oaBodyResolve: "নাগরিক দেখতে পাবেন যে অভিযোগটির সমাধান হয়েছে। কী করা হয়েছে তা লিখুন।",
+    oaBodyRefer: "সমস্যাটি রেফার হিসেবে চিহ্নিত হবে এবং নাগরিক তা দেখতে পাবেন।",
+    oaBodyResolve: "নাগরিক দেখতে পাবেন যে সমস্যাটির সমাধান হয়েছে। কী করা হয়েছে তা লিখুন।",
     oaNote: "নোট",
     oaNoteHint: "শুধু কর্মীদের জন্য। নাগরিক এই নোট দেখতে পান না। {min} থেকে {max} অক্ষর।",
     oaNoteEmpty: "এগোনোর আগে একটি নোট লিখুন।",
@@ -258,7 +260,7 @@ export const dict = {
     oaToastRequestInfo: "তথ্যের অনুরোধ লেখা হয়েছে",
     oaToastRefer: "সংস্থায় রেফার করা হয়েছে",
     oaToastResolve: "সমাধান হয়েছে বলে চিহ্নিত হয়েছে",
-    oaNoActions: "এই অভিযোগে এখন কোনো কাজ বাকি নেই।",
+    oaNoActions: "এই সমস্যায় এখন কোনো কাজ বাকি নেই।",
     oaAuditTitle: "কে কী করেছেন",
     oaAuditAria: "কাজের তালিকা",
     oaAuditEmpty: "এখনও কোনো কাজ লেখা হয়নি।",
@@ -266,8 +268,8 @@ export const dict = {
     oaAuditActorUnknown: "লেখা নেই",
     oaAuditNote: "নোট",
     oaAuditNoNote: "কোনো নোট নেই",
-    oaAuditStaffOnly: "শুধু কর্মীদের জন্য। নোট ও নাম কখনো জনসাধারণের পাতায় বা আমার অভিযোগে দেখা যায় না।",
-    oaActReceived: "অভিযোগ পাওয়া গেছে",
+    oaAuditStaffOnly: "শুধু কর্মীদের জন্য। নোট ও নাম কখনো জনসাধারণের পাতায় বা আমার সমস্যায় দেখা যায় না।",
+    oaActReceived: "সমস্যা পাওয়া গেছে",
     oaActAcknowledge: "স্বীকৃতি দেওয়া হয়েছে",
     oaActRequestInfo: "আরও তথ্য চাওয়া হয়েছে",
     oaActRefer: "রেফার করা হয়েছে",
@@ -286,6 +288,13 @@ export const dict = {
     stNotFoundBody: "লিংকটি ভুল হতে পারে, অথবা পাতাটি সরিয়ে ফেলা হয়েছে।",
     stNoAccessTitle: "এই পাতায় ঢোকার অনুমতি নেই",
     stNoAccessBody: "এই পাতা শুধু অফিসের কর্মীদের জন্য। আপনি কর্মী হলে সঠিক অ্যাকাউন্টে সাইন ইন করুন।",
+    roleCitizen: "নাগরিক",
+    roleAdmin: "অ্যাডমিন",
+    naSignedInAs: "আপনি এই অ্যাকাউন্টে সাইন ইন করা আছেন:",
+    naRoleLine: "আপনার ভূমিকা:",
+    naSwitch: "অন্য অ্যাকাউন্টে সাইন ইন করুন",
+    stSignInNeededTitle: "সাইন ইন দরকার",
+    stSignInNeededBody: "এই পাতা দেখতে আগে সাইন ইন করুন। সাইন ইন করলে আপনি এখানেই ফিরে আসবেন।",
     stExpiredTitle: "আবার সাইন ইন করুন",
     stExpiredBody: "আপনার সাইন ইনের মেয়াদ শেষ হয়েছে, অথবা এই পাতা দেখতে সাইন ইন দরকার। সাইন ইন করে আবার চেষ্টা করুন।",
     stOfflineTitle: "ইন্টারনেট নেই",
@@ -320,7 +329,7 @@ export const dict = {
     loginVerify: "যাচাই করুন",
     loginVerifying: "যাচাই হচ্ছে…",
     loginVerifyFail: "কোডটি মেলেনি বা মেয়াদ শেষ। আবার চেষ্টা করুন।",
-    cats: { roads: "রাস্তা", drainage: "ড্রেন", water: "পানি", electricity: "বিদ্যুৎ", waste: "ময়লা", flooding: "জলাবদ্ধতা", health: "স্বাস্থ্য", education: "শিক্ষা", safety: "নিরাপত্তা", environment: "পরিবেশ", facilities: "সুবিধা", other: "অন্যান্য" },
+    cats: { roads: "রাস্তাঘাট", drainage: "ড্রেন ও নালা", water: "পানির সমস্যা", electricity: "বিদ্যুৎ", waste: "ময়লা-আবর্জনা", flooding: "জলাবদ্ধতা ও বন্যা", health: "স্বাস্থ্যসেবা", education: "স্কুল ও পড়াশোনা", safety: "নিরাপত্তা", environment: "পরিবেশ", facilities: "সরকারি ভবন ও সুবিধা", other: "অন্য কিছু" },
     dev: {
       title: "ডিজাইন সিস্টেম (শুধু রিভিউর জন্য)",
       intro: "প্রতিটি উপাদান ও তার অবস্থা। এই পাতা প্রোডাকশনে খোলে না।",
@@ -335,9 +344,9 @@ export const dict = {
       tabsAria: "নমুনা ট্যাব", tabA: "জনপ্রিয়", tabB: "নতুন", tabC: "বিবেচনায়", tabD: "বন্ধ", panelA: "জনপ্রিয় তালিকা এখানে।", panelB: "নতুন তালিকা এখানে।", panelC: "বিবেচনাধীন তালিকা এখানে।",
       cardTitle: "কার্ডের শিরোনাম", cardBody: "কার্ডের ভেতরের লেখা।",
       bNeutral: "সাধারণ", bInfo: "তথ্য", bWarn: "সতর্কতা", bDanger: "সমস্যা",
-      emptyTitle: "এখনো কিছু নেই", emptyBody: "প্রথম অভিযোগটি আপনি জানাতে পারেন।", noResultsTitle: "কিছু মেলেনি", noResultsBody: "অন্য শব্দে খুঁজে দেখুন।",
+      emptyTitle: "এখনো কিছু নেই", emptyBody: "প্রথম সমস্যাটি আপনি জানাতে পারেন।", noResultsTitle: "কিছু মেলেনি", noResultsBody: "অন্য শব্দে খুঁজে দেখুন।",
       steps: { category: "ধরন", describe: "বিবরণ", location: "জায়গা", evidence: "ছবি", review: "দেখুন" },
-      tRef: "নম্বর", tSubject: "বিষয়", tStatus: "অবস্থা", tCaption: "নমুনা অভিযোগের তালিকা", rowA: "রাস্তায় বড় গর্ত", rowB: "ড্রেন বন্ধ", rowC: "রাতে বাতি নেই",
+      tRef: "নম্বর", tSubject: "বিষয়", tStatus: "অবস্থা", tCaption: "নমুনা সমস্যার তালিকা", rowA: "রাস্তায় বড় গর্ত", rowB: "ড্রেন বন্ধ", rowC: "রাতে বাতি নেই",
     },
   },
   en: {
@@ -487,10 +496,10 @@ export const dict = {
     viewReport: "View report",
     reportAnother: "Report another",
     sentTitle: "Your report has been sent",
-    refId: "Reference ID",
+    refId: "Reference number",
     status: "Status",
     timeline: "Progress",
-    statuses: { received: "Received", acknowledged: "Seen by office", referred: "Referred to agency", resolved: "Resolved" },
+    statuses: { received: "Submitted", acknowledged: "Received by the office", referred: "Sent to the responsible authority", resolved: "Resolved" },
     isReportedOn: "Reported",
     isReportDetails: "Report details",
     isNoArea: "No area given",
@@ -618,6 +627,13 @@ export const dict = {
     stNotFoundBody: "The link may be wrong, or the page has been removed.",
     stNoAccessTitle: "You do not have access to this page",
     stNoAccessBody: "This page is for office staff only. If you are staff, sign in with the right account.",
+    roleCitizen: "Citizen",
+    roleAdmin: "Admin",
+    naSignedInAs: "You are signed in as",
+    naRoleLine: "Your role:",
+    naSwitch: "Sign in with another account",
+    stSignInNeededTitle: "Sign in needed",
+    stSignInNeededBody: "Sign in to see this page. After you sign in, you will come back here.",
     stExpiredTitle: "Please sign in again",
     stExpiredBody: "Your session has ended, or this page needs you to sign in. Sign in and try again.",
     stOfflineTitle: "You are offline",
@@ -652,7 +668,7 @@ export const dict = {
     loginVerify: "Verify",
     loginVerifying: "Verifying…",
     loginVerifyFail: "The code did not match or has expired. Please try again.",
-    cats: { roads: "Roads", drainage: "Drainage", water: "Water", electricity: "Electricity", waste: "Waste", flooding: "Flooding", health: "Health", education: "Education", safety: "Safety", environment: "Environment", facilities: "Facilities", other: "Other" },
+    cats: { roads: "Roads & transport", drainage: "Drainage", water: "Water supply", electricity: "Electricity", waste: "Waste", flooding: "Flooding & waterlogging", health: "Public health", education: "Education", safety: "Public safety", environment: "Environment", facilities: "Public infrastructure", other: "Other" },
     dev: {
       title: "Design system (review only)",
       intro: "Every primitive and its states. This page does not open in production.",
@@ -674,22 +690,13 @@ export const dict = {
   },
 } as const;
 
+/** Phase 2 strings live in `strings/*` (bn and en must have the same keys: checked by types). */
+export const dict = {
+  bn: { ...base.bn, ...p2.bn },
+  en: { ...base.en, ...p2.en },
+} as const;
+
 type Widen<T> = T extends string ? string : { [K in keyof T]: Widen<T[K]> };
 export type Dict = Widen<(typeof dict)["en"]>;
 
-/** Formats a number with Bangla digits in bn (e.g. 12 -> ১২). */
-export function fmtNum(n: number, lang: Lang) {
-  return n.toLocaleString(lang === "bn" ? "bn-BD" : "en-GB", { useGrouping: false });
-}
-
-/** Fills `{name}` placeholders; numeric values are formatted for the language. */
-export function fillNum(template: string, values: Record<string, string | number>, lang: Lang) {
-  return template.replace(/\{(\w+)\}/g, (_, k: string) => {
-    const v = values[k];
-    return typeof v === "number" ? fmtNum(v, lang) : String(v ?? "");
-  });
-}
-
-export function fmtDate(iso: string, lang: Lang) {
-  return new Date(iso).toLocaleString(lang === "bn" ? "bn-BD" : "en-GB", { timeZone: "Asia/Dhaka", dateStyle: "medium", timeStyle: "short" });
-}
+export { fmtNum, fillNum, fmtDate, fmtDay } from "./format";

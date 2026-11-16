@@ -1,7 +1,8 @@
 "use client";
 import { useRef, useState } from "react";
-import { fillNum, type Dict, type Lang } from "@/lib/i18n";
-import { compressImage, PHOTO_TYPES } from "@/lib/image";
+import { fillNum } from "@/lib/format";
+import { type Dict, type Lang } from "@/lib/i18n";
+import { checkPhoto, compressImage, MAX_PHOTO_BYTES, PHOTO_TYPES } from "@/lib/image";
 import { MAX_CAPTION, MAX_PHOTOS } from "@/lib/report";
 import Button from "../ui/Button";
 import Card from "../ui/Card";
@@ -27,7 +28,8 @@ export default function EvidenceStep({ t, lang, photos, onChange }: {
     if (picked.length > room) toast("error", t.errPhotoMax);
     setBusy(true);
     for (const f of picked.slice(0, Math.max(0, room))) {
-      if (!PHOTO_TYPES.includes(f.type)) { toast("error", t.errPhotoType); continue; }
+      const problem = PHOTO_TYPES.includes(f.type) ? await checkPhoto(f) : "type";
+      if (problem) { toast("error", problem === "size" ? fillNum(t.errPhotoSize, { mb: MAX_PHOTO_BYTES / 1024 / 1024 }, lang) : t.errPhotoType); continue; }
       try {
         const blob = await compressImage(f);
         const p: Photo = { id: crypto.randomUUID(), url: URL.createObjectURL(blob), kb: Math.max(1, Math.round(blob.size / 1024)), caption: "" };
