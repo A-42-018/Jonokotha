@@ -6,8 +6,8 @@
  * The wording below is a draft for the team to approve (docs/aibc/runbooks/imminent-harm.md). Numbers: 999 national
  * emergency, 109 violence against women and children helpline, 1098 child helpline.
  */
-export type EmergencyKind = "self_harm" | "violence" | "child_in_danger";
-export interface Emergency { kind: EmergencyKind; guidance: { bn: string; en: string }; numbers: string[] }
+import type { Emergency, EmergencyKind } from "./types";
+export type { Emergency, EmergencyKind };
 
 const RULES: { kind: EmergencyKind; re: RegExp }[] = [
   { kind: "self_harm", re: /(আত্মহত্যা|আত্মহনন|নিজেকে শেষ|বাঁচতে চাই না|বাঁচতে ইচ্ছা করে না|মরে যেতে চাই|মরে যাব|বিষ খাব|গলায় দড়ি|suicid|kill myself|end my life|want to die|don'?t want to live|hang myself|take my own life|ami morte chai|atmohotta|attohotta)/i },

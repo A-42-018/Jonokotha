@@ -1,6 +1,6 @@
 # Backups and restore drill
 
-Backend plan 3.3. Status: **script built and verified on a local database; no production restore drill has been done yet.**
+Backend plan 3.3. Status: **a partial production drill was done on 2026-11-16 (public schema only); the full drill is still open.**
 
 ## What exists
 
@@ -31,5 +31,6 @@ Photos in the private `issue-media` bucket are not covered by the database dump.
 | Date | Source | Recovery time | Row counts | Result |
 |---|---|---|---|---|
 | 2026-11-16 | local stack (dev dry run of the script) | 1 s | match (audit_logs 78, others 0) | script works; **not a production drill** |
+| 2026-11-16 | **production**, read-only `supabase db dump --remote` (schema, then data), restored into a scratch database in the local container | 1 s (tiny data: 3 profiles, 1 issue) | 11 tables compared, all match; 283 functions and 57 policies restored | **public schema restores.** Not covered: the `auth` schema (scratch used a stub `auth.users`, so sign-in accounts were not restored or checked), Storage objects, extensions on a real new project. Dump files were deleted afterwards (they held emails) |
 
-Drill result: PENDING (no production drill yet)
+Drill result: PARTIAL (public schema restored and counted; auth, Storage and a restore into a real Supabase project not yet done)
