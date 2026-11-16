@@ -10,8 +10,8 @@ import { CATEGORIES, ISSUE_STATUSES, CaseInput, type IssueStatus } from "./types
 import { z } from "zod";
 
 /** Shared by POST /api/cases (legacy) and POST /api/v1/issues. Reports are public, so personal data is removed before storing. */
-export async function submitIssue(sb: SupabaseClient, userId: string, input: z.infer<typeof CaseInput> & { lat?: number; lng?: number; locationSource?: string; locationAccuracyM?: number }) {
-  const clean = { ...input, title: redactPii(input.title).text, description: redactPii(input.description).text, area: redactPii(input.area).text };
+export async function submitIssue(sb: SupabaseClient, userId: string, input: z.infer<typeof CaseInput> & { lat?: number; lng?: number; locationSource?: string; locationAccuracyM?: number; duration?: string; affectedWho?: string }) {
+  const clean = { ...input, duration: input.duration ? redactPii(input.duration).text : undefined, affectedWho: input.affectedWho ? redactPii(input.affectedWho).text : undefined, title: redactPii(input.title).text, description: redactPii(input.description).text, area: redactPii(input.area).text };
   const ref = await createCase(sb, userId, clean, await summarize(clean));
   await indexIssueByRef(ref); // embedding for the Duplicate Agent; best-effort, capped at a few seconds
   return ref;
@@ -31,7 +31,7 @@ interface PublicRow {
 }
 const PUBLIC_COLS = "ref,title,category,description,area,status,status_detail,created_at,ai_summary,ai_similar,constituency_key,is_demo,public_lat,public_lng";
 const toPublic = (r: PublicRow) => ({
-  ref: r.ref, title: r.title, category: r.category, description: r.description, area: r.area ?? "", status: r.status_detail, legacy_status: r.status,
+  ref: r.ref, service_request_id: r.ref, service_code: `JK-${r.category.toUpperCase().replace(/_/g, "-")}`, title: r.title, category: r.category, description: r.description, area: r.area ?? "", status: r.status_detail, legacy_status: r.status,
   created_at: r.created_at, summary: r.ai_summary || null, similar_refs: r.ai_similar, constituency: r.constituency_key, is_sample: r.is_demo,
   // Approximate on purpose (grid cell centre); the exact point is private to the reporter and the office.
   location: r.public_lat != null && r.public_lng != null ? { lat: r.public_lat, lng: r.public_lng, approximate: true } : null,
@@ -90,7 +90,7 @@ export const OfficeFilters = z.object({
   category: z.enum(CATEGORIES).optional(),
   assigned: z.enum(["me", "none"]).optional(),
 });
-const OFFICE_COLS = "id,ref,title,category,description,area,status,priority,assigned_to,created_at,updated_at,constituency_key,is_demo";
+const OFFICE_COLS = "duration_text,affected_who,id,ref,title,category,description,area,status,priority,assigned_to,created_at,updated_at,constituency_key,is_demo";
 
 export async function listOffice(sb: SupabaseClient, userId: string, f: z.infer<typeof OfficeFilters>, limit: number, cursor?: string) {
   let q = sb.from("issues").select(OFFICE_COLS).order("created_at", { ascending: false }).order("ref", { ascending: false }).limit(limit + 1);
@@ -113,7 +113,7 @@ export async function getOffice(sb: SupabaseClient, ref: string) {
   const [events, assignments, referrals, feedback] = await Promise.all([
     sb.from("issue_events").select("event_type,from_status,to_status,public_message,internal_note,metadata,is_public,created_at").eq("issue_id", id).order("created_at", { ascending: true }),
     sb.from("issue_assignments").select("assigned_to,assigned_by,reason,assigned_at,unassigned_at").eq("issue_id", id).order("assigned_at", { ascending: true }),
-    sb.from("issue_agency_referrals").select("agency_id,agency_name,agency_contact_or_channel,external_reference,forwarded_at,acknowledged_at,notes,visibility").eq("issue_id", id).order("forwarded_at", { ascending: true }),
+    sb.from("issue_agency_referrals").select("id,agency_id,agency_name,agency_contact_or_channel,external_reference,forwarded_at,acknowledged_at,notes,visibility,registration_status,registration_reference,task_status,closed_at,closure_evidence,registered_at").eq("issue_id", id).order("forwarded_at", { ascending: true }),
     sb.from("issue_feedback").select("rating,comment,created_at").eq("issue_id", id),
   ]);
   return { ...issue, events: events.data ?? [], assignments: assignments.data ?? [], referrals: referrals.data ?? [], feedback: feedback.data ?? [] };

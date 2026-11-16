@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { z, type ZodType } from "zod";
 import { anthropic } from "../anthropic";
 import { logAiRun, type AiAgent, type AiStatus } from "./log";
+import { glossaryText } from "./glossary";
 import type { Prompt } from "./prompts";
 
 /**
@@ -28,6 +29,23 @@ export interface RunOptions<T> {
   issueId?: string | null;
   actorId?: string | null;
   requestId?: string | null;
+  /** The person asked for simple language (user_preferences.simple_language_mode); output is written with short sentences and common words. */
+  simpleLanguage?: boolean;
+}
+
+/**
+ * System prompt as blocks, STABLE content first so the provider can cache the prefix (B5.10): shared rules and the Bangla glossary
+ * (same for every call), then the agent's own prompt (same per agent and version), then, last and uncached, the per-person style.
+ * Only the first two blocks carry cache_control; changing the style never invalidates them.
+ */
+export const SHARED_RULES = "You are part of Jonokotha, a civic platform for Bangladeshi citizens and MP offices. Be accurate, neutral and non-partisan. Never invent facts. If you cannot do the task from the given data, say so through the tool's fields instead of guessing.";
+export function buildSystem(prompt: Prompt, simpleLanguage = false) {
+  const blocks: { type: "text"; text: string; cache_control?: { type: "ephemeral" } }[] = [
+    { type: "text", text: `${SHARED_RULES}\n${glossaryText()}`, cache_control: { type: "ephemeral" } },
+    { type: "text", text: prompt.system, cache_control: { type: "ephemeral" } },
+  ];
+  if (simpleLanguage) blocks.push({ type: "text", text: "STYLE: write for a reader with limited reading practice: short sentences, everyday words, no jargon, one idea per sentence." });
+  return blocks;
 }
 
 export const defaultModel = () => process.env.ANTHROPIC_MODEL ?? "claude-opus-5-5";
@@ -57,7 +75,7 @@ export async function runAgent<T>(o: RunOptions<T>): Promise<AiOutcome<T>> {
     const res = await anthropic().messages.create({
       model,
       max_tokens: o.maxTokens ?? 600,
-      system: o.prompt.system,
+      system: buildSystem(o.prompt, o.simpleLanguage),
       tools: [{ name: o.tool.name, description: o.tool.description, input_schema: z.toJSONSchema(o.schema) as { type: "object" } }],
       tool_choice: { type: "tool", name: o.tool.name },
       messages: [{ role: "user", content: o.input }],

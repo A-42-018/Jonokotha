@@ -46,7 +46,7 @@ async function eventsFor(sb: SupabaseClient, refs: string[]) {
   return (data ?? []) as EventRow[];
 }
 
-export async function createCase(sb: SupabaseClient, userId: string, input: IntakeDraft & { constituencyId: string; lat?: number; lng?: number; locationSource?: string; locationAccuracyM?: number }, summary: string) {
+export async function createCase(sb: SupabaseClient, userId: string, input: IntakeDraft & { constituencyId: string; lat?: number; lng?: number; locationSource?: string; locationAccuracyM?: number; duration?: string; affectedWho?: string }, summary: string) {
   const { data: peers } = await sb.from("public_cases").select("ref,title,description").eq("category", input.category).order("created_at", { ascending: false }).limit(50);
   const text = `${input.title} ${input.description}`;
   const similar = (peers ?? []).filter((c) => similarity(text, `${c.title} ${c.description}`) > 0.35).slice(0, 3).map((c) => c.ref);
@@ -54,6 +54,7 @@ export async function createCase(sb: SupabaseClient, userId: string, input: Inta
     reporter_id: userId, title: input.title, category: input.category, description: input.description, area: input.area,
     constituency_key: input.constituencyId, ai_summary: summary, ai_agency: pickAgency(await getAgencies(sb), input.category).id,
     ai_confidence: similar.length ? 0.85 : 0.7, ai_similar: similar,
+    ...(input.duration ? { duration_text: input.duration } : {}), ...(input.affectedWho ? { affected_who: input.affectedWho } : {}),
     ...(input.lat !== undefined && input.lng !== undefined ? { lat: input.lat, lng: input.lng, location_source: input.locationSource ?? null, location_accuracy_m: input.locationAccuracyM ?? null } : {}),
   }).select("ref").single();
   if (error) throw error;

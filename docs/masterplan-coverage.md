@@ -104,3 +104,8 @@ Status: **Done**, **Partial**, **Open**, as of 2026-11-16.
 | 29 | Launch checklist | M.12, B6 | F.8, F6 | Open |
 | 30 | Product copy | — | existing | Done |
 | 31 | Master build prompt requirements | all phases | all phases | Partial |
+
+
+## Phase 5 update (2026-11-17)
+
+Backend items B5.1-B5.15 are built on the Phase 5 branch (migrations 0030-0036); see the status block in `docs/backend.md` for what is built, tested, not measured and blocked. Sections this moves from planned to built on the backend side: §5.2 (MP approval, delegation), §5.5 (agency liaison), §5.6 and §6.4 (admin configuration), §1 and §28 (received / forwarded / officially registered), §4.2, §7.3, §8.5, §12 (comments, polls, snapshot, project transparency), §7.4 (report fields, video), §7.13 and §16 (administrative hierarchy, uncertain boundary), §10.1 and §20 (jobs, Realtime, Sentry, privacy-conscious analytics), §15 (notification events, opt-in, unsubscribe), §17.2 and §17.5 (idea assistant, translation label, caching, glossary), §17.4 and §19.1 (personalization, Banglish search), §2.8.4 (country adapters), §2.9 (capability labels), §13.10 (Open311-ready ids). Frontend rows are unchanged.

@@ -3,7 +3,7 @@ import { ApiError, fromDbError, parse, type Ctx, type Result } from "./api";
 
 const REF = /^[A-Za-z0-9-]{3,40}$/;
 export const FollowInput = z.strictObject({
-  type: z.enum(["issue", "area", "category"], "issue, area or category"),
+  type: z.enum(["issue", "area", "category", "project", "representative"], "issue, area, category, project or representative"),
   target: z.string().trim().min(1, "required").max(60, "too long").regex(/^[A-Za-z0-9_-]+$/, "invalid"),
 });
 
@@ -20,14 +20,14 @@ export async function setAffected(c: Ctx, on: boolean): Promise<Result> {
 
 export async function listFollows(c: Ctx): Promise<Result> {
   const { data, error } = await c.sb.from("follows")
-    .select("id,target_type,category,created_at,issues(ref,title),constituencies(key,name_bn,name_en)")
+    .select("id,target_type,category,created_at,issues(ref,title),constituencies(key,name_bn,name_en),projects(ref,title),representatives(id,full_name)")
     .eq("user_id", c.user!.id).order("created_at", { ascending: false }).limit(200);
   if (error) throw fromDbError(error);
-  type Row = { id: string; target_type: string; category: string | null; created_at: string; issues: { ref: string; title: string } | null; constituencies: { key: string; name_bn: string; name_en: string } | null };
+  type Row = { id: string; target_type: string; category: string | null; created_at: string; issues: { ref: string; title: string } | null; constituencies: { key: string; name_bn: string; name_en: string } | null; projects: { ref: string; title: string } | null; representatives: { id: string; full_name: string } | null };
   return { data: (data as unknown as Row[]).map((r) => ({
     id: r.id, type: r.target_type, created_at: r.created_at,
-    target: r.target_type === "issue" ? r.issues?.ref : r.target_type === "area" ? r.constituencies?.key : r.category,
-    label: r.target_type === "issue" ? r.issues?.title : r.target_type === "area" ? { bn: r.constituencies?.name_bn, en: r.constituencies?.name_en } : null,
+    target: r.target_type === "issue" ? r.issues?.ref : r.target_type === "area" ? r.constituencies?.key : r.target_type === "project" ? r.projects?.ref : r.target_type === "representative" ? r.representatives?.id : r.category,
+    label: r.target_type === "issue" ? r.issues?.title : r.target_type === "area" ? { bn: r.constituencies?.name_bn, en: r.constituencies?.name_en } : r.target_type === "project" ? r.projects?.title : r.target_type === "representative" ? r.representatives?.full_name : null,
   })) };
 }
 

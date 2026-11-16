@@ -185,7 +185,7 @@ describe("public reads", () => {
     expect((await call(listPublic, "GET", "/api/v1/issues?limit=500")).status).toBe(422);
     const text = JSON.stringify(r.json);
     expect(text).not.toMatch(/reporter|confidence|assigned_to|internal_note|actor/);
-    expect(Object.keys(r.json.data[0]).sort()).toEqual(["affected_count", "area", "category", "constituency", "created_at", "description", "is_sample", "legacy_status", "location", "ref", "similar_refs", "status", "summary", "title"]);
+    expect(Object.keys(r.json.data[0]).sort()).toEqual(["affected_count", "area", "category", "constituency", "created_at", "description", "is_sample", "legacy_status", "location", "ref", "service_code", "service_request_id", "similar_refs", "status", "summary", "title"]);
   });
 });
 
