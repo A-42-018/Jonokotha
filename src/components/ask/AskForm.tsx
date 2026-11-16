@@ -13,6 +13,8 @@ import Card from "@/components/ui/Card";
 import { RadioGroup } from "@/components/ui/Choice";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
+import { usePersonalModes } from "@/components/ui/usePersonalization";
+import SpeakBar from "@/components/ui/SpeakBar";
 import Textarea from "@/components/ui/Textarea";
 import { useToast } from "@/components/ui/Toast";
 import { useLang } from "@/components/ui/useLang";
@@ -28,6 +30,8 @@ function AskInner({ signedIn, constituency }: { signedIn: boolean; constituency:
   const t = useT();
   const lang = useLang();
   const toast = useToast();
+  const [modes] = usePersonalModes();
+  const voiceFirst = modes.voiceFirst;
   const [sent, setSent] = useState<Asked & { kind: AskKind }>();
   const key = useRef(newId()); // one Idempotency-Key per question: a double tap does not send twice
   const [kind, setKind] = useState<AskKind | "">("");
@@ -81,7 +85,9 @@ function AskInner({ signedIn, constituency }: { signedIn: boolean; constituency:
         options={[{ value: "private", label: t.askKindPrivate, hint: t.askPrivateNote }, { value: "public", label: t.askKindPublic, hint: t.askPublicWarn }]} />
       <Select label={t.askTopic} placeholder={t.askChoose} value={topic} error={errs.topic ? t.askErrTopic : undefined} onChange={(e) => setTopic(e.target.value)} options={TOPICS.map((k) => ({ value: k, label: topicLabel(k) }))} />
       <Input label={t.askSubject} maxLength={120} value={subject} error={errs.subject ? t.askErrSubject : undefined} onChange={(e) => setSubject(e.target.value)} />
+      {voiceFirst && <SpeakBar onText={(add) => setMessage((m) => add(m).slice(0, 2000))} />}
       <Textarea label={t.askMessage} rows={6} maxLength={2000} value={message} error={errs.message ? t.askErrMessage : undefined} onChange={(e) => setMessage(e.target.value)} />
+      {!voiceFirst && <SpeakBar onText={(add) => setMessage((m) => add(m).slice(0, 2000))} />}
       <p className="text-sm text-muted">{t.askGuidance}</p>
       <p className="text-sm text-muted">{t.askRateNote}</p>
       {kind === "public" && <PublicNotice kind="question" />}

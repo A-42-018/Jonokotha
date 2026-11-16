@@ -77,7 +77,7 @@ Status: **Done**, **Partial**, **Open**, as of 2026-11-16.
 | 15 | Notifications incl. email, SMS, poll reminders, unsubscribe | existing, B5.9, B7.4 | F.10, F5.11 | Partial |
 | 16 | Maps and location privacy incl. spoof review | existing, B5.7 | existing | Partial |
 | 17.1–17.3 | Agents incl. Translation, Insight, Idea Assistant; RAG; graph | existing, B5.10 | F5.14 | Partial |
-| 17.4 | Personalization incl. simple-language and voice-first modes, view/reset | B5.11 | F5.15 | Open |
+| 17.4 | Personalization incl. simple-language and voice-first modes, view/reset | B5.11 | F5.15 | Partial |
 | 17.5 | Model selection, prompt caching, glossary in every prompt | B5.10 | — | Partial |
 | 17.6 | Real data sources (EC, Parliament, HDX, OSM, National Portal, GRS, 999/333) with lineage | B6.2 | — | Open |
 | 17.7 | AI evaluation incl. real consented examples, dialect STT | M.10, B6.5 | — | Partial |

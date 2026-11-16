@@ -6,6 +6,7 @@ import Card from "@/components/ui/Card";
 import { Checkbox } from "@/components/ui/Choice";
 import MyAreaCard from "@/components/me/MyAreaCard";
 import DataRights from "@/components/me/DataRights";
+import PersonalizationPanel from "@/components/me/PersonalizationPanel";
 import PushSettings from "@/components/me/PushSettings";
 import NoticeTypePrefs from "@/components/me/NoticeTypePrefs";
 import Dialog from "@/components/ui/Dialog";
@@ -37,6 +38,7 @@ export default function SettingsPanel({ email, role, statusUrl = null }: { email
         <p className="mt-2 text-sm text-muted">{t.stNotifLocal}</p>
       </Card>
       )}
+      <PersonalizationPanel signedIn={!!email} />
       <PushSettings signedIn={!!email} />
       <Card title={t.stAccount}>
         {email ? <p className="break-all font-medium">{email}{role ? ` · ${role}` : ""}</p> : (

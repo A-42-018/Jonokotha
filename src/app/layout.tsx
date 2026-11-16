@@ -6,6 +6,7 @@ import ConstituencyPicker from "@/components/ConstituencyPicker";
 import RegisterSW from "@/components/RegisterSW";
 import BottomTabBar from "@/components/ui/BottomTabBar";
 import I18nProvider from "@/components/ui/I18nProvider";
+import PersonalizationApplier from "@/components/ui/PersonalizationApplier";
 import QueueSync from "@/components/offline/QueueSync";
 import MainShell from "@/components/ui/MainShell";
 import OfflineBanner from "@/components/ui/OfflineBanner";
@@ -69,6 +70,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             />
           }
         />
+          <PersonalizationApplier />
           <OfflineBanner />
           <RegisterSW />
           <ToastProvider>

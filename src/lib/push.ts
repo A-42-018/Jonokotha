@@ -26,7 +26,7 @@ export function quietError(start: string, end: string): "pushQuietBad" | null {
 }
 
 export const fetchPrefs = async () => (await api<Prefs>("/me/notification-preferences")).data;
-export const savePrefs = async (patch: Partial<Pick<Prefs, "quiet_hours" | "timezone" | "muted_types">> & { channels?: { push?: boolean } }) =>
+export const savePrefs = async (patch: Partial<Pick<Prefs, "quiet_hours" | "timezone" | "muted_types" | "personalization_enabled">> & { channels?: { push?: boolean } }) =>
   (await api<Prefs>("/me/notification-preferences", { method: "PUT", body: patch })).data;
 
 export type EnableResult = "on" | "denied" | "unavailable" | "unsupported";

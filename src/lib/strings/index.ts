@@ -23,6 +23,7 @@ import { offline } from "./offline";
 import { office } from "./office";
 import { officeWs } from "./officeWs";
 import { pages } from "./pages";
+import { personalize } from "./personalize";
 import { projects } from "./projects";
 import { push } from "./push";
 import { referral } from "./referral";
@@ -32,7 +33,7 @@ import { refresh } from "./refresh";
 import { share } from "./share";
 import { voice } from "./voice";
 
-const parts = [explore, location, voice, ideas, mp, engage, ask, feed, share, pages, office, officeWs, liaison, live, admin, adminConsole, offline, security, mfa, emergency, legal, metrics, push, community, capability, referral, reportExtras, refresh, nav, home, projects, areas, aiHelpers];
+const parts = [explore, location, voice, ideas, mp, engage, ask, feed, share, pages, office, officeWs, liaison, live, admin, adminConsole, offline, security, mfa, emergency, legal, metrics, push, community, capability, referral, reportExtras, refresh, nav, home, projects, areas, aiHelpers, personalize];
 
 type UnionToIntersection<U> = (U extends unknown ? (x: U) => void : never) extends (x: infer I) => void ? I : never;
 type Bn = UnionToIntersection<(typeof parts)[number]["bn"]>;
