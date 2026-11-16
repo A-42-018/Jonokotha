@@ -47,6 +47,9 @@ export const FEATURES = {
   areaHierarchy: { status: "planned", backend: "B5.7" },
   areaCorrection: { status: "planned", backend: "B5.7" },
   commentReports: { status: "planned", backend: "B5.5" },
+  liaisonAcknowledge: { status: "planned", backend: "B5.2" },
+  liaisonReference: { status: "planned", backend: "B5.2" },
+  liaisonClose: { status: "planned", backend: "B5.2" },
 } as const satisfies Record<string, { status: DataStatus; backend: string }>;
 
 export type FeatureKey = keyof typeof FEATURES;

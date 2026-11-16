@@ -49,7 +49,7 @@ test.describe("phase 2 public pages", () => {
     await page.goto("/area");
     await expect(page.getByText("নমুনা: এখানকার").first()).toBeVisible();
     await expect(page.getByText("২টি সমস্যা পাওয়া গেছে")).toBeVisible();
-    await page.getByLabel("খুঁজুন").fill("ড্রেন");
+    await page.getByLabel("খুঁজুন").fill("গর্ত");
     await expect(page.getByText("১টি সমস্যা পাওয়া গেছে")).toBeVisible();
     await page.getByLabel("খুঁজুন").fill("zzzz");
     await expect(page.getByRole("heading", { name: "কিছু মেলেনি" })).toBeVisible();

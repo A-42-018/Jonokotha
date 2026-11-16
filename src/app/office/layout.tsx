@@ -14,6 +14,7 @@ export default async function OfficeLayout({ children }: LayoutProps<"/office">)
     { href: "/office/polls", label: t.owNavPolls },
     { href: "/office/analytics", label: t.owNavAnalytics },
     { href: "/office/announcements", label: t.odAnnouncements },
+    { href: "/office/agency", label: t.lsNav },
     { href: "/office/staff", label: t.owNavStaff },
     { href: "/office/audit", label: t.owNavAudit },
     { href: "/office/settings", label: t.owNavSettings },
