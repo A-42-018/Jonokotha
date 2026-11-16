@@ -46,3 +46,18 @@ describe("uploadPhotos", () => {
     expect(up).toHaveBeenCalledTimes(3);
   });
 });
+
+import { ideaBody, toIdea, type ApiIdea } from "@/lib/ideas-api";
+
+describe("ideas api mapping", () => {
+  const base: ApiIdea = { ref: "ID-1", constituency_key: "demo-1", category: "roads", title: "টয়লেট", body: "দরকার", status: "published", decision_note: null, created_at: "2026-11-10T06:00:00Z", support_count: 5 };
+  it("maps API statuses to citizen labels and keeps the public reason", () => {
+    expect(toIdea(base).status).toBe("submitted");
+    expect(toIdea({ ...base, status: "declined", decision_note: "বাজেট নেই" })).toMatchObject({ status: "not_planned", reason: "বাজেট নেই", supports: 5 });
+    expect(toIdea({ ...base, status: "pending_review", category: null, is_sample: true })).toMatchObject({ status: "moderation", category: "other", sample: true });
+  });
+  it("joins the form parts into one labelled body and skips empty ones", () => {
+    const f = { title: "t", problem: "P", solution: "S", benefit: "", area: "", category: "roads", cost: "" };
+    expect(ideaBody(f, { problem: "সমস্যা", solution: "সমাধান", benefit: "উপকার", area: "এলাকা", cost: "খরচ" }, "")).toBe("সমস্যা: P\n\nসমাধান: S");
+  });
+});

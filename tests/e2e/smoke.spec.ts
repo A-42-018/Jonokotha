@@ -57,7 +57,9 @@ test.describe("phase 2 public pages", () => {
     await expect(page.getByRole("region", { name: /সমস্যার মানচিত্র/ })).toBeVisible();
   });
 
-  test("ideas: sample banner, tabs switch, support needs sign-in, new idea needs sign-in", async ({ page }) => {
+  test("ideas: loads from the API, sample banner, tabs switch, support needs sign-in, new idea needs sign-in", async ({ page }) => {
+    const idea = (ref: string, title: string, status: string) => ({ ref, constituency_key: "demo-1", category: "facilities", title, body: "বিবরণ", status, decision_note: null, created_at: "2026-11-10T06:00:00Z", is_sample: true, support_count: 7 });
+    await page.route("**/api/v1/ideas?**", (r) => r.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ data: [idea("ID-1", "বাজারের পাশে টয়লেট", "under_consideration"), idea("ID-2", "স্কুলের পাশে গতিরোধক", "published")], page: { next_cursor: null, limit: 50 }, request_id: "t" }) }));
     await page.goto("/ideas");
     await expect(page.getByText("নমুনা: এখানকার আইডিয়া").first()).toBeVisible();
     await expect(page.getByRole("link", { name: /আমিও চাই.{0,3} জানাতে সাইন ইন/ }).first()).toBeVisible();
