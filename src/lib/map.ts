@@ -7,6 +7,8 @@ export const TILES = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
 export const GLYPHS = "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf";
 // Worker file copied to public/vendor (see its README): the bundled default URL does not resolve.
 export const WORKER = "/vendor/maplibre-gl-worker.mjs";
+/** Map moves jump instead of gliding when the OS asks for reduced motion (WCAG 2.3.3). */
+export const mapAnimate = () => typeof matchMedia === "function" && !matchMedia("(prefers-reduced-motion: reduce)").matches;
 export const CENTER: [number, number] = [90.3687, 23.8069];
 
 export const osmStyle = (): StyleSpecification => ({

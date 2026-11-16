@@ -2,7 +2,7 @@
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useEffect, useRef, useState } from "react";
 import { useT } from "@/components/ui/useT";
-import { CENTER, osmStyle, WORKER } from "@/lib/map";
+import { CENTER, mapAnimate, osmStyle, WORKER } from "@/lib/map";
 import type { Pin } from "@/lib/places";
 
 /** Tap-to-place pin map (lazy loaded by LocationPicker). `focus` recentres the map; `pin` is controlled. */
@@ -47,7 +47,7 @@ export default function PinMap({ pin, focus, onPick }: { pin?: Pin; focus?: Pin;
   }, [pin, ready]);
 
   useEffect(() => {
-    if (focus && ready) mapRef.current?.easeTo({ center: [focus.lng, focus.lat], zoom: 15 });
+    if (focus && ready) mapRef.current?.easeTo({ center: [focus.lng, focus.lat], zoom: 15, animate: mapAnimate() });
   }, [focus, ready]);
 
   if (failed) return <p role="alert" className="rounded-xl border border-amber/60 bg-amber/10 p-3 text-sm">{t.exMapFailed}</p>;

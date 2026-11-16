@@ -3,7 +3,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import { useEffect, useRef, useState } from "react";
 import type { ExploreIssue } from "@/lib/explore";
 import { useT } from "@/components/ui/useT";
-import { CENTER, osmStyle, WORKER } from "@/lib/map";
+import { CENTER, mapAnimate, osmStyle, WORKER } from "@/lib/map";
 
 
 type Props = { issues: ExploreIssue[]; onSelect: (ref: string) => void; origin?: { lat: number; lng: number } };
@@ -48,7 +48,7 @@ export default function ExploreMap({ issues, onSelect, origin }: Props) {
           map.addLayer({ id: "cluster-count", type: "symbol", source: "issues", filter: ["has", "point_count"], layout: { "text-field": ["get", "point_count_abbreviated"], "text-size": 14, "text-font": ["Open Sans Regular"] }, paint: { "text-color": "#fff" } });
           map.addLayer({ id: "point", type: "circle", source: "issues", filter: ["!", ["has", "point_count"]], paint: { "circle-color": "#0b6b6d", "circle-radius": 9, "circle-stroke-color": "#fff", "circle-stroke-width": 3 } });
           map.on("click", "point", (e) => { const ref = e.features?.[0]?.properties?.ref; if (ref) latest.current.onSelect(String(ref)); });
-          map.on("click", "clusters", (e) => { map?.easeTo({ center: e.lngLat, zoom: (map.getZoom() ?? 12) + 2 }); });
+          map.on("click", "clusters", (e) => { map?.easeTo({ center: e.lngLat, zoom: (map.getZoom() ?? 12) + 2, animate: mapAnimate() }); });
           for (const l of ["point", "clusters"]) { map.on("mouseenter", l, () => { map!.getCanvas().style.cursor = "pointer"; }); map.on("mouseleave", l, () => { map!.getCanvas().style.cursor = ""; }); }
           setState("ready");
         });
@@ -65,7 +65,7 @@ export default function ExploreMap({ issues, onSelect, origin }: Props) {
   }, [issues]);
 
   useEffect(() => {
-    if (origin) mapRef.current?.easeTo({ center: [origin.lng, origin.lat], zoom: 14 });
+    if (origin) mapRef.current?.easeTo({ center: [origin.lng, origin.lat], zoom: 14, animate: mapAnimate() });
   }, [origin]);
 
   if (state === "failed") return <p role="alert" className="rounded-xl border border-amber/60 bg-amber/10 p-4">{t.exMapFailed}</p>;

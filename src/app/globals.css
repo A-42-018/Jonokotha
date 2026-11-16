@@ -22,3 +22,13 @@
 
 body { background: var(--background); color: var(--foreground); font-family: var(--font-sans); }
 h1, h2, h3 { font-family: var(--font-heading); }
+
+/* Reduced motion (WCAG 2.3.3): no animation or smooth scrolling for people who ask the OS for less motion. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

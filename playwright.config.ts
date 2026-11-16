@@ -19,6 +19,7 @@ export default defineConfig({
   webServer: {
     command: ci ? `npm run build && npm run start -- -p ${port}` : `npm run dev -- -p ${port}`,
     url: `http://localhost:${port}`,
+    env: { JK_AUDIT: "1" },
     reuseExistingServer: !ci,
     timeout: 180_000,
   },
