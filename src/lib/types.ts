@@ -14,12 +14,22 @@ export type IntakeDraft = z.infer<typeof IntakeDraft>;
 
 export const CaseInput = IntakeDraft.extend({ constituencyId: z.string().default("demo-1") });
 
+/** Legacy 4-state label set the current UI knows. Still the type of CaseRecord.status. */
 export type Status = "received" | "acknowledged" | "referred" | "resolved";
+
+/** The real 13-state model (masterplan §9). CaseRecord.statusDetail carries it; the UI can adopt it when ready. */
+export const ISSUE_STATUSES = [
+  "submitted", "under_review", "needs_information", "acknowledged", "assigned", "referred_to_authority", "in_progress",
+  "resolved", "closed", "rejected", "duplicate", "out_of_jurisdiction", "reopened",
+] as const;
+export type IssueStatus = (typeof ISSUE_STATUSES)[number];
 
 export interface CaseRecord extends IntakeDraft {
   ref: string;
   constituencyId: string;
   status: Status;
+  /** Added in Phase 1 (additive): the precise state. `status` is a mapped, coarser label for older UI code. */
+  statusDetail?: IssueStatus;
   createdAt: string;
   timeline: { status: Status; at: string; note?: string }[];
   ai: { summary: string; similarRefs: string[]; agencyId: string; confidence: number };
