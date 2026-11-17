@@ -16,7 +16,7 @@ import { primaryNav } from "@/lib/nav-items";
  * (primary navigation is the bottom tab bar). lg and up: logo, primary links, picker,
  * bell, report CTA, language, account.
  */
-export default function TopNav({ isStaff, picker, account }: { isStaff: boolean; picker: ReactNode; account: ReactNode }) {
+export default function TopNav({ isStaff, userId = null, picker, account }: { isStaff: boolean; userId?: string | null; picker: ReactNode; account: ReactNode }) {
   const t = useT();
   const path = usePathname();
   const items = [
@@ -54,7 +54,7 @@ export default function TopNav({ isStaff, picker, account }: { isStaff: boolean;
         <div className="ms-auto flex shrink-0 items-center gap-1 text-sm lg:ms-0 lg:gap-2">
           {/* Wrappers hide: `hidden` loses to the inline-flex inside Badge and buttonClass. */}
           <div className="hidden 2xl:block"><Badge tone="warning">{t.demoBadge}</Badge></div>
-          <NotificationBell />
+          <NotificationBell userId={userId} />
           <div className="hidden shrink-0 lg:block"><Link href="/report" className={buttonClass()}>{t.reportCta}</Link></div>
           {/* Route handler (sets the cookie, redirects back), so a plain anchor is intended. */}
           <a href="/lang" aria-label={t.navLangSwitch} className={cx("inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-slate-300 px-3 text-sm font-medium text-foreground hover:bg-slate-50", focusRing)}>

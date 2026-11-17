@@ -4,15 +4,18 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import PublicNotice from "@/components/PublicNotice";
 import Button, { buttonClass } from "@/components/ui/Button";
+import PlannedPanel from "@/components/ui/PlannedPanel";
 import Card from "@/components/ui/Card";
 import { Checkbox } from "@/components/ui/Choice";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import Textarea from "@/components/ui/Textarea";
+import ClarityHelper from "./ClarityHelper";
 import { useToast } from "@/components/ui/Toast";
 import { useLang } from "@/components/ui/useLang";
 import { useT } from "@/components/ui/useT";
 import { ApiError } from "@/lib/api-client";
+import { costLabel } from "@/lib/country";
 import { fillNum } from "@/lib/format";
 import { fetchSimilar, ideaBody, postIdea } from "@/lib/ideas-api";
 import { newId } from "@/lib/offline-queue";
@@ -60,8 +63,8 @@ function NewIdeaInner({ constituency, signedIn }: { constituency: string; signed
 
   const post = useMutation({
     mutationFn: () => {
-      const cost = { s: t.idCostS, m: t.idCostM, l: t.idCostL }[f.cost as "s" | "m" | "l"] ?? "";
-      const body = ideaBody(f, { problem: t.idFProblem, solution: t.idFSolution, benefit: t.idFBenefit, area: t.idFArea, cost: t.idFCost }, cost);
+      const cost = costLabel(f.cost, lang);
+      const body = ideaBody(f, { problem: t.idFProblem, solution: t.idFSolution, benefit: t.idFBenefit, area: t.idFArea, cost: t.idCostBody }, cost);
       return postIdea(constituency, f, body, key.current);
     },
     onSuccess: (r) => { setRemoved(r.pii_removed.length > 0); setDone(true); },
@@ -108,16 +111,18 @@ function NewIdeaInner({ constituency, signedIn }: { constituency: string; signed
         <section aria-live="polite" className="space-y-2 rounded-2xl border border-amber/60 bg-amber/10 p-3">
           <h2 className="font-semibold">{t.idSimilarTitle}</h2>
           <p className="text-sm">{t.idSimilarBody}</p>
-          <ul className="space-y-1">{similar.map((i) => <li key={i.ref}><Link href="/ideas" className="underline">{i.title}</Link> <span className="text-sm text-muted">· {fillNum(t.idSupportCount, { n: i.support_count }, lang)}</span></li>)}</ul>
+          <ul className="space-y-1">{similar.map((i) => <li key={i.ref}><Link href={`/ideas/${encodeURIComponent(i.ref)}`} className="underline">{i.title}</Link> <span className="text-sm text-muted">· {fillNum(t.idSupportCount, { n: i.support_count }, lang)}</span></li>)}</ul>
         </section>
       )}
       <Textarea label={t.idFProblem} rows={4} maxLength={700} value={f.problem} error={errors.problem} onChange={(e) => set("problem", e.target.value)} />
       <Textarea label={t.idFSolution} rows={4} maxLength={700} value={f.solution} error={errors.solution} onChange={(e) => set("solution", e.target.value)} />
+      <ClarityHelper title={f.title} text={`${f.problem} ${f.solution}`} />
       <Textarea label={t.idFBenefit} optional rows={3} maxLength={300} value={f.benefit} onChange={(e) => set("benefit", e.target.value)} />
       <Input label={t.idFArea} optional maxLength={120} value={f.area} onChange={(e) => set("area", e.target.value)} />
       <Select label={t.idFCategory} placeholder={t.idChoose} required value={f.category} error={errors.category} onChange={(e) => set("category", e.target.value)} options={CATEGORIES.map((c) => ({ value: c, label: t.cats[c] }))} />
       <Select label={t.idFCost} optional hint={t.idFCostHint} value={f.cost} onChange={(e) => set("cost", e.target.value)}
-        options={[{ value: "", label: t.idCostNone }, { value: "s", label: t.idCostS }, { value: "m", label: t.idCostM }, { value: "l", label: t.idCostL }]} />
+        options={[{ value: "", label: t.idCostNone }, { value: "s", label: costLabel("s", lang) }, { value: "m", label: costLabel("m", lang) }, { value: "l", label: costLabel("l", lang) }]} />
+      <PlannedPanel as="h2" title={t.idAttachTitle} body={t.idAttachBody} />
       <Checkbox label={t.idFAck} checked={f.ack} error={errors.ack} onChange={(e) => set("ack", e.target.checked)} />
       <PublicNotice kind="idea" />
       <Button type="submit" size="lg" full loading={post.isPending}>{post.isPending ? t.idPublishing : t.idPublish}</Button>

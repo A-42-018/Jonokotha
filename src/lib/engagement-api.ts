@@ -1,7 +1,7 @@
 import { api } from "@/lib/api-client";
 
 export type FollowType = "issue" | "area" | "category";
-export interface FollowRow { id: string; type: FollowType; target: string; created_at: string }
+export interface FollowRow { id: string; type: FollowType; target: string; label?: string; created_at: string }
 
 /** Public count of people who said "me too". Only the number is public, never who. */
 export const fetchAffectedCount = (ref: string) => api<{ affected_count?: number }>(`/issues/${encodeURIComponent(ref)}`).then((r) => r.data.affected_count ?? 0);

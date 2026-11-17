@@ -4,6 +4,7 @@ import QueryProvider from "@/components/QueryProvider";
 import Badge, { type BadgeTone } from "@/components/ui/Badge";
 import CapabilityLabel from "@/components/ui/CapabilityLabel";
 import Button from "@/components/ui/Button";
+import Link from "next/link";
 import Card from "@/components/ui/Card";
 import EmptyState from "@/components/ui/EmptyState";
 import { Skeleton } from "@/components/ui/Skeleton";
@@ -44,6 +45,7 @@ function Inner({ constituency }: { constituency: string }) {
                 <div><dt className="inline text-muted">{t.pjUpdated} </dt><dd className="inline">{fmtDay(p.updated_at, lang)}</dd></div>
                 {src && <div><a href={src} target="_blank" rel="noopener noreferrer" className="text-civic underline">{t.pjSource}</a>{p.source_checked_at && <span className="text-muted"> · {t.pjChecked} {fmtDay(p.source_checked_at, lang)}</span>}</div>}
               </dl>
+            <Link href={`/projects/${encodeURIComponent(p.ref)}`} className="mt-2 inline-flex min-h-11 items-center text-civic underline">{t.pjOpen}</Link>
             </Card>
           </li>
         );

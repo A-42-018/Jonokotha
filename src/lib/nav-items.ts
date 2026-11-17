@@ -1,7 +1,7 @@
 import { FLAGS } from "./flags";
 
 /** One place for citizen navigation (masterplan 6.1 and 6.2), used by the desktop top bar and the "more" lists. */
-export interface NavItem { href: string; key: "navHome" | "navArea" | "navProjects" | "navIdeas" | "navAskMp" | "navFindMp" | "navPolls" | "navHelp" | "navConsult" | "navTerms" }
+export interface NavItem { href: string; key: "navHome" | "navArea" | "navProjects" | "navIdeas" | "navAskMp" | "navFindMp" | "navPolls" | "navHelp" | "navConsult" | "navTerms" | "navAbout" }
 
 export function primaryNav(flags: { consultations: boolean } = FLAGS): NavItem[] {
   return [
@@ -20,6 +20,7 @@ export function moreNav(): NavItem[] {
   return [
     { href: "/polls", key: "navPolls" },
     { href: "/help", key: "navHelp" },
+    { href: "/about", key: "navAbout" },
     { href: "/terms", key: "navTerms" },
   ];
 }

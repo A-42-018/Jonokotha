@@ -16,8 +16,9 @@ import { useLocalValue } from "@/components/ui/useLocalValue";
 import { CATEGORIES } from "@/lib/categories";
 import { fetchFeed } from "@/lib/feed-api";
 import { fmtAgo } from "@/lib/format";
+import { FEED_PERSONAL_KEY } from "@/lib/personalize";
+import { savePrefs } from "@/lib/push";
 
-const PERSONAL_KEY = "jonokotha:feed-personalized:v1";
 
 export default function FollowedFeed({ signedIn }: { signedIn: boolean }) {
   return <QueryProvider><FeedInner signedIn={signedIn} /></QueryProvider>;
@@ -29,7 +30,7 @@ function FeedInner({ signedIn }: { signedIn: boolean }) {
   const lang = useLang();
   const toast = useToast();
   const [now] = useState(() => Date.now());
-  const [personalized, setPersonalized] = useLocalValue<boolean>(PERSONAL_KEY, true);
+  const [personalized, setPersonalized] = useLocalValue<boolean>(FEED_PERSONAL_KEY, true);
   const { isFollowing, toggle } = useFollows(signedIn);
   const feed = useQuery({ queryKey: ["feed", personalized], queryFn: () => fetchFeed(personalized), enabled: signedIn });
   const why = (w: "issue" | "area" | "category" | null) => (w ? (t[`fdWhy_${w}` as keyof typeof t] as string) : t.fdWhy_none);
@@ -62,7 +63,7 @@ function FeedInner({ signedIn }: { signedIn: boolean }) {
         </div>
       </fieldset>
       <div className="flex flex-wrap items-center gap-3">
-        <Button variant="ghost" aria-pressed={personalized} onClick={() => setPersonalized(!personalized)}>{personalized ? t.fdPersonalOff : t.fdPersonalOn}</Button>
+        <Button variant="ghost" aria-pressed={personalized} onClick={() => { const on = !personalized; setPersonalized(on); void savePrefs({ personalization_enabled: on }).catch(() => toast("error", t.pzFeedFail)); }}>{personalized ? t.fdPersonalOff : t.fdPersonalOn}</Button>
         <span className="text-sm text-muted">{personalized ? t.fdOrderFollowed : t.fdOrderNewest}</span>
       </div>
       {feed.isPending && <p role="status" className="text-sm text-muted">{t.exLoading}</p>}

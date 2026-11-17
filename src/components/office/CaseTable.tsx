@@ -70,7 +70,7 @@ export default function CaseTable({ cases }: { cases: CaseRecord[] }) {
     <section aria-labelledby="cases-h" className="space-y-3">
       <h2 id="cases-h" className="text-xl font-semibold">{t.queue}</h2>
       <form role="search" onSubmit={(e) => e.preventDefault()} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        <Input label={t.odSearch} type="search" value={f.q} onChange={(e) => setF({ ...f, q: e.target.value })} />
+        <Input label={t.odSearch} type="search" hint={t.srBanglish} value={f.q} onChange={(e) => setF({ ...f, q: e.target.value })} />
         <Select label={t.odStatus} value={f.status} onChange={(e) => setF({ ...f, status: e.target.value as CaseFilter["status"] })} options={[{ value: "all", label: t.odAll }, ...STATUSES.map((s) => ({ value: s, label: t.statuses[s] }))]} />
         <Select label={t.odCategory} value={f.category} onChange={(e) => setF({ ...f, category: e.target.value as CaseFilter["category"] })} options={[{ value: "all", label: t.odAll }, ...CATEGORIES.map((c) => ({ value: c, label: t.cats[c] }))]} />
       </form>

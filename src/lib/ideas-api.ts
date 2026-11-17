@@ -49,3 +49,6 @@ export function ideaBody(f: IdeaDraft, label: { problem: string; solution: strin
 
 export const postIdea = (constituency: string, f: IdeaDraft, body: string, key: string) =>
   api<{ ref: string; status: string; pii_removed: string[] }>("/ideas", { body: { constituency, category: f.category, title: f.title.trim(), body }, idempotencyKey: key }).then((r) => r.data);
+
+/** One idea (`GET /api/v1/ideas/{ref}`), for the shareable link. A 404 means it is not public (or not yours). */
+export const fetchIdea = (ref: string) => api<ApiIdea>(`/ideas/${encodeURIComponent(ref)}`).then((r) => toIdea(r.data));

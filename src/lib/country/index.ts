@@ -35,3 +35,6 @@ export async function activeCountry(sb: SupabaseClient): Promise<CountryAdapter>
   const code = typeof data === "string" ? data : process.env.COUNTRY_CODE ?? "BD";
   return REGISTRY[code.toUpperCase()] ?? BANGLADESH;
 }
+
+// Client-side display helpers (F5.12/F5.16), kept alongside the server adapter registry (B5.12).
+export * from "./ui";

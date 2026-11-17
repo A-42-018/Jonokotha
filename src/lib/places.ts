@@ -1,3 +1,5 @@
+import { inCountryBox } from "./country";
+import { matchesQuery } from "./translit";
 import type { Lang } from "./i18n";
 
 /** SAMPLE places (নমুনা) for area search until a real gazetteer/geocoder is chosen (Nominatim terms need review). */
@@ -10,15 +12,14 @@ export const SAMPLE_PLACES: Place[] = [
   { id: "w5", bn: "ওয়ার্ড ৫ (নমুনা)", en: "Ward 5 (sample)", lat: 23.8227, lng: 90.3659 },
 ];
 
-const BN = "০১২৩৪৫৬৭৮৯";
-const norm = (s: string) => s.replace(/[০-৯]/g, (d) => String(BN.indexOf(d))).toLowerCase().trim();
 
 export function searchPlaces(q: string, lang: Lang, list: Place[] = SAMPLE_PLACES): Place[] {
-  const n = norm(q);
-  if (!n) return [];
-  return list.filter((p) => norm(p[lang]).includes(n) || norm(p.bn).includes(n) || norm(p.en).includes(n));
+  if (!q.trim()) return [];
+  return list.filter((p) => matchesQuery(p[lang], q) || matchesQuery(p.bn, q) || matchesQuery(p.en, q));
 }
 
 export interface Pin { lat: number; lng: number }
-/** Coordinates inside Bangladesh's bounding box only (rejects 0,0 and out-of-country taps). */
-export const inBangladesh = (p: Pin) => p.lat >= 20.5 && p.lat <= 26.7 && p.lng >= 88 && p.lng <= 92.8;
+/** Coordinates inside the active country's bounding box only (rejects 0,0 and out-of-country taps). */
+export const inCountry = (p: Pin) => inCountryBox(p.lat, p.lng);
+/** @deprecated kept for older imports; same as `inCountry`. */
+export const inBangladesh = inCountry;

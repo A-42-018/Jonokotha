@@ -30,10 +30,12 @@ import Select from "./ui/Select";
 import Stepper from "./ui/Stepper";
 import Textarea from "./ui/Textarea";
 import { appendTranscript } from "@/lib/speech";
+import { usePersonalModes } from "@/components/ui/usePersonalization";
 import { useSpeech } from "./report/useSpeech";
 import LocationPicker from "./report/LocationPicker";
 import type { Pin } from "@/lib/places";
 import EmergencyGuidance from "@/components/EmergencyGuidance";
+import { country } from "@/lib/country";
 import type { Emergency } from "@/lib/types";
 import { useToast } from "./ui/Toast";
 import { useKeyboardInset } from "./ui/useKeyboardInset";
@@ -93,7 +95,11 @@ function ReportFormInner({ t, lang, constituencyId }: { t: Dict; lang: Lang; con
   // One Idempotency-Key per report: a second tap or a retry after a lost answer is replayed, not duplicated.
   const reportKey = useRef(newId());
   const [quickDone, setQuickDone] = useState(false);
-  const speech = useSpeech(lang === "bn" ? "bn-BD" : "en-US", (text) => setQuick((q) => appendTranscript(q, text)));
+  const speech = useSpeech(country().speechLocale[lang], (text) => setQuick((q) => appendTranscript(q, text)));
+  const [modes] = usePersonalModes();
+  const micButton = speech.listening
+    ? <Button variant="danger" size={modes.voiceFirst ? "lg" : undefined} full={modes.voiceFirst} icon={<span aria-hidden>⏹</span>} onClick={speech.stop}>{t.vStop}</Button>
+    : <Button variant={modes.voiceFirst ? "primary" : "secondary"} size={modes.voiceFirst ? "lg" : undefined} full={modes.voiceFirst} icon={<span aria-hidden>🎤</span>} onClick={speech.start}>{t.speak}</Button>;
   const loaded = useRef(false);
   const heading = useRef<HTMLHeadingElement>(null);
   const stepMounted = useRef(false);
@@ -283,6 +289,7 @@ function ReportFormInner({ t, lang, constituencyId }: { t: Dict; lang: Lang; con
       {step === 0 && (
         <div className="space-y-5">
           <Card tone="info" className="space-y-3">
+            {modes.voiceFirst && <div data-voice-first>{micButton}</div>}
             <Textarea
               label={t.quickTitle}
               hint={t.quickHint}
@@ -294,9 +301,7 @@ function ReportFormInner({ t, lang, constituencyId }: { t: Dict; lang: Lang; con
             />
             {warn && hasPersonalNumber(quick) && <PrivacyWarning t={t} />}
             <div className="flex flex-wrap gap-3">
-              {speech.listening
-                ? <Button variant="danger" icon={<span aria-hidden>⏹</span>} onClick={speech.stop}>{t.vStop}</Button>
-                : <Button variant="secondary" icon={<span aria-hidden>🎤</span>} onClick={speech.start}>{t.speak}</Button>}
+              {!modes.voiceFirst && micButton}
               <Button loading={busy === "draft"} disabled={quick.trim().length < 3 || busy !== ""} onClick={() => void makeDraft()}>
                 {busy === "draft" ? t.drafting : t.draft}
               </Button>
@@ -313,7 +318,7 @@ function ReportFormInner({ t, lang, constituencyId }: { t: Dict; lang: Lang; con
                 {speech.problem === "unsupported" ? t.speakUnsupported : speech.problem === "denied" ? t.vDenied : speech.problem === "silence" ? t.vSilence : speech.problem === "network" ? t.vNetwork : t.vOther}
               </p>
             )}
-            {!speech.problem && <p className="text-sm text-muted">{t.vHint}</p>}
+            {!speech.problem && <p className="jk-more text-sm text-muted">{t.vHint}</p>}
             {quickDone && <p role="status" className="text-sm font-medium text-leaf-strong">✓ {t.quickDone}</p>}
             {ai.length > 0 && <p className="text-sm text-muted">{t.aiNote}</p>}
           </Card>

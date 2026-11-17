@@ -40,11 +40,30 @@ export function worstStatus(items: readonly ({ data_status?: unknown; is_sample?
  */
 export const FEATURES = {
   polls: { status: "planned", backend: "B5.5" },
+  realtime: { status: "planned", backend: "B5.8" },
   consultations: { status: "planned", backend: "B7.1" },
   staffDirectory: { status: "planned", backend: "B5.1" },
   authorContest: { status: "planned", backend: "M.9" },
   mfaRecoveryCodes: { status: "planned", backend: "M.6" },
+  areaHierarchy: { status: "planned", backend: "B5.7" },
+  areaCorrection: { status: "planned", backend: "B5.7" },
   commentReports: { status: "planned", backend: "B5.5" },
+  liaisonAcknowledge: { status: "planned", backend: "B5.2" },
+  liaisonReference: { status: "planned", backend: "B5.2" },
+  liaisonClose: { status: "planned", backend: "B5.2" },
+  adminUserList: { status: "planned", backend: "B5.3" },
+  adminAreaRecords: { status: "planned", backend: "B5.3" },
+  adminCategories: { status: "planned", backend: "B5.3" },
+  adminSla: { status: "planned", backend: "B5.3" },
+  adminAppeals: { status: "planned", backend: "B5.3" },
+  adminHealthDetail: { status: "planned", backend: "B5.3" },
+  adminAlerts: { status: "planned", backend: "B5.3" },
+  adminIntegrations: { status: "planned", backend: "B5.3" },
+  adminFlags: { status: "planned", backend: "B5.3" },
+  adminKnowledgeManage: { status: "planned", backend: "B5.3" },
+  adminDemo: { status: "planned", backend: "B5.3" },
+  ideaClarity: { status: "planned", backend: "B5.10" },
+  insightBrief: { status: "planned", backend: "B5.10" },
 } as const satisfies Record<string, { status: DataStatus; backend: string }>;
 
 export type FeatureKey = keyof typeof FEATURES;

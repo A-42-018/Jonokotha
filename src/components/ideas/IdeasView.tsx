@@ -69,7 +69,7 @@ function IdeasInner({ constituency, signedIn }: { constituency: string; signedIn
       )}
       <p className="text-sm text-muted">{t.idSupportNote}</p>
       <form role="search" onSubmit={(e) => e.preventDefault()} className="grid gap-3 sm:grid-cols-2">
-        <Input label={t.idSearch} type="search" value={q} onChange={(e) => setQ(e.target.value)} />
+        <Input label={t.idSearch} type="search" hint={t.srBanglish} value={q} onChange={(e) => setQ(e.target.value)} />
         <Select label={t.idCategory} value={category} onChange={(e) => setCategory(e.target.value as Category | "all")}
           options={[{ value: "all", label: t.idAll }, ...CATEGORIES.map((c) => ({ value: c, label: t.cats[c] }))]} />
       </form>

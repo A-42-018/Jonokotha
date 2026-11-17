@@ -49,7 +49,7 @@ test.describe("phase 2 public pages", () => {
     await page.goto("/area");
     await expect(page.getByText("নমুনা: এখানকার").first()).toBeVisible();
     await expect(page.getByText("২টি সমস্যা পাওয়া গেছে")).toBeVisible();
-    await page.getByLabel("খুঁজুন").fill("ড্রেন");
+    await page.getByLabel("খুঁজুন").fill("গর্ত");
     await expect(page.getByText("১টি সমস্যা পাওয়া গেছে")).toBeVisible();
     await page.getByLabel("খুঁজুন").fill("zzzz");
     await expect(page.getByRole("heading", { name: "কিছু মেলেনি" })).toBeVisible();
@@ -89,7 +89,7 @@ test.describe("phase 2 public pages", () => {
     await page.getByLabel("আপনার এলাকা বা ওয়ার্ডের নাম লিখুন").fill("ওয়ার্ড ৩");
     await expect(page.getByRole("heading", { name: "নমুনা জনপ্রতিনিধি ১" })).toBeVisible();
     await page.getByLabel("আপনার এলাকা বা ওয়ার্ডের নাম লিখুন").fill("ওয়ার্ড ৫");
-    await expect(page.getByText("দুটি নির্বাচনী এলাকার সীমানায়")).toBeVisible();
+    await expect(page.getByText(/২টি নির্বাচনী এলাকার/)).toBeVisible();
     await page.goto(`/mp/${ID}`);
     await expect(page.getByText("সময়কাল:")).toBeVisible();
     await expect(page.getByText("র‍্যাঙ্কিং করা হয় না")).toBeVisible();

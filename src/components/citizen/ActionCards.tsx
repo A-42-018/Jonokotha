@@ -17,21 +17,21 @@ export default function ActionCards({ t }: { t: Dict }) {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img loading="lazy" decoding="async" src="/illustrations/card-report.svg" alt="" className="size-24 self-start rounded-2xl" />
           <h2 className="text-xl font-semibold">{t.homeReportTitle}</h2>
-          <p className="text-white/90">{t.homeReportBody}</p>
+          <p className="jk-more text-white/90">{t.homeReportBody}</p>
           <Link href="/report" className={`${BTN} bg-white text-civic focus-visible:outline-white`}>{t.reportCta}</Link>
         </li>
         <li className={`${CARD} border border-slate-200 bg-white`}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img loading="lazy" decoding="async" src="/illustrations/card-idea.svg" alt="" className="size-24 self-start rounded-2xl" />
           <h2 className="text-xl font-semibold text-slate-800">{t.homeIdeaTitle}</h2>
-          <p className="text-slate-600">{t.homeIdeaBody}</p>
+          <p className="jk-more text-slate-600">{t.homeIdeaBody}</p>
           <Link href="/ideas/new" className={outline}>{t.homeIdeaCta}</Link>
         </li>
         <li className={`${CARD} border border-slate-200 bg-white`}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img loading="lazy" decoding="async" src="/illustrations/card-ask.svg" alt="" className="size-24 self-start rounded-2xl" />
           <h2 className="text-xl font-semibold text-slate-800">{t.askTitle}</h2>
-          <p className="text-slate-600">{t.rfAskBody}</p>
+          <p className="jk-more text-slate-600">{t.rfAskBody}</p>
           <Link href="/ask" className={outline}>{t.rfAskCta}</Link>
         </li>
       </ul>

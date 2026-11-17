@@ -8,6 +8,7 @@ import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import IdeaComments from "@/components/ideas/IdeaComments";
 import ReportContent from "@/components/ReportContent";
+import TranslatedText from "@/components/ui/TranslatedText";
 import { useLocalValue } from "@/components/ui/useLocalValue";
 import { useLang } from "@/components/ui/useLang";
 import { useShare } from "@/components/ui/useShare";
@@ -40,7 +41,7 @@ export default function IdeaCard({ idea, signedIn, heading: H = "h2" }: { idea: 
   const [mine, setMine] = useLocalValue<string[]>(SUPPORT_KEY, NONE);
   const [count, setCount] = useState(idea.supports);
   const supported = mine.includes(idea.id);
-  const { share } = useShare(t, `/ideas#${idea.id}`, idea.title);
+  const { share } = useShare(t, `/ideas/${encodeURIComponent(idea.id)}`, idea.title);
 
   const support = useMutation({
     mutationFn: (on: boolean) => setSupport(idea.id, on),
@@ -63,12 +64,13 @@ export default function IdeaCard({ idea, signedIn, heading: H = "h2" }: { idea: 
           <p className="text-sm text-muted">{t.cats[idea.category]}{idea.area && ` · ${idea.area}`} · {fmtDate(idea.createdAt, lang)}</p>
         </div>
       </div>
-      <p>{idea.summary}</p>
+      <TranslatedText text={idea.summary} signedIn={signedIn} next={`/ideas/${encodeURIComponent(idea.id)}`} />
       <div className="flex flex-wrap items-center gap-2">
         <Badge tone={TONE[idea.status]} icon={ICON[idea.status]}>{ideaStatusLabel(t, idea.status)}</Badge>
         {idea.sample && <CapabilityLabel status="sample" />}
         <span className="text-sm text-muted">{fillNum(t.idSupportCount, { n: count }, lang)}</span>
       </div>
+      <p className="text-sm text-muted">{t[`idHelp_${idea.status}` as keyof Dict] as string}</p>
       {idea.reason && <p className="rounded-xl bg-slate-100 p-3 text-sm"><span className="font-medium">{t.idReason}: </span>{idea.reason}</p>}
       <div className="flex flex-wrap items-center gap-2">
         {signedIn ? (
