@@ -47,10 +47,10 @@ export default function AccountMenu({ email, role, labels }: { email: string | n
         aria-expanded={open}
         aria-label={`${labels.account}: ${email}`}
         onClick={() => setOpen((v) => !v)}
-        className="inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-full border border-white/50 bg-white/10 px-2 text-white hover:bg-white/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:pe-3"
+        className="inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-full border border-white/50 bg-white/10 px-2 text-white hover:bg-white/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white lg:pe-3"
       >
         <span aria-hidden className="flex h-7 w-7 items-center justify-center rounded-full bg-amber text-sm font-semibold uppercase text-ink">{email[0]}</span>
-        <span className="hidden max-w-40 truncate sm:inline">{email}</span>
+        <span className="hidden max-w-40 truncate lg:inline">{email}</span>
       </button>
       {open && (
         <div role="menu" className="absolute end-0 z-20 mt-2 w-64 rounded-xl border border-slate-200 bg-white p-3 text-foreground shadow-lg">

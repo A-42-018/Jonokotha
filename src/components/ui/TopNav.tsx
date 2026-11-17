@@ -11,9 +11,9 @@ import { useT } from "./useT";
 import { primaryNav } from "@/lib/nav-items";
 
 /**
- * The one header, a deep green band (redesign §2b) with a marigold wordmark and report button. Phones and tablets (under 1280px): logo, bell, language,
- * account on one row, area picker below (primary navigation is the bottom tab bar). xl and up: logo, primary links, picker,
- * bell, report CTA, language, account. The desktop row needs about 1210px, so it must not start at lg (1024px).
+ * The one header, a deep green band (redesign §2b) with a marigold wordmark and report button. Always ONE row, never wrapped. Phones and tablets (under 1280px):
+ * logo, area picker (shrinks and truncates), bell, language, account (primary navigation is the bottom tab bar). xl and up: logo, primary links, picker,
+ * bell, report CTA, language, account. The desktop row needs about 1210px, so the links must not start at lg (1024px).
  */
 export default function TopNav({ isStaff, userId = null, picker, account }: { isStaff: boolean; userId?: string | null; picker: ReactNode; account: ReactNode }) {
   const t = useT();
@@ -24,11 +24,11 @@ export default function TopNav({ isStaff, userId = null, picker, account }: { is
   ];
   return (
     <header className="bg-brand-deep text-white shadow-[0_4px_14px_rgb(11_61_46/0.22)] xl:sticky xl:top-0 xl:z-40">
-      <div className="mx-auto flex w-full max-w-[90rem] flex-wrap items-center gap-x-2 gap-y-1 px-4 py-2 sm:px-6 lg:px-8 xl:flex-nowrap xl:gap-x-2 2xl:gap-x-3">
+      <div className="mx-auto flex w-full max-w-[90rem] flex-nowrap items-center gap-x-2 px-4 py-2 sm:px-6 lg:px-8 2xl:gap-x-3">
         <Link href="/" className={cx("-ms-1 flex min-h-11 shrink-0 items-center gap-1.5 rounded-lg px-0.5 font-heading font-bold text-amber sm:gap-2.5 sm:px-1", ringOnDark)}>
           {/* Logo lockup: street scene art (drawn for the deep green band, no plate) and the Bangla wordmark in every language. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/brand/jonokotha-scene.svg" alt="" width={980} height={430} className="h-7 w-auto sm:h-11 xl:h-7 2xl:h-11" />
+          <img src="/brand/jonokotha-scene.svg" alt="" width={980} height={430} className="hidden h-7 w-auto sm:block sm:h-11 xl:h-7 2xl:h-11" />
           <span aria-hidden="true" lang="bn" className="text-xl leading-none sm:text-3xl xl:text-xl 2xl:text-3xl">জনকথা</span>
           <span className="sr-only">{t.appName}</span>
         </Link>
@@ -51,8 +51,8 @@ export default function TopNav({ isStaff, userId = null, picker, account }: { is
             <li><MoreMenu path={path} /></li>
           </ul>
         </nav>
-        <div className="order-last flex w-full xl:order-none xl:ms-auto xl:w-auto xl:min-w-0 xl:shrink">{picker}</div>
-        <div className="ms-auto flex shrink-0 items-center gap-1 text-sm xl:ms-0 xl:gap-2">
+        <div className="ms-auto flex min-w-0 shrink">{picker}</div>
+        <div className="flex shrink-0 items-center gap-1 text-sm xl:gap-2">
           {/* Wrappers hide: `hidden` loses to the inline-flex inside Badge and buttonClass. */}
           <div className="hidden 2xl:block"><Badge tone="warningOnDark">{t.demoBadge}</Badge></div>
           <NotificationBell userId={userId} />
