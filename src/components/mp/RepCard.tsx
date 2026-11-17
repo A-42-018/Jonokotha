@@ -13,10 +13,12 @@ export default function RepCard({ rep, t, lang, showProfile = true, confirm }: {
     <Card as="article" className="space-y-3">
       <div className="flex items-start gap-3">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img loading="lazy" decoding="async" src="/illustrations/mp-portrait.svg" alt="" className="size-20 shrink-0 rounded-xl bg-slate-50" />
+        <img loading="lazy" decoding="async" src={rep.photoUrl ?? "/illustrations/mp-portrait.svg"} alt={rep.photoUrl ? rep.name : ""} className={`size-20 shrink-0 rounded-xl bg-slate-50 ${rep.photoUrl ? "object-cover" : ""}`} />
         <div className="min-w-0 space-y-1">
           <h3 className="text-lg font-semibold text-foreground">{rep.name}</h3>
           <p className="text-sm text-muted">{rep.role}{rep.constituency && ` · ${rep.constituency}`}</p>
+          {rep.party && <p className="text-sm text-muted">{rep.party}</p>}
+          {rep.roleNote && <p className="text-sm font-medium text-foreground">{rep.roleNote}</p>}
           <div className="flex flex-wrap gap-2">
             <Badge tone="success" icon="✓">{t.mpVerified}</Badge>
             {rep.sample && <CapabilityLabel status="sample" />}
@@ -26,6 +28,7 @@ export default function RepCard({ rep, t, lang, showProfile = true, confirm }: {
       <p className="text-sm text-muted">
         {rep.verifiedAt && <>{fillNum(t.mpVerifiedOn, { date: fmtDay(rep.verifiedAt, lang) }, lang)}</>}
         {host && <> · {t.mpSource}: {host}</>}
+        {rep.photoUrl && <> · {t.mpPhotoCredit}</>}
       </p>
       <div className="flex flex-wrap gap-2">
         <Link href="/report" className={buttonClass()}>{t.mpReport}</Link>

@@ -13,7 +13,7 @@ import MainShell from "@/components/ui/MainShell";
 import OfflineBanner from "@/components/ui/OfflineBanner";
 import TopNav from "@/components/ui/TopNav";
 import { ToastProvider } from "@/components/ui/Toast";
-import { getConstituencyId } from "@/lib/constituency-server";
+import { getArea } from "@/lib/constituency-server";
 import { currentUser } from "@/lib/supabase/server";
 import { dict, getLang } from "@/lib/i18n";
 
@@ -57,10 +57,10 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           userId={userId}
           picker={
             <ConstituencyPicker
-              selectedId={await getConstituencyId()}
+              selected={await getArea()}
               signedIn={!!email}
               lang={lang}
-              labels={{ open: t.cpOpen, choose: t.cpChoose, none: t.cpNone, title: t.cpTitle, hint: t.cpHint, sample: t.cpSample, close: t.cpClose }}
+              labels={{ open: t.cpOpen, choose: t.cpChoose, none: t.cpNone, title: t.cpTitle, hint: t.cpHint, sample: t.cpSample, close: t.cpClose, searchLabel: t.seSearchLabel, searchHint: t.seSearchHint, noResults: t.seNoResults, error: t.seSearchError, searching: t.seSearching, seat: t.seSeatNo, vacant: t.seVacant }}
             />
           }
           account={

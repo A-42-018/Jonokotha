@@ -52,7 +52,7 @@ function ProfileInner({ id }: { id: string }) {
 
   return (
     <div className="space-y-5">
-      <h1 className="sr-only">{r.full_name}</h1>
+      <h1 className="sr-only">{lang === "bn" ? r.full_name_bn || r.full_name : r.full_name}</h1>
       <RepCard rep={repView(r, area, lang, t.mpRoleFallback)} t={t} lang={lang} showProfile={false} />
       {area && <p className="text-sm text-muted">{t.mpTerm}: {fmtDay(area.valid_from, lang)}{area.valid_to ? ` – ${fmtDay(area.valid_to, lang)}` : ""}</p>}
 

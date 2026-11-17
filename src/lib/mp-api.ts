@@ -2,7 +2,7 @@ import { api } from "@/lib/api-client";
 
 /** Representative as the API gives it (verified only). Every public fact has a source and a check date. */
 export interface ApiRep {
-  id: string; full_name: string; office_title: string | null; party_name?: string | null; official_contact: string | null;
+  id: string; full_name: string; full_name_bn?: string | null; party_name_bn?: string | null; photo_path?: string | null; role_note?: string | null; office_title: string | null; party_name?: string | null; official_contact: string | null;
   source_url: string | null; verified_at: string | null; is_sample: boolean;
 }
 export interface ApiArea { key: string; name_bn: string; name_en: string; district: string | null; is_demo: boolean }
@@ -21,11 +21,14 @@ export interface Responsiveness {
 }
 
 /** What the card shows, whichever endpoint it came from. */
-export interface RepView { id: string; name: string; role: string; constituency: string; verifiedAt: string | null; source: string | null; sample: boolean }
+export interface RepView { id: string; name: string; role: string; constituency: string; verifiedAt: string | null; source: string | null; sample: boolean; party?: string | null; photoUrl?: string | null; roleNote?: string | null }
+
+/** Public URL of a stored MP photo (bucket rep-photos), or null when there is none. */
+export const repPhotoUrl = (path: string | null | undefined): string | null => (path && process.env.NEXT_PUBLIC_SUPABASE_URL ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/rep-photos/${encodeURIComponent(path)}` : null);
 
 export function repView(r: ApiRep, area: ApiArea | undefined, lang: "bn" | "en", fallbackRole: string): RepView {
   return {
-    id: r.id, name: r.full_name, role: r.office_title || fallbackRole, constituency: area ? (lang === "bn" ? area.name_bn : area.name_en) : "",
+    id: r.id, name: lang === "bn" ? r.full_name_bn || r.full_name : r.full_name, party: lang === "bn" ? r.party_name_bn || r.party_name || null : r.party_name ?? null, photoUrl: repPhotoUrl(r.photo_path), roleNote: r.role_note ?? null, role: r.office_title || fallbackRole, constituency: area ? (lang === "bn" ? area.name_bn : area.name_en) : "",
     verifiedAt: r.verified_at, source: r.source_url, sample: r.is_sample,
   };
 }
