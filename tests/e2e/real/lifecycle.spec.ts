@@ -1,5 +1,5 @@
 import { expect, test, type BrowserContext } from "@playwright/test";
-import { api, buildWorld, dropWorld, latestCode, skipUnlessReal, sessionFor, submitIssue, uploadPhoto, type World } from "./support";
+import { api, buildWorld, dropWorld, gotoOk, latestCode, skipUnlessReal, sessionFor, submitIssue, uploadPhoto, type World } from "./support";
 
 /**
  * Masterplan §21.3 scenarios 1-8: one issue travels from registration to feedback, on the real API and a local Supabase.
@@ -98,9 +98,9 @@ test("4. the office manager acknowledges and assigns the report", async () => {
 });
 
 test("5. staff add a public update and a private note; the citizen sees only the update", async () => {
-  expect((await api(office.request, "POST", `/office/issues/${ref}/update`, { note: INTERNAL })).status).toBe(200);
+  expect((await api(office.request, "POST", `/office/issues/${ref}/update`, { note: INTERNAL })).status).toBe(201);
   const pubUpdate = await api(office.request, "POST", `/office/issues/${ref}/update`, { note: PUBLIC, public: true });
-  expect(pubUpdate.status, JSON.stringify(pubUpdate.json)).toBe(200);
+  expect(pubUpdate.status, JSON.stringify(pubUpdate.json)).toBe(201);
   const forCitizen = JSON.stringify((await api(citizen.request, "GET", `/issues/${ref}`)).json);
   expect(forCitizen).toContain(PUBLIC);
   expect(forCitizen).not.toContain(INTERNAL);
@@ -109,7 +109,7 @@ test("5. staff add a public update and a private note; the citizen sees only the
   expect(forVisitor).not.toContain(INTERNAL);
   expect(JSON.stringify((await api(office.request, "GET", `/office/issues/${ref}`)).json)).toContain(INTERNAL);
   const page = await citizen.newPage();
-  await page.goto(`/issue/${ref}`);
+  await gotoOk(page, `/issue/${ref}`);
   await expect(page.getByText(PUBLIC).first()).toBeVisible();
   await expect(page.getByText(INTERNAL)).toHaveCount(0);
   await page.close();

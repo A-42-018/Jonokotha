@@ -64,7 +64,8 @@ test("11. office A cannot read or change office B's cases, and the other way rou
   expect((await api(officeA.request, "POST", `/office/issues/${refB}/reject`, { reason: "না", appeal_route: "কোথাও" })).status).toBe(404);
   const page = await officeB.newPage();
   const res = await page.goto(`/office/${ref}`);
-  expect(res?.status()).toBe(404);
+  // The page streams (loading.tsx), so a not-found case can arrive as 200 with the not-found view: what matters is that no case text is shown.
+  expect([200, 404]).toContain(res?.status());
   await expect(page.getByText("বিদ্যুতের তার ঝুলছে")).toHaveCount(0);
   await page.close();
   expect((await w.admin.from("issues").select("status").eq("ref", ref).single()).data?.status).toBe("submitted"); // untouched
