@@ -13,7 +13,7 @@ export default async function OfficeKpisPage() {
   return (
     <div className="space-y-4">
       <Link href="/office" className="inline-flex min-h-11 items-center text-civic underline">← {t.mxOfficeBack}</Link>
-      <h1 className="text-2xl font-semibold text-civic">{t.mxOfficeTitle}</h1>
+      <h1 className="jk-h1">{t.mxOfficeTitle}</h1>
       <p className="text-muted">{t.mxOfficeLead}</p>
       <OfficeKpis constituency={(await getConstituencyId()) ?? DEMO_CONSTITUENCY.id} />
     </div>

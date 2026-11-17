@@ -13,7 +13,7 @@ export default async function Budgeting() {
   const t = dict[await getLang()];
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold text-civic">{t.r2PbTitle}</h1>
+      <h1 className="jk-h1">{t.r2PbTitle}</h1>
       <p className="text-muted">{t.r2PbLead}</p>
       <PbList constituency={(await getConstituencyId()) ?? DEMO_CONSTITUENCY.id} />
     </div>

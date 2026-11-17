@@ -58,7 +58,7 @@ function NewSource({ constituency }: { constituency: string }) {
   const msg = (k: NonNullable<typeof err>) => (err === k ? t[({ title: "r2BgErrTitle", publisher: "r2BgErrPublisher", url: "r2BgErrUrl", year: "r2BgErrYear", hash: "r2BgErrHash" } as const)[k]] : undefined);
   return (
     <form noValidate onSubmit={(e) => { e.preventDefault(); const p = sourceProblem({ title: f.title, publisher: f.publisher, source_url: f.url, fiscal_year: f.year, doc_sha256: f.hash }); setErr(p); if (!p) m.mutate(); }} className="space-y-3 rounded-2xl border border-line bg-white p-4">
-      <h2 className="text-lg font-semibold">{t.r2BgNewSource}</h2>
+      <h2 className="jk-h2">{t.r2BgNewSource}</h2>
       <Input label={t.r2BgSrcTitle} maxLength={200} value={f.title} onChange={set("title")} error={msg("title")} />
       <Input label={t.r2BgSrcPublisher} maxLength={150} value={f.publisher} onChange={set("publisher")} error={msg("publisher")} />
       <Select label={t.r2BgSrcKind} value={f.kind} onChange={(e) => setF((s) => ({ ...s, kind: e.target.value as BudgetDocKind }))} options={DOC_KINDS.map((k) => ({ value: k, label: t[`r2BgDoc_${k}`] }))} />

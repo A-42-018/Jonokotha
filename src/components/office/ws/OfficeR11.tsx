@@ -33,7 +33,7 @@ function Kpis({ constituency }: { constituency: string }) {
   const forbidden = q.error instanceof ApiError && q.error.status === 403;
   return (
     <section aria-labelledby="kp-h" className="space-y-3">
-      <h2 id="kp-h" className="text-xl font-semibold">{t.kpTitle}</h2>
+      <h2 id="kp-h" className="jk-h2">{t.kpTitle}</h2>
       <p className="text-muted">{t.kpLead}</p>
       {forbidden ? <p role="alert">{t.kpNoAccess}</p> : (
         <Boundary q={q} emptyTitle={t.kpNone}>
@@ -74,7 +74,7 @@ function Clusters({ constituency }: { constituency: string }) {
   if (q.isError && q.error instanceof ApiError && q.error.status === 403) return <p role="alert">{t.hmoNoAccess}</p>;
   return (
     <section aria-labelledby="hmo-h" className="space-y-2">
-      <h2 id="hmo-h" className="text-xl font-semibold">{t.hmoTitle}</h2>
+      <h2 id="hmo-h" className="jk-h2">{t.hmoTitle}</h2>
       <p className="text-muted">{t.hmoLead}</p>
       <Boundary q={q} emptyTitle={t.hmNone}>
         {(d) => (
@@ -99,7 +99,7 @@ function WeeklyBriefs() {
   if (q.data?.kind === "planned") return <PlannedPanel title={t.wbPlanned} body={t.r1PlannedBody} />;
   return (
     <section aria-labelledby="wb-h" className="space-y-3">
-      <h2 id="wb-h" className="text-xl font-semibold">{t.wbTitle}</h2>
+      <h2 id="wb-h" className="jk-h2">{t.wbTitle}</h2>
       <p className="text-muted">{t.wbLead}</p>
       <Boundary q={q} isEmpty={(d) => d.kind === "ok" && d.data.length === 0} emptyTitle={t.wbEmpty}>
         {(d) => d.kind === "ok" ? <ul className="space-y-3">{d.data.map((b) => <li key={b.id}><BriefCard b={b} /></li>)}</ul> : null}

@@ -18,7 +18,7 @@ export default async function Office() {
   const cases = await listCases(sb);
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold text-civic">{t.odOverview}</h1>
+      <h1 className="jk-h1">{t.odOverview}</h1>
       <OfficeTour />
       <Overview o={overviewStats(cases, nowMs())} t={t} lang={lang} />
       <OfficeCharts cases={cases} t={t} lang={lang} />

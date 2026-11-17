@@ -91,7 +91,7 @@ function ExploreInner({ constituency }: { constituency: string }) {
           <Card as="article" padded={false} className={`p-3 ${i.ref === selected ? "ring-2 ring-civic" : ""}`}>
             <div className="flex items-start gap-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img loading="lazy" decoding="async" src={`/illustrations/cat-${i.category}.svg`} alt="" className="size-12 shrink-0" />
+              <img loading="lazy" decoding="async" src={`/illustrations/home/cat-${i.category}.webp`} alt="" className="size-12 shrink-0" />
               <div className="min-w-0 flex-1 space-y-1">
                 <h2 className="font-medium text-foreground">
                   <Link href={`/issue/${i.ref}`} className="underline-offset-2 hover:underline">{i.title}</Link>
@@ -131,7 +131,7 @@ function ExploreInner({ constituency }: { constituency: string }) {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold text-civic">{t.exTitle}</h1>
+      <h1 className="jk-h1">{t.exTitle}</h1>
       {hasSample && <p className="rounded-xl border border-amber/60 bg-amber/10 p-3 text-sm">{t.exSampleBanner}</p>}
       <div className="flex flex-wrap items-center gap-3">
         <Button variant={followingArea ? "success" : "secondary"} aria-pressed={followingArea} loading={toggleFollow.isPending || follows === undefined}

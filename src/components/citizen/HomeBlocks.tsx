@@ -98,7 +98,7 @@ export function AreaRepCard({ t, lang, rep, areaName }: { t: Dict; lang: Lang; r
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img loading="lazy" decoding="async" src="/illustrations/spot-find-mp.svg" alt="" className="size-20 shrink-0 rounded-2xl bg-cream p-1" />
       <div className="min-w-0 space-y-1">
-        <h2 id="home-rep" className="text-xl font-semibold text-foreground">{t.homeRepTitle}</h2>
+        <h2 id="home-rep" className="jk-h2">{t.homeRepTitle}</h2>
         <p className="text-[0.9375rem] text-muted">{areaName}</p>
         {!rep.ok ? <p role="alert" className="text-[0.9375rem] text-ink-2">{t.hvRepError}</p> : !rep.data ? <p className="text-[0.9375rem] leading-relaxed text-ink-2">{t.hvRepNone}</p> : (
           <>
@@ -129,7 +129,7 @@ export function ExploreLinks({ t }: { t: Dict }) {
   const items = [...primaryNav().filter((i) => !["navHome", "navArea", "navIdeas"].includes(i.key)), ...moreNav().filter((i) => i.key !== "navTerms" && i.key !== "navAbout")];
   return (
     <nav aria-labelledby="home-more" className="space-y-3">
-      <h2 id="home-more" className="text-xl font-semibold text-foreground">{t.hvMoreTitle}</h2>
+      <h2 id="home-more" className="jk-h2">{t.hvMoreTitle}</h2>
       <ul className="flex flex-wrap gap-2">
         {items.map((i) => <li key={i.href}><Link href={i.href} className="inline-flex min-h-11 items-center rounded-full border border-civic/30 bg-white px-4 text-[0.9375rem] font-medium text-civic hover:bg-civic/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-civic">{t[i.key]}</Link></li>)}
       </ul>

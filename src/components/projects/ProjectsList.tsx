@@ -38,7 +38,7 @@ function Inner({ constituency }: { constituency: string }) {
                 <Badge tone={TONE[p.status]}>{t[`pjSt_${p.status}`]}</Badge>
                 <CapabilityLabel status={p.capability} />
               </div>
-              <h2 className="mt-1 break-words text-lg font-semibold text-civic">{p.title}</h2>
+              <h2 className="jk-h3 mt-1 break-words">{p.title}</h2>
               <dl className="mt-1 space-y-0.5 text-sm">
                 {p.budget_text && <div><dt className="inline text-muted">{t.pjBudget} </dt><dd className="inline break-words">{p.budget_text}</dd></div>}
                 {p.expected_end_date && <div><dt className="inline text-muted">{t.pjEnd} </dt><dd className="inline">{fmtDay(p.expected_end_date, lang)}</dd></div>}

@@ -9,7 +9,7 @@ export default async function Challenge({ searchParams }: { searchParams: Promis
   const ref = ((await searchParams).ref ?? "").slice(0, 41);
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold text-civic">{t.chTitle}</h1>
+      <h1 className="jk-h1">{t.chTitle}</h1>
       <ChallengeForm supportEmail={SUPPORT_EMAIL} defaultRef={ref} />
       <LegalMeta t={t} lang={lang} />
     </div>

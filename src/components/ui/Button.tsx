@@ -5,17 +5,17 @@ export type ButtonVariant = "primary" | "secondary" | "success" | "danger" | "gh
 export type ButtonSize = "md" | "lg";
 
 const VARIANT: Record<ButtonVariant, string> = {
-  primary: "bg-civic text-white",
-  secondary: "border border-civic bg-white text-civic",
-  success: "bg-leaf-strong text-white",
-  danger: "bg-danger text-white",
+  primary: "bg-civic text-white hover:bg-civic-dark",
+  secondary: "border border-civic bg-white text-civic hover:bg-civic/5",
+  success: "bg-leaf-strong text-white hover:brightness-95",
+  danger: "bg-danger text-white hover:brightness-95",
   ghost: "text-civic underline-offset-2 hover:underline",
 };
 
 /** Class string for anything that looks like a button (links included). Min height 44px. */
 export function buttonClass({ variant = "primary", size = "md", full = false }: { variant?: ButtonVariant; size?: ButtonSize; full?: boolean } = {}): string {
   return cx(
-    "inline-flex items-center justify-center gap-2 rounded-xl px-5 font-medium",
+    "inline-flex items-center justify-center gap-2 rounded-xl px-5 font-semibold",
     size === "lg" ? "min-h-12 text-lg" : "min-h-11",
     "disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:cursor-not-allowed aria-disabled:opacity-50",
     VARIANT[variant],

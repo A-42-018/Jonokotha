@@ -31,7 +31,7 @@ export default function Table<T>({ columns, rows, rowKey, caption, empty }: {
     <>
       <ul aria-label={caption} className="space-y-3 md:hidden">
         {rows.map((r) => (
-          <li key={rowKey(r)} className="space-y-2 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+          <li key={rowKey(r)} className="space-y-2 jk-card p-4">
             {primary && <div className="font-medium">{primary.cell(r)}</div>}
             <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
               {rest.map((c) => (
@@ -45,7 +45,7 @@ export default function Table<T>({ columns, rows, rowKey, caption, empty }: {
         ))}
       </ul>
 
-      <div className="hidden overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm md:block">
+      <div className="hidden overflow-x-auto jk-card md:block">
         <table className="w-full text-start text-sm">
           <caption className="sr-only">{caption}</caption>
           <thead className="bg-slate-50 text-muted">

@@ -40,7 +40,7 @@ function Polls({ constituency }: { constituency: string }) {
   if (q.data?.kind === "planned") return <PlannedPanel title={t.owPollsPlannedTitle} body={t.owPollsPlannedBody} />;
   return (
     <section aria-labelledby="osp-polls" className="space-y-3">
-      <h2 id="osp-polls" className="text-xl font-semibold">{t.ospPollsH}</h2>
+      <h2 id="osp-polls" className="jk-h2">{t.ospPollsH}</h2>
       <NewPoll constituency={constituency} />
       <Boundary q={q} isEmpty={(d) => d.kind === "ok" && d.data.length === 0} emptyTitle={t.ospEmpty}>
         {(d) => d.kind === "ok" ? <ul className="space-y-2">{d.data.map((p) => <li key={p.ref}><PollRow p={p} /></li>)}</ul> : null}
@@ -126,7 +126,7 @@ function Surveys({ constituency }: { constituency: string }) {
   if (q.data?.kind === "planned") return <PlannedPanel title={t.r1PlannedTitle} body={t.r1PlannedBody} />;
   return (
     <section aria-labelledby="osp-sv" className="space-y-3">
-      <h2 id="osp-sv" className="text-xl font-semibold">{t.ospSurveysH}</h2>
+      <h2 id="osp-sv" className="jk-h2">{t.ospSurveysH}</h2>
       <p className="text-sm text-muted">{t.ospFreeTextNote}</p>
       <NewSurvey constituency={constituency} />
       <Boundary q={q} isEmpty={(d) => d.kind === "ok" && d.data.length === 0} emptyTitle={t.ospSurveyEmpty}>

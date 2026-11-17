@@ -1,37 +1,49 @@
 "use client";
-import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { saveConstituency, type Area } from "@/lib/constituency";
 import { api } from "@/lib/api-client";
 import type { AreaMatch } from "@/lib/geo";
-import { useLocalValue } from "@/components/ui/useLocalValue";
-import { MY_AREA_KEY, type MyArea } from "@/lib/areas-api";
-import type { Lang } from "@/lib/i18n";
-import type { LookupMatch } from "@/lib/mp-api";
+import { fmtNum, type Lang } from "@/lib/i18n";
+import Button from "@/components/ui/Button";
+import { fill } from "@/components/ui/cx";
 
-const AreaChooser = dynamic(() => import("./AreaChooser"), { ssr: false });
-
-type Labels = { open: string; choose: string; title: string; hint: string; sample: string; close: string; none: string; searchLabel: string; searchHint: string; noResults: string; error: string; searching: string; seat: string; vacant: string };
+type Labels = { open: string; choose: string; title: string; hint: string; sample: string; close: string; none: string; searchLabel: string; searchHint: string; noResults: string; error: string; searching: string; seat: string; vacant: string; ls: { btn: string; busy: string; privacy: string; denied: string; unsupported: string; failed: string; outside: string; foundSeat: string; foundDistrict: string; or: string } };
 
 export default function ConstituencyPicker({ selected, signedIn, lang, labels }: { selected: Area; signedIn: boolean; lang: Lang; labels: Labels }) {
   const router = useRouter();
   const dialog = useRef<HTMLDialogElement>(null);
   const autoOpened = useRef(false);
-  const [opened, setOpened] = useState(false);
-  const [, setMine] = useLocalValue<MyArea | null>(MY_AREA_KEY, null);
   const current = selected;
   const [q, setQ] = useState("");
   const [results, setResults] = useState<AreaMatch[] | null>(null);
   const [state, setState] = useState<"idle" | "loading" | "error">("idle");
   const name = (c: { nameBn: string; nameEn: string }) => (lang === "bn" ? c.nameBn : c.nameEn);
 
+  // "Find my seat from my location": ask the browser once, send the point to the server for this one lookup, show the seat or the district's seats.
+  type Located = { method: "boundary" | "district" | "none"; seat: AreaMatch | null; district: { name_bn: string; name_en: string } | null; seats: AreaMatch[] };
+  const [loc, setLoc] = useState<"idle" | "busy" | "denied" | "unsupported" | "failed">("idle");
+  const [located, setLocated] = useState<Located | null>(null);
+  function locate() {
+    setLocated(null);
+    if (!("geolocation" in navigator)) { setLoc("unsupported"); return; }
+    setLoc("busy");
+    navigator.geolocation.getCurrentPosition(
+      (p) => {
+        api<Located>(`/constituencies/locate?${new URLSearchParams({ lat: p.coords.latitude.toFixed(5), lng: p.coords.longitude.toFixed(5) })}`)
+          .then((r) => { setLocated(r.data); setLoc("idle"); })
+          .catch(() => setLoc("failed"));
+      },
+      (e) => setLoc(e.code === e.PERMISSION_DENIED ? "denied" : "failed"),
+      { timeout: 10_000, maximumAge: 300_000 },
+    );
+  }
+
   // First sign-in: ask once if nothing has been chosen yet.
   useEffect(() => {
     if (signedIn && current.sample && !autoOpened.current) {
       autoOpened.current = true;
       dialog.current?.showModal();
-      setOpened(true);
     }
   }, [signedIn, current]);
 
@@ -57,11 +69,33 @@ export default function ConstituencyPicker({ selected, signedIn, lang, labels }:
     router.refresh();
   }
 
+  // A large tap target: seat name, then its number; filled green when it is the current seat.
+  const seatRow = (c: AreaMatch) => (
+    <li key={c.key}>
+      <button
+        type="button"
+        onClick={() => choose(c.key)}
+        aria-pressed={c.key === current.id}
+        className="flex min-h-14 w-full items-center justify-between gap-2 rounded-xl bg-slate-100 px-3.5 py-2 text-start text-foreground transition-colors hover:bg-civic/10 aria-pressed:bg-civic aria-pressed:text-white focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-civic"
+      >
+        <span className="min-w-0">
+          <span className="block truncate font-semibold">{lang === "bn" ? c.name_bn : c.name_en}</span>
+          {c.seat_no ? <span className="block text-[0.9375rem] opacity-80">{labels.seat} {fmtNum(c.seat_no, lang)}</span> : null}
+        </span>
+        <span className="flex shrink-0 items-center gap-1.5">
+          {c.seat_status === "vacant" && <span className="rounded-full bg-white px-2 py-0.5 text-sm text-ink">{labels.vacant}</span>}
+          {c.is_demo && <span className="rounded-full bg-amber px-2 py-0.5 text-sm font-semibold text-ink">{labels.sample}</span>}
+          {c.key === current.id && <span aria-hidden className="text-lg">✓</span>}
+        </span>
+      </button>
+    </li>
+  );
+
   return (
     <>
       <button
         type="button"
-        onClick={() => { dialog.current?.showModal(); setOpened(true); }}
+        onClick={() => dialog.current?.showModal()}
         aria-haspopup="dialog"
         // WCAG 2.5.3: the visible words (the area name, then the sample badge, with a space between them) are all inside the name.
         aria-label={`${labels.open}: ${name(current)}${current.sample ? ` ${labels.sample}` : ""}`}
@@ -74,52 +108,71 @@ export default function ConstituencyPicker({ selected, signedIn, lang, labels }:
       <dialog
         ref={dialog}
         aria-labelledby="cp-title"
-        onClose={() => setOpened(false)}
         onClick={(e) => { if (e.target === dialog.current) dialog.current?.close(); }}
-        className="m-auto w-[calc(100%-2rem)] max-w-md rounded-2xl p-0 shadow-xl backdrop:bg-black/40"
+        // Phones: a bottom sheet. From sm: a centred card.
+        className="mx-auto mb-0 mt-auto max-h-[92dvh] w-full max-w-lg overflow-y-auto rounded-t-3xl bg-white p-0 text-foreground jk-lift backdrop:bg-black/50 sm:m-auto sm:max-h-[90dvh] sm:rounded-3xl"
       >
-        <div className="space-y-3 p-5">
-          <h2 id="cp-title" className="text-xl font-semibold text-civic">{labels.title}</h2>
-          <p className="text-sm text-slate-600">{labels.hint}</p>
-          <label htmlFor="cp-search" className="block text-sm font-medium">{labels.searchLabel}</label>
-          <input
-            id="cp-search" type="search" value={q} onChange={(e) => setQ(e.target.value)} autoComplete="off" inputMode="search"
-            aria-describedby="cp-hint" className="min-h-11 w-full rounded-lg border border-slate-300 px-3 focus-visible:outline-2 focus-visible:outline-civic"
-          />
-          <p id="cp-hint" className="text-xs text-muted">{labels.searchHint}</p>
-          <div aria-live="polite" className="text-sm text-slate-600">
-            {searchable && state === "loading" && labels.searching}
-            {searchable && state === "error" && labels.error}
-            {searchable && state === "idle" && shown && shown.length === 0 && labels.noResults}
+        <div className="space-y-5 p-5 sm:p-6">
+          <span aria-hidden className="mx-auto -mt-1 block h-1.5 w-10 rounded-full bg-slate-300 sm:hidden" />
+          <div className="flex items-start justify-between gap-3">
+            <div className="space-y-1">
+              <h2 id="cp-title" className="jk-h2">{labels.title}</h2>
+              <p className="text-ink-2">{labels.hint}</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => dialog.current?.close()}
+              aria-label={labels.close}
+              className="-me-2 -mt-1 flex size-11 shrink-0 items-center justify-center rounded-full text-foreground hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-civic"
+            >
+              <svg aria-hidden viewBox="0 0 24 24" className="size-6" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round"><path d="M6 6l12 12M18 6 6 18" /></svg>
+            </button>
           </div>
-          <ul className="max-h-64 space-y-2 overflow-y-auto">
-            {(shown ?? []).map((c) => (
-              <li key={c.key}>
-                <button
-                  type="button"
-                  onClick={() => choose(c.key)}
-                  aria-pressed={c.key === current.id}
-                  className="flex min-h-11 w-full items-center justify-between gap-2 rounded-lg border border-slate-300 px-3 py-2 text-left hover:bg-slate-50 aria-pressed:border-civic aria-pressed:bg-civic/10 focus-visible:outline-2 focus-visible:outline-civic"
-                >
-                  <span>{lang === "bn" ? c.name_bn : c.name_en}{c.seat_no ? <span className="ms-2 text-xs text-muted">{labels.seat} {c.seat_no}</span> : null}</span>
-                  <span className="flex items-center gap-2">
-                    {c.seat_status === "vacant" && <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs">{labels.vacant}</span>}
-                    {c.is_demo && <span className="rounded-full bg-amber/20 px-2 py-0.5 text-xs text-amber-900">{labels.sample}</span>}
-                    {c.key === current.id && <span aria-hidden>✓</span>}
-                  </span>
-                </button>
-              </li>
-            ))}
-          </ul>
-          {opened && (
-            <AreaChooser onConfirm={(m: LookupMatch) => {
-              setMine({ key: m.constituency.key, name_bn: m.constituency.name_bn, name_en: m.constituency.name_en, sample: m.constituency.is_demo });
-              dialog.current?.close();
-            }} />
-          )}
-          <button type="button" onClick={() => dialog.current?.close()} className="min-h-11 w-full rounded-lg border border-slate-300 px-3 font-medium focus-visible:outline-2 focus-visible:outline-civic">
-            {labels.close}
-          </button>
+
+          <section className="space-y-2">
+            <Button full size="lg" loading={loc === "busy"} onClick={locate} icon={<span aria-hidden>📍</span>}>{loc === "busy" ? labels.ls.busy : labels.ls.btn}</Button>
+            <p className="flex items-start gap-1.5 text-[0.9375rem] text-ink-2">
+              <svg aria-hidden viewBox="0 0 24 24" className="mt-1 size-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="11" width="14" height="9" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></svg>
+              {labels.ls.privacy}
+            </p>
+            <div aria-live="polite" className="space-y-2">
+              {loc === "denied" && <p className="rounded-xl bg-amber/15 p-3">{labels.ls.denied}</p>}
+              {loc === "unsupported" && <p className="rounded-xl bg-amber/15 p-3">{labels.ls.unsupported}</p>}
+              {loc === "failed" && <p className="rounded-xl bg-amber/15 p-3">{labels.ls.failed}</p>}
+              {located?.method === "none" && <p className="rounded-xl bg-amber/15 p-3">{labels.ls.outside}</p>}
+              {located?.method === "boundary" && located.seat && (
+                <>
+                  <p className="font-semibold">{labels.ls.foundSeat}</p>
+                  <ul>{seatRow(located.seat)}</ul>
+                </>
+              )}
+              {located?.method === "district" && located.district && (
+                <>
+                  <p className="font-semibold">{fill(labels.ls.foundDistrict, { district: lang === "bn" ? located.district.name_bn : located.district.name_en })}</p>
+                  <ul className="grid max-h-[40dvh] grid-cols-2 gap-2 overflow-y-auto">{located.seats.map(seatRow)}</ul>
+                </>
+              )}
+            </div>
+          </section>
+
+          <div aria-hidden className="flex items-center gap-3 text-[0.9375rem] text-muted">
+            <span className="h-px flex-1 bg-slate-200" />{labels.ls.or}<span className="h-px flex-1 bg-slate-200" />
+          </div>
+
+          <section className="space-y-2">
+            <label htmlFor="cp-search" className="block font-semibold">{labels.searchLabel}</label>
+            <input
+              id="cp-search" type="search" value={q} onChange={(e) => setQ(e.target.value)} autoComplete="off" inputMode="search"
+              aria-describedby="cp-hint" className="min-h-12 w-full rounded-xl border border-line bg-white px-3.5 text-base text-foreground focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-civic"
+            />
+            <p id="cp-hint" className="text-[0.9375rem] text-muted">{labels.searchHint}</p>
+            <div aria-live="polite" className="text-ink-2">
+              {searchable && state === "loading" && labels.searching}
+              {searchable && state === "error" && labels.error}
+              {searchable && state === "idle" && shown && shown.length === 0 && labels.noResults}
+            </div>
+            {(shown ?? []).length > 0 && <ul className="grid max-h-[40dvh] gap-2 overflow-y-auto sm:grid-cols-2">{(shown ?? []).map(seatRow)}</ul>}
+          </section>
         </div>
       </dialog>
     </>

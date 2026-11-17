@@ -34,7 +34,7 @@ export default function ReportSuccess({ t, lang, refId, failedPhotos = [], emerg
           <p className="mt-1 text-lg font-semibold">{emergency.numbers.join(" · ")}</p>
         </div>
       )}
-      <h1 className="text-2xl font-semibold text-civic">{t.sentTitle}</h1>
+      <h1 className="jk-h1">{t.sentTitle}</h1>
       <p className="text-muted">{t.successBody}</p>
       {left.length > 0 && (
         <div role="status" className="space-y-2 rounded-xl border border-amber/60 bg-amber/10 p-3 text-sm">

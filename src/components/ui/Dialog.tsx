@@ -43,7 +43,7 @@ export default function Dialog({ open, onClose, title, description, children, ac
     >
       <div className="space-y-3 p-5">
         <div className="flex items-start justify-between gap-3">
-          <h2 id={`${id}-title`} className="text-xl font-semibold text-civic">{title}</h2>
+          <h2 id={`${id}-title`} className="jk-h2">{title}</h2>
           <button type="button" onClick={onClose} disabled={busy} aria-label={t.uiClose} className={cx("-me-2 -mt-2 inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-lg text-muted disabled:opacity-50", focusRing)}>
             <span aria-hidden>✕</span>
           </button>

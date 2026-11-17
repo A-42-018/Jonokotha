@@ -24,7 +24,7 @@ export default function IssueView({ c, t, lang, signedIn = false, referral = nul
       <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:gap-6">
         <div className="space-y-4">
           <header className="space-y-2">
-            <h1 className="break-words text-2xl font-semibold text-civic">{c.title}</h1>
+            <h1 className="break-words jk-h1">{c.title}</h1>
             <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-muted">
               <span>{t.refId}: <b className="select-all text-foreground">{c.ref}</b></span>
               <StatusChip status={c.status} label={t.statuses[c.status]} />

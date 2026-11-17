@@ -19,10 +19,10 @@ export default async function Polls() {
   const constituency = (await getConstituencyId()) ?? DEMO_CONSTITUENCY.id;
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold text-civic">{t.plTitle}</h1>
+      <h1 className="jk-h1">{t.plTitle}</h1>
       <p className="text-muted">{t.pvLead}</p>
       <section aria-labelledby="pl-h" className="space-y-3">
-        <h2 id="pl-h" className="text-xl font-semibold">{t.svPollsTitle}</h2>
+        <h2 id="pl-h" className="jk-h2">{t.svPollsTitle}</h2>
         <PollsPanel signedIn={signedIn} loginHref={loginUrl("/polls")} constituency={constituency} />
       </section>
       {FLAGS.surveys && <SurveysPanel signedIn={signedIn} loginHref={loginUrl("/polls")} constituency={constituency} />}

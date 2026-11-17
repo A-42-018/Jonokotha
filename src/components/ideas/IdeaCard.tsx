@@ -60,7 +60,7 @@ export default function IdeaCard({ idea, signedIn, heading: H = "h2" }: { idea: 
     <Card as="article" padded={false} className="space-y-3 p-4">
       <div id={idea.id} className="flex items-start gap-3">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img loading="lazy" decoding="async" src={`/illustrations/cat-${idea.category}.svg`} alt="" className="size-12 shrink-0" />
+        <img loading="lazy" decoding="async" src={`/illustrations/home/cat-${idea.category}.webp`} alt="" className="size-12 shrink-0" />
         <div className="min-w-0 flex-1 space-y-1">
           <H className="text-lg font-semibold text-foreground">{idea.title}</H>
           <p className="text-sm text-muted">{t.cats[idea.category]}{idea.area && ` · ${idea.area}`} · {fmtDate(idea.createdAt, lang)}</p>

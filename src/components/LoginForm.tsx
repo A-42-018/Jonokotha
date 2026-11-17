@@ -33,7 +33,7 @@ export default function LoginForm({ next = "/report" }: { next?: string }) {
 
   return (
     <form className="space-y-4" noValidate onSubmit={(e) => { e.preventDefault(); void (sent ? verify() : send()); }}>
-      <h1 className="text-2xl font-semibold text-civic">{t.loginTitle}</h1>
+      <h1 className="jk-h1">{t.loginTitle}</h1>
       <p className="text-muted">{t.loginHint}</p>
       <Input label={t.loginEmail} type="email" autoComplete="email" inputMode="email" placeholder="email@example.com" value={email} onChange={(e) => setEmail(e.target.value)} disabled={sent} error={emailErr} />
       {!sent ? (

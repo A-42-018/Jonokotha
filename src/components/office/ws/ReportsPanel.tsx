@@ -43,7 +43,7 @@ function Inner({ constituency }: { constituency: string }) {
     <div className="space-y-4">
       <Link href="/office/kpis" className="inline-flex min-h-11 items-center text-civic underline">{t.owAnKpiLink}</Link>
       <section aria-labelledby="an-r" className="space-y-3">
-        <h2 id="an-r" className="text-xl font-semibold">{t.owAnReports}</h2>
+        <h2 id="an-r" className="jk-h2">{t.owAnReports}</h2>
         <p className="text-muted">{t.owAnReportsLead}</p>
         <form className="flex flex-wrap items-end gap-3" onSubmit={(e) => { e.preventDefault(); create.mutate(); }}>
           <Select label={t.owAnDays} value={days} onChange={(e) => setDays(e.target.value)} options={DAYS.map((d) => ({ value: d, label: fillNum(t.owAnPeriod, { n: Number(d) }, lang) }))} />

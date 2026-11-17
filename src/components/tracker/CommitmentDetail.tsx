@@ -35,7 +35,7 @@ function Inner({ refId }: { refId: string }) {
         {c && (
           <>
             <header className="space-y-2">
-              <h1 className="break-words text-2xl font-semibold text-civic">{c.title}</h1>
+              <h1 className="break-words jk-h1">{c.title}</h1>
               <div className="flex flex-wrap items-center gap-2">
                 <Badge tone={ST_TONE[c.status]} icon={ST_ICON[c.status]}>{t[`tkSt_${c.status}` as "tkSt_planned"]}</Badge>
                 <Badge tone="teal">{t.tkLabel}</Badge>
@@ -56,7 +56,7 @@ function Inner({ refId }: { refId: string }) {
               </Card>
             )}
             <section aria-labelledby="tk-hist" className="space-y-2">
-              <h2 id="tk-hist" className="text-lg font-semibold">{t.tkHistory}</h2>
+              <h2 id="tk-hist" className="jk-h2">{t.tkHistory}</h2>
               {c.history.length === 0 ? <p className="text-muted">{t.tkHistoryEmpty}</p> : (
                 <ol className="space-y-2">
                   {c.history.map((e, i) => {

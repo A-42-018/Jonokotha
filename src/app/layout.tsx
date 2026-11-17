@@ -63,7 +63,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
               selected={await getArea()}
               signedIn={!!email}
               lang={lang}
-              labels={{ open: t.cpOpen, choose: t.cpChoose, none: t.cpNone, title: t.cpTitle, hint: t.cpHint, sample: t.cpSample, close: t.cpClose, searchLabel: t.seSearchLabel, searchHint: t.seSearchHint, noResults: t.seNoResults, error: t.seSearchError, searching: t.seSearching, seat: t.seSeatNo, vacant: t.seVacant }}
+              labels={{ open: t.cpOpen, choose: t.cpChoose, none: t.cpNone, title: t.cpTitle, hint: t.cpHint, sample: t.cpSample, close: t.cpClose, searchLabel: t.seSearchLabel, searchHint: t.seSearchHint, noResults: t.seNoResults, error: t.seSearchError, searching: t.seSearching, seat: t.seSeatNo, vacant: t.seVacant, ls: { btn: t.lsBtn, busy: t.lsBusy, privacy: t.lsPrivacy, denied: t.lsDenied, unsupported: t.lsUnsupported, failed: t.lsFailed, outside: t.lsOutside, foundSeat: t.lsFoundSeat, foundDistrict: t.lsFoundDistrict, or: t.lsOr } }}
             />
           }
           account={

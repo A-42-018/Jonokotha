@@ -39,7 +39,7 @@ function Inner({ refId, signedIn, loginHref }: { refId: string; signedIn: boolea
         {q.data && (
           <>
             <header className="space-y-2">
-              <h1 className="text-2xl font-semibold text-civic">{q.data.question}</h1>
+              <h1 className="jk-h1">{q.data.question}</h1>
               <div className="flex flex-wrap items-center gap-2">
                 <Badge tone={q.data.status === "open" ? "success" : "neutral"} icon={q.data.status === "open" ? "●" : "○"}>{q.data.status === "open" ? t.csTabOpen : q.data.status === "reported" ? t.csTabReported : t.csTabClosed}</Badge>
                 {q.data.is_sample && <CapabilityLabel status="sample" />}
@@ -88,7 +88,7 @@ function Open({ c, refId }: { c: ConsultationFull; refId: string }) {
           <VoteButtons current={null} busy={vote.isPending} onVote={(v) => vote.mutate({ id: next.statement.id, vote: v })} />
         </Card>
       ) : !next && !changing ? (
-        <Card tone="info"><h2 className="text-lg font-semibold">{t.csDoneTitle}</h2><p>{t.csDoneBody}</p></Card>
+        <Card tone="info"><h2 className="jk-h2">{t.csDoneTitle}</h2><p>{t.csDoneBody}</p></Card>
       ) : null}
       {done > 0 && (
         <section className="space-y-2">

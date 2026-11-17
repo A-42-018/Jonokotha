@@ -51,7 +51,7 @@ function Inner({ constituency }: { constituency: string }) {
         <>
           <NewForm constituency={constituency} onCreated={setOpen} />
           <section aria-labelledby="ofc-list" className="space-y-2">
-            <h2 id="ofc-list" className="text-lg font-semibold">{t.ofcList}</h2>
+            <h2 id="ofc-list" className="jk-h2">{t.ofcList}</h2>
             <Boundary q={q} isEmpty={(d) => d.kind === "ok" && d.data.length === 0} emptyTitle={t.ofcEmpty}>
               {(d) => d.kind === "ok" ? (
                 <ul className="space-y-2">
@@ -102,7 +102,7 @@ function NewForm({ constituency, onCreated }: { constituency: string; onCreated:
   };
   return (
     <form noValidate onSubmit={(e) => { e.preventDefault(); submit(); }} className="space-y-3 rounded-2xl border border-line bg-white p-4">
-      <h2 className="text-lg font-semibold">{t.ofcNew}</h2>
+      <h2 className="jk-h2">{t.ofcNew}</h2>
       <Input label={t.ofcQuestion} hint={t.ofcQuestionHint} value={f.question} maxLength={200} error={err.question} onChange={set("question")} />
       <Textarea label={t.ofcDesc} optional rows={2} maxLength={1000} value={f.description} onChange={set("description")} />
       <Textarea label={t.ofcSeeds} hint={`${t.ofcSeedsHint} ${t.ofcNoSeeds}`} optional rows={5} value={f.seeds} error={err.seeds} onChange={set("seeds")} />

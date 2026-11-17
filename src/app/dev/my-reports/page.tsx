@@ -27,7 +27,7 @@ export default async function DevMyReports({ searchParams }: PageProps<"/dev/my-
   const extra = sp.state === "empty" || one ? { state: sp.state as string } : undefined;
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold text-civic">{dict[lang].meMyReports} (demo)</h1>
+      <h1 className="jk-h1">{dict[lang].meMyReports} (demo)</h1>
       <MyReports reports={data} filter={parseFilter(sp.status)} page={parsePage(sp.page)} base="/dev/my-reports" extra={extra} t={dict[lang]} lang={lang} />
     </div>
   );

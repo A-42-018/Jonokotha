@@ -72,7 +72,7 @@ export default function MfaPanel({ next, email }: { next: string; email: string 
   const lead = mode === "challenge" ? t.mfaLeadChallenge : t.mfaLeadEnroll;
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold text-civic">{t.mfaTitle}</h1>
+      <h1 className="jk-h1">{t.mfaTitle}</h1>
       <p className="text-muted">{lead}</p>
       <p className="text-sm text-muted">{t.mfaSignedAs} <span className="break-all font-medium text-foreground">{email}</span></p>
 

@@ -78,7 +78,7 @@ function NewDraft() {
   return (
     <div className="space-y-3">
       <form noValidate onSubmit={(e) => { e.preventDefault(); const p = rtiProblem(f); setErr(p); if (!p) m.mutate(); }} className="space-y-3 rounded-2xl border border-line bg-white p-4">
-        <h2 className="text-lg font-semibold">{t.r2RtNew}</h2>
+        <h2 className="jk-h2">{t.r2RtNew}</h2>
         <Input label={t.r2RtAgency} maxLength={150} value={f.agency} onChange={set("agency")} error={err === "agency" ? t.r2RtErr_agency : undefined} />
         <Input label={t.r2RtSubject} maxLength={150} value={f.subject} onChange={set("subject")} error={err === "subject" ? t.r2RtErr_subject : undefined} />
         <Textarea label={t.r2RtInfo} rows={5} maxLength={2000} value={f.info} onChange={set("info")} error={err === "info" ? t.r2RtErr_info : undefined} />
@@ -108,7 +108,7 @@ function Mine() {
   const q = useQuery({ queryKey: ["rti-drafts"], queryFn: fetchRtiDrafts, retry: false });
   return (
     <section aria-labelledby="rti-mine" className="space-y-2">
-      <h2 id="rti-mine" className="text-lg font-semibold">{t.r2RtMine}</h2>
+      <h2 id="rti-mine" className="jk-h2">{t.r2RtMine}</h2>
       <Gate data={q.data}>{(rows) => rows.length === 0 ? <p className="text-muted">{t.r2RtNoDrafts}</p> : <ul className="space-y-3">{rows.map((d) => <li key={d.id}><Draft d={d} /></li>)}</ul>}</Gate>
     </section>
   );

@@ -16,7 +16,7 @@ export default async function About() {
   const link = "inline-flex min-h-11 items-center text-civic underline";
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold text-civic">{t.abTitle}</h1>
+      <h1 className="jk-h1">{t.abTitle}</h1>
       <p className="text-muted">{t.abLead}</p>
       <Card title={t.abDoTitle}>{list([t.abDo1, t.abDo2, t.abDo3, t.abDo4])}</Card>
       <Card tone="danger" title={t.abNotTitle}>{list([t.abNot1, t.abNot2, t.abNot3])}</Card>

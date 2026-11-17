@@ -14,7 +14,7 @@ export default async function RtiPage() {
   try { signedIn = !!(await currentUser()).user; } catch { /* signed out */ }
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold text-civic">{t.r2RtTitle}</h1>
+      <h1 className="jk-h1">{t.r2RtTitle}</h1>
       <p className="text-muted">{t.r2RtLead}</p>
       <Rti signedIn={signedIn} />
     </div>

@@ -94,7 +94,7 @@ function One({ slug, constituency }: { slug: string; constituency?: string }) {
               </Card>
               {cols.length > 0 && (
                 <section aria-labelledby="od-prev" className="space-y-2">
-                  <h2 id="od-prev" className="text-lg font-semibold">{t.r2OdPreview}</h2>
+                  <h2 id="od-prev" className="jk-h2">{t.r2OdPreview}</h2>
                   <div className="overflow-x-auto rounded-xl border border-line bg-white">
                     <table className="w-full text-left text-sm">
                       <caption className="sr-only">{t.r2OdPreview}</caption>

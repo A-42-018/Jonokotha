@@ -278,7 +278,7 @@ function ReportFormInner({ t, lang, constituencyId, initialCategory }: { t: Dict
       onSubmit={(e) => { e.preventDefault(); if (isLast) void handleSubmit(submit, jumpToError)(); else void next(); }}
       className="space-y-5 pb-28 [&_input]:scroll-mb-32 [&_select]:scroll-mb-32 [&_textarea]:scroll-mb-32"
     >
-      <h1 className="text-2xl font-semibold text-civic">{t.reportCta}</h1>
+      <h1 className="jk-h1">{t.reportCta}</h1>
       <Stepper steps={steps} current={step} label={t.uiStepperAria} stepOf={fillNum(t.uiStepOf, { current: step + 1, total: steps.length }, lang)} />
 
       {restored && (
@@ -288,7 +288,7 @@ function ReportFormInner({ t, lang, constituencyId, initialCategory }: { t: Dict
         </Card>
       )}
 
-      <h2 ref={heading} tabIndex={-1} className="text-xl font-semibold text-civic outline-none">{titles[step]}</h2>
+      <h2 ref={heading} tabIndex={-1} className="jk-h2 outline-none">{titles[step]}</h2>
 
       {step === 0 && (
         <div className="space-y-5">
@@ -369,7 +369,7 @@ function ReportFormInner({ t, lang, constituencyId, initialCategory }: { t: Dict
             {category ? (
               <span className="flex items-center gap-3">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img loading="lazy" decoding="async" src={`/illustrations/cat-${category}.svg`} alt="" width={40} height={40} className="size-10" />
+                <img loading="lazy" decoding="async" src={`/illustrations/home/cat-${category}.webp`} alt="" width={40} height={40} className="size-10" />
                 {t.cats[category]}
               </span>
             ) : "—"}

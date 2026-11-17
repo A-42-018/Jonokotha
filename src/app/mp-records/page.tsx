@@ -13,7 +13,7 @@ export default async function MpRecordsPage({ searchParams }: PageProps<"/mp-rec
   const mp = typeof sp.mp === "string" && /^[0-9a-f-]{36}$/i.test(sp.mp) ? sp.mp : undefined;
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold text-civic">{t.r2MrTitle}</h1>
+      <h1 className="jk-h1">{t.r2MrTitle}</h1>
       <p className="text-muted">{t.r2MrLead}</p>
       <MpRecords representativeId={mp} />
     </div>

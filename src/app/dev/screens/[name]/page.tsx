@@ -55,7 +55,7 @@ export default async function DevScreen({ params }: PageProps<"/dev/screens/[nam
     case "case-long":
       return (
         <div className="space-y-4">
-          <h1 className="break-words text-2xl font-semibold text-civic">{LONG_CASE.title}</h1>
+          <h1 className="break-words jk-h1">{LONG_CASE.title}</h1>
           <p className="whitespace-pre-wrap break-words">{LONG_CASE.description}</p>
           <AuditList entries={auditFromTimeline(LONG_CASE.timeline)} t={t} lang={lang} />
           <NotesAndAssign cref={LONG_CASE.ref} />
@@ -65,7 +65,7 @@ export default async function DevScreen({ params }: PageProps<"/dev/screens/[nam
     case "office":
       return (
         <div className="space-y-4">
-          <h1 className="text-2xl font-semibold text-civic">{t.odOverview}</h1>
+          <h1 className="jk-h1">{t.odOverview}</h1>
           <Overview o={overviewStats(DEMO_CASES, Date.UTC(2026, 10, 16))} t={t} lang={lang} />
           <OfficeCharts cases={DEMO_CASES} t={t} lang={lang} />
           <CaseTable cases={[...DEMO_CASES, LONG_CASE]} />
@@ -74,7 +74,7 @@ export default async function DevScreen({ params }: PageProps<"/dev/screens/[nam
     case "case":
       return (
         <div className="space-y-4">
-          <h1 className="text-2xl font-semibold text-civic">{c.title}</h1>
+          <h1 className="jk-h1">{c.title}</h1>
           <AuditList entries={auditFromTimeline(c.timeline)} t={t} lang={lang} />
           <NotesAndAssign cref={c.ref} />
           <Copilot c={c} agency={undefined} />
@@ -82,7 +82,7 @@ export default async function DevScreen({ params }: PageProps<"/dev/screens/[nam
         </div>
       );
     case "announcements":
-      return <div className="space-y-4"><h1 className="text-2xl font-semibold text-civic">{t.anTitle}</h1><AnnouncementComposer constituency="demo-1" /></div>;
+      return <div className="space-y-4"><h1 className="jk-h1">{t.anTitle}</h1><AnnouncementComposer constituency="demo-1" /></div>;
     case "admin-verification":
       return <AdminShell t={t} title={t.adVerifyTitle} lead={t.adVerifyLead} current="/admin/verification"><VerifyForm /></AdminShell>;
     case "admin-moderation":

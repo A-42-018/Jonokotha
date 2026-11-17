@@ -180,7 +180,7 @@ function NewCycle({ constituency }: { constituency: string }) {
   const e = (k: Exclude<typeof err, null | "src">) => (err === k ? t[`r2PbErr_${k}`] : undefined);
   return (
     <form noValidate onSubmit={(ev) => { ev.preventDefault(); submit(); }} className="space-y-3 rounded-2xl border border-line bg-white p-4">
-      <h2 className="text-lg font-semibold">{t.r2PbNew}</h2>
+      <h2 className="jk-h2">{t.r2PbNew}</h2>
       <Input label={t.r2PbSrc} value={f.src} onChange={set("src")} error={err === "src" ? t.r2PbSrc : undefined} />
       <Input label={t.r2PbName} value={f.title} onChange={set("title")} error={e("title")} />
       <Textarea label={t.r2PbDesc} optional rows={2} value={f.desc} onChange={set("desc")} />

@@ -23,7 +23,7 @@ export default async function Ask() {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img loading="lazy" decoding="async" src="/illustrations/spot-ask-mp.svg" alt="" className="hidden size-24 sm:block" />
         <div className="space-y-1">
-          <h1 className="text-2xl font-semibold text-civic">{t.askTitle}</h1>
+          <h1 className="jk-h1">{t.askTitle}</h1>
           <p className="text-muted">{t.askLead}</p>
           <Link href="/ask/inbox" className="inline-flex min-h-11 items-center text-civic underline">{t.askInbox}</Link>
         </div>
@@ -32,7 +32,7 @@ export default async function Ask() {
       <AskForm signedIn={signedIn} constituency={constituency} />
       <PublicQuestions constituency={constituency} signedIn={signedIn} />
       <section aria-labelledby="faq" className="space-y-2">
-        <h2 id="faq" className="text-xl font-semibold text-foreground">{t.askFaqTitle}</h2>
+        <h2 id="faq" className="jk-h2">{t.askFaqTitle}</h2>
         <p className="text-sm text-muted">{t.askFaqNote}</p>
         {SAMPLE_FAQ.map((f) => (
           <Card key={f.id} as="details" className="group">

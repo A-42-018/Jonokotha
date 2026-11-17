@@ -13,7 +13,7 @@ export default async function Notifications() {
   try { signedIn = !!(await currentUser()).user; } catch { /* signed out */ }
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold text-civic">{t.ntTitle}</h1>
+      <h1 className="jk-h1">{t.ntTitle}</h1>
       <p className="text-muted">{t.ntLead}</p>
       {signedIn ? <NotificationList /> : (
         <div className="space-y-3">

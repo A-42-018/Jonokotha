@@ -43,13 +43,13 @@ function Inner({ refId }: { refId: string }) {
             {r.you_said_we_did && <Card as="section" tone="info" title={t.rpDidTitle}><p className="whitespace-pre-line break-words">{r.you_said_we_did}</p></Card>}
             {r.actions.length > 0 && (
               <section aria-labelledby="rp-actions" className="space-y-1">
-                <h2 id="rp-actions" className="text-lg font-semibold">{t.rpActions}</h2>
+                <h2 id="rp-actions" className="jk-h2">{t.rpActions}</h2>
                 <ul className="list-disc space-y-1 ps-6">{r.actions.map((a, i) => <li key={i} className="break-words">{a.text}</li>)}</ul>
               </section>
             )}
             {r.groups.length > 0 && (
               <section aria-labelledby="rp-groups" className="space-y-1">
-                <h2 id="rp-groups" className="text-lg font-semibold">{t.rpGroups}</h2>
+                <h2 id="rp-groups" className="jk-h2">{t.rpGroups}</h2>
                 <ul className="flex flex-wrap gap-2">{r.groups.map((g) => <li key={g.group}><Badge tone="teal">{fillNum(t.rpGroup, { name: groupName(g.group, lang) }, lang)} · {fillNum(t.rpGroupSize, { n: g.size }, lang)}</Badge></li>)}</ul>
                 {r.hidden_groups > 0 && <p className="text-sm text-muted">{fillNum(t.rpHidden, { n: r.hidden_groups }, lang)}</p>}
                 <p className="text-sm text-muted">{t.rpAssoc}</p>
@@ -57,7 +57,7 @@ function Inner({ refId }: { refId: string }) {
             )}
             {r.agreement.length > 0 && (
               <section aria-labelledby="rp-st" className="space-y-2">
-                <h2 id="rp-st" className="text-lg font-semibold">{t.rpStatements}</h2>
+                <h2 id="rp-st" className="jk-h2">{t.rpStatements}</h2>
                 <ul className="space-y-3">{r.agreement.map((a) => <li key={a.statement_id}><Row a={a} /></li>)}</ul>
                 <p className="text-sm text-muted">{t.rpAside}</p>
               </section>

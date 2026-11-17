@@ -14,7 +14,7 @@ export default async function BudgetingOne({ params }: PageProps<"/budgeting/[re
   try { signedIn = !!(await currentUser()).user; } catch { /* signed out */ }
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold text-civic">{t.r2PbTitle}</h1>
+      <h1 className="jk-h1">{t.r2PbTitle}</h1>
       <PbDetail refId={ref} signedIn={signedIn} />
     </div>
   );

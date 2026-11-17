@@ -16,7 +16,7 @@ function FinderInner() {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img loading="lazy" decoding="async" src="/illustrations/spot-find-mp.svg" alt="" className="hidden size-24 sm:block" />
         <div>
-          <h1 className="text-2xl font-semibold text-civic">{t.mpFindTitle}</h1>
+          <h1 className="jk-h1">{t.mpFindTitle}</h1>
           <p className="text-muted">{t.mpFindLead}</p>
         </div>
       </div>

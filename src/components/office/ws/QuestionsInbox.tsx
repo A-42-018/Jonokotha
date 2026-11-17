@@ -62,7 +62,7 @@ function Item({ q, myId }: { q: OfficeQuestion; myId?: string }) {
         <Badge>{owner}</Badge>
         <span className="text-sm text-muted">{fmtDate(q.last_message_at, lang)}</span>
       </div>
-      <h2 className="text-lg font-semibold">{q.title}</h2>
+      <h2 className="jk-h2">{q.title}</h2>
       <div className="flex flex-wrap gap-2">
         <Button variant="secondary" aria-expanded={open} onClick={() => setOpen(!open)}>{t.owQOpen}<span className="sr-only">: {q.title}</span></Button>
         {canAssign && <Button variant="secondary" disabled={assign.isPending} onClick={() => assign.mutate()}>{mine ? t.owQUnassign : t.owQAssignMe}</Button>}

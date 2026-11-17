@@ -16,7 +16,7 @@ export default async function Consultations() {
       <div className="flex items-center gap-3">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/illustrations/spot-consult.svg" alt="" width={96} height={96} decoding="async" className="size-20 shrink-0 sm:size-24" />
-        <h1 className="text-2xl font-semibold text-civic">{t.coTitle}</h1>
+        <h1 className="jk-h1">{t.coTitle}</h1>
       </div>
       <p className="text-muted">{t.csLead}</p>
       <p className="text-sm text-muted">{t.csScope}</p>

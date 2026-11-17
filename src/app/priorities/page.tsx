@@ -17,7 +17,7 @@ export default async function Priorities() {
   try { signedIn = !!(await currentUser()).user; } catch { /* signed out */ }
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold text-civic">{t.prxHeading}</h1>
+      <h1 className="jk-h1">{t.prxHeading}</h1>
       <p className="text-muted">{t.prxLead}</p>
       <PrioritiesPanel constituency={(await getConstituencyId()) ?? DEMO_CONSTITUENCY.id} signedIn={signedIn} loginHref={loginUrl("/priorities")} />
     </div>

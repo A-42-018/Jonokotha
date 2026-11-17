@@ -8,7 +8,7 @@ export default async function Loading() {
       <span className="sr-only">{t.stLoading}</span>
       <Skeleton className="h-8 w-24" />
       <Skeleton className="h-32 w-full" />
-      <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
+      <div className="jk-card p-4 sm:p-5">
         <Skeleton className="mb-4 h-6 w-40" />
         <div className="mb-4 flex flex-wrap gap-2">
           {Array.from({ length: 5 }, (_, i) => <Skeleton key={i} className="h-11 w-20 rounded-full" />)}

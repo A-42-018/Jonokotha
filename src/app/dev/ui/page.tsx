@@ -9,7 +9,7 @@ export default async function DevUi() {
   const t = dict[await getLang()];
   return (
     <div className="space-y-4">
-      <h1 className="text-3xl font-semibold text-civic">{t.dev.title}</h1>
+      <h1 className="jk-h1">{t.dev.title}</h1>
       <p className="text-muted">{t.dev.intro}</p>
       <I18nProvider dicts={{ bn: dict.bn, en: dict.en }}><UiGallery /></I18nProvider>
     </div>

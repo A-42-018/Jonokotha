@@ -61,7 +61,7 @@ function Item({ r }: { r: ReferredIssue }) {
         {r.is_sample && <Badge>{t.owSample}</Badge>}
         <span className="text-sm text-muted">{t.owColUpdated}: {fmtDate(r.updated_at, lang)}</span>
       </div>
-      <h2 className="text-lg font-semibold">{r.title}</h2>
+      <h2 className="jk-h2">{r.title}</h2>
       <div className="flex flex-wrap gap-2">
         <Button variant="secondary" aria-expanded={open} onClick={() => setOpen(!open)}>{open ? t.lsCloseDetail : t.lsOpenDetail}<span className="sr-only">: {r.title}</span></Button>
         <Link href={`/office/${encodeURIComponent(r.ref)}`} className="inline-flex min-h-11 items-center text-civic underline">{t.lsOpenCase}<span className="sr-only">: {r.title}</span></Link>

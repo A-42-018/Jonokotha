@@ -40,7 +40,7 @@ function List({ representativeId, name }: { representativeId?: string; name?: st
           <div className="space-y-4">
             <p role="note" className="rounded-xl border border-civic/30 bg-civic/5 p-3 text-sm">{t.r2MrNeutral}</p>
             <Select label={t.r2MrKind} value={kind} onChange={(e) => setKind(e.target.value)} options={[{ value: "", label: t.r2MrAll }, ...MP_KINDS.map((k) => ({ value: k, label: t[`r2MrKind_${k}`] }))]} />
-            {name && <h2 className="text-lg font-semibold">{fillNum(t.r2MrFor, { name }, lang)}</h2>}
+            {name && <h2 className="jk-h2">{fillNum(t.r2MrFor, { name }, lang)}</h2>}
             {d.records.length === 0 ? <EmptyState title={t.r2MrEmpty} body={t.r2MrEmptyBody} /> : (
               <ul className="space-y-3">{d.records.map((r) => (
                 <li key={r.ref}>
@@ -107,7 +107,7 @@ function NewRecord() {
   });
   return (
     <form noValidate onSubmit={(e) => { e.preventDefault(); if (!ok) { setBad(true); return; } m.mutate(); }} className="space-y-3 rounded-2xl border border-line bg-white p-4">
-      <h2 className="text-lg font-semibold">{t.r2MrNewRecord}</h2>
+      <h2 className="jk-h2">{t.r2MrNewRecord}</h2>
       {bad && <p role="alert" className="text-sm text-danger">{t.r2MrErr}</p>}
       <Input label={t.r2MrRep} value={f.rep} onChange={set("rep")} />
       <Select label={t.r2MrKind} value={f.kind} onChange={(e) => setF((s) => ({ ...s, kind: e.target.value }))} options={MP_KINDS.map((k) => ({ value: k, label: t[`r2MrKind_${k}`] }))} />

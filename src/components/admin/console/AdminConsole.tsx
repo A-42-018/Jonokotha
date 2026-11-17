@@ -75,7 +75,7 @@ function UsersInner() {
   return (
     <div className="grid gap-4 lg:grid-cols-2">
       <form onSubmit={submit} noValidate className="space-y-3 rounded-2xl border border-line bg-white p-4" aria-labelledby="ac-user-h">
-        <h2 id="ac-user-h" className="text-lg font-semibold">{t.acUserFormTitle}</h2>
+        <h2 id="ac-user-h" className="jk-h2">{t.acUserFormTitle}</h2>
         <Input label={t.acUserId} dir="ltr" value={id} error={err.id} onChange={(e) => setId(e.target.value)} />
         <Select label={t.acUserRole} value={role} onChange={(e) => setRole(e.target.value as Role)} options={ROLES.map((r) => ({ value: r, label: get(t, `acRole_${r}`) }))} />
         <Select label={t.acUserStatus} value={status} onChange={(e) => setStatus(e.target.value as "active" | "suspended")} options={[{ value: "active", label: t.acStatus_active }, { value: "suspended", label: t.acStatus_suspended }]} />
@@ -83,7 +83,7 @@ function UsersInner() {
         <Button type="submit" loading={save.isPending}>{t.acUserSave}</Button>
       </form>
       <form onSubmit={submitInvite} noValidate className="space-y-3 rounded-2xl border border-line bg-white p-4" aria-labelledby="ac-inv-h">
-        <h2 id="ac-inv-h" className="text-lg font-semibold">{t.acInviteTitle}</h2>
+        <h2 id="ac-inv-h" className="jk-h2">{t.acInviteTitle}</h2>
         <p className="text-sm text-muted">{t.acInviteLead}</p>
         <Input label={t.acInviteEmail} type="email" inputMode="email" value={email} error={ierr.email} onChange={(e) => setEmail(e.target.value)} />
         <Input label={t.acInviteArea} hint={t.acInviteAreaHint} dir="ltr" value={area} error={ierr.area} onChange={(e) => setArea(e.target.value)} />
@@ -131,7 +131,7 @@ function BoundaryInner() {
   }
   return (
     <form onSubmit={submit} noValidate className="space-y-3 rounded-2xl border border-line bg-white p-4" aria-labelledby="ac-bnd-h">
-      <h2 id="ac-bnd-h" className="text-lg font-semibold">{t.acAreasImport}</h2>
+      <h2 id="ac-bnd-h" className="jk-h2">{t.acAreasImport}</h2>
       <div className="grid gap-3 md:grid-cols-2">
         <Input label={t.acSrcName} value={src.name} error={bad("name")} onChange={set("name")} />
         <Input label={t.acSrcUrl} type="url" inputMode="url" dir="ltr" value={src.url} error={bad("url")} onChange={set("url")} />
@@ -200,7 +200,7 @@ function KnowledgeInner() {
   });
   return (
     <section aria-labelledby="ac-kn-h" className="space-y-3 rounded-2xl border border-line bg-white p-4">
-      <h2 id="ac-kn-h" className="text-lg font-semibold">{t.acKnowIndexT}</h2>
+      <h2 id="ac-kn-h" className="jk-h2">{t.acKnowIndexT}</h2>
       <p className="text-muted">{t.acKnowIndexB}</p>
       <Button onClick={() => run.mutate()} loading={run.isPending}>{t.acKnowRun}</Button>
       {run.data && <pre role="status" aria-label={t.acKnowResult} dir="ltr" className="overflow-x-auto rounded-xl bg-slate-50 p-3 text-xs">{JSON.stringify(run.data, null, 2)}</pre>}
