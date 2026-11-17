@@ -19,8 +19,8 @@ export function buildCsp({ supabaseUrl, nonce }: CspOptions = {}): string {
     "script-src": [script],
     // Tailwind and React style attributes need inline styles; MapLibre sets inline styles at runtime.
     "style-src": ["'self'", "'unsafe-inline'"],
-    // Report photos are previewed from blob: URLs; map tiles come from OpenStreetMap.
-    "img-src": ["'self'", "data:", "blob:", "https://tile.openstreetmap.org"],
+    // Report photos are previewed from blob: URLs; map tiles come from OpenStreetMap; MP photos come from this project's public storage bucket.
+    "img-src": ["'self'", "data:", "blob:", "https://tile.openstreetmap.org", ...(supa ? [supa] : [])],
     "font-src": ["'self'"],
     // Sign-in (Supabase) and map labels (glyph server). Add the speech or AI hosts here if they ever move to the browser.
     "connect-src": ["'self'", ...(supa ? [supa] : []), "https://demotiles.maplibre.org", "https://tile.openstreetmap.org"],

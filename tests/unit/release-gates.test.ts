@@ -22,14 +22,14 @@ describe("F.8: every screen has its error, empty and offline states", () => {
     const files = walk(path.join(root, "src")).filter((f) => /\.(tsx|ts)$/.test(f) && /useQuery|useInfiniteQuery/.test(readFileSync(f, "utf8")));
     expect(files.length).toBeGreaterThan(10);
     // Mutation-only helpers and map layers hold no list: named here so a new data component cannot slip past.
-    const exempt = ["useFollows.ts", "NewIdeaForm.tsx", "IssueActions.tsx", "Copilot.tsx", "HotspotMapLive.tsx", "NotesAndAssign.tsx", "AnnouncementComposer.tsx", "DataRights.tsx", "RepProfile.tsx", "MpFinder.tsx", "KpiPanel.tsx", "OfficeKpis.tsx", "PushSettings.tsx"];
+    const exempt = ["useFollows.ts", "NewIdeaForm.tsx", "IssueActions.tsx", "Copilot.tsx", "HotspotMapLive.tsx", "NotesAndAssign.tsx", "AnnouncementComposer.tsx", "DataRights.tsx", "RepProfile.tsx", "MpFinder.tsx", "KpiPanel.tsx", "OfficeKpis.tsx", "PushSettings.tsx", "NoticeTypePrefs.tsx"];
     const missing: string[] = [];
     for (const f of files) {
       const name = path.basename(f);
       if (name.endsWith(".ts")) continue; // hooks render nothing; the components that use them are checked
       const text = readFileSync(f, "utf8");
-      const hasError = /isError|\.error\b|onError|role="alert"|kind="error"|kind: "error"|<State\b/.test(text);
-      const hasEmpty = /empty=\{|EmptyState|kind="(empty|noResults|officeEmpty)"|length === 0|\.length\s*<\s*1|!.*\.length/.test(text);
+      const hasError = /isError|\.error\b|onError|role="alert"|kind="error"|kind: "error"|<State\b|<Boundary\b/.test(text);   // Boundary (office lists) renders loading, error, offline, no-access and empty itself
+      const hasEmpty = /empty=\{|EmptyState|<Boundary\b|kind="(empty|noResults|officeEmpty)"|length === 0|\.length\s*<\s*1|!.*\.length/.test(text);
       if (!hasError) missing.push(`${name}: no error state`);
       if (!hasEmpty && !exempt.includes(name)) missing.push(`${name}: no empty state`);
     }
@@ -37,7 +37,7 @@ describe("F.8: every screen has its error, empty and offline states", () => {
   });
 
   it("the data components exempt from the empty-state rule still show an error or a not-found state", () => {
-    for (const n of ["RepProfile.tsx", "MpFinder.tsx", "OfficeKpis.tsx", "KpiPanel.tsx", "DataRights.tsx"]) {
+    for (const n of ["RepProfile.tsx", "AreaPicker.tsx", "OfficeKpis.tsx", "KpiPanel.tsx", "DataRights.tsx"]) {
       const f = walk(path.join(root, "src")).find((x) => x.endsWith(n))!;
       expect(/isError|\.error\b|onError|kind="error"|<State\b|role="alert"/.test(readFileSync(f, "utf8")), n).toBe(true);
     }

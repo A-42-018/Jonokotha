@@ -66,7 +66,7 @@ describe("home blocks (F5.2)", () => {
   });
 
   it("representative card: verified rep with date and source, none published, and error", () => {
-    const rep = { id: "r1", full_name: "রহিম", office_title: "সংসদ সদস্য", source_url: "https://parliament.example/x", verified_at: "2026-10-01T00:00:00Z", is_demo: false };
+    const rep = { id: "r1", full_name: "রহিম", full_name_bn: null, office_title: "সংসদ সদস্য", source_url: "https://parliament.example/x", verified_at: "2026-10-01T00:00:00Z", is_demo: false };
     const { rerender } = render(<AreaRepCard t={t} lang="bn" rep={{ ok: true, data: rep }} areaName="এলাকা" />);
     expect(screen.getByText("রহিম")).toBeInTheDocument();
     expect(screen.getByText(/parliament\.example/)).toBeInTheDocument();

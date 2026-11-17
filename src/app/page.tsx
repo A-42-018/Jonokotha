@@ -5,9 +5,7 @@ import FollowedFeed from "@/components/citizen/FollowedFeedLazy";
 import ActionCards from "@/components/citizen/ActionCards";
 import HomeHero from "@/components/citizen/HomeHero";
 import { ActivePolls, AreaRepCard, ExploreLinks, HomeSnapshot, PopularIdeas } from "@/components/citizen/HomeBlocks";
-import { findConstituency } from "@/lib/constituency";
-import { getConstituencyId } from "@/lib/constituency-server";
-import { DEMO_CONSTITUENCY } from "@/lib/demo-data";
+import { getArea } from "@/lib/constituency-server";
 import { dict, getLang } from "@/lib/i18n";
 import { nowMs } from "@/lib/explore";
 import { loadAreaRep, loadPopularIdeas, loadSnapshot, type HomeRep, type HomeIdea, type Loaded, type Snapshot } from "@/lib/home-data";
@@ -18,7 +16,7 @@ import type { CaseRecord } from "@/lib/types";
 export default async function Home() {
   const lang = await getLang();
   const t = dict[lang];
-  const area = findConstituency(await getConstituencyId()) ?? DEMO_CONSTITUENCY;
+  const area = await getArea();
   const areaName = lang === "bn" ? area.nameBn : area.nameEn;
 
   let cases: CaseRecord[] = [];
@@ -43,7 +41,7 @@ export default async function Home() {
       <HomeHero t={t} />
       <OnboardingCard />
       <ActionCards t={t} />
-      <HomeSnapshot t={t} lang={lang} snap={snap} areaName={areaName} sample={"sample" in area && !!area.sample} />
+      <HomeSnapshot t={t} lang={lang} snap={snap} areaName={areaName} sample={area.sample} />
       <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <div className="space-y-8">
           {signedIn ? <FollowedFeed signedIn /> : <AreaNews t={t} lang={lang} cases={cases} failed={failed} now={nowMs()} />}
