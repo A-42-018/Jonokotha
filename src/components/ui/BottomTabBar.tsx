@@ -33,7 +33,7 @@ export default function BottomTabBar() {
 
   const reportActive = isActivePath(path, "/report");
   return (
-    <nav aria-label={t.navTabsAria} className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white pb-[env(safe-area-inset-bottom)] lg:hidden">
+    <nav aria-label={t.navTabsAria} className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white pb-[env(safe-area-inset-bottom)] xl:hidden">
       <ul className="mx-auto grid max-w-lg grid-cols-5">
         {tab("/", t.navHome, <HomeIcon />)}
         {tab("/area", t.navArea, <AreaIcon />)}

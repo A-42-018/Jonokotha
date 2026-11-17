@@ -11,9 +11,9 @@ import { useT } from "./useT";
 import { primaryNav } from "@/lib/nav-items";
 
 /**
- * The one header, a deep green band (redesign §2b) with a marigold wordmark and report button. Phones: logo, bell, language,
- * account on one row, area picker below (primary navigation is the bottom tab bar). lg and up: logo, primary links, picker,
- * bell, report CTA, language, account.
+ * The one header, a deep green band (redesign §2b) with a marigold wordmark and report button. Phones and tablets (under 1280px): logo, bell, language,
+ * account on one row, area picker below (primary navigation is the bottom tab bar). xl and up: logo, primary links, picker,
+ * bell, report CTA, language, account. The desktop row needs about 1210px, so it must not start at lg (1024px).
  */
 export default function TopNav({ isStaff, userId = null, picker, account }: { isStaff: boolean; userId?: string | null; picker: ReactNode; account: ReactNode }) {
   const t = useT();
@@ -23,14 +23,16 @@ export default function TopNav({ isStaff, userId = null, picker, account }: { is
     ...(isStaff ? [{ href: "/office", label: t.officeCta }] : []),
   ];
   return (
-    <header className="bg-brand-deep text-white">
-      <div className="mx-auto flex w-full max-w-[120rem] flex-wrap items-center gap-x-2 gap-y-1 px-4 py-2 sm:px-6 lg:px-8 lg:flex-nowrap lg:gap-x-3">
-        <Link href="/" className={cx("-ms-1 flex min-h-11 shrink-0 items-center gap-2 rounded-lg px-1 font-heading text-2xl font-semibold text-amber", ringOnDark)}>
+    <header className="bg-brand-deep text-white shadow-[0_4px_14px_rgb(11_61_46/0.22)] xl:sticky xl:top-0 xl:z-40">
+      <div className="mx-auto flex w-full max-w-[90rem] flex-wrap items-center gap-x-2 gap-y-1 px-4 py-2 sm:px-6 lg:px-8 xl:flex-nowrap xl:gap-x-2 2xl:gap-x-3">
+        <Link href="/" className={cx("-ms-1 flex min-h-11 shrink-0 items-center gap-1.5 rounded-lg px-0.5 font-heading font-bold text-amber sm:gap-2.5 sm:px-1", ringOnDark)}>
+          {/* Logo lockup: street scene art (drawn for the deep green band, no plate) and the Bangla wordmark in every language. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/illustrations/logo-mark.svg" alt="" className="size-8 rounded-full bg-white p-0.5" />
-          {t.appName}
+          <img src="/brand/jonokotha-scene.svg" alt="" width={980} height={430} className="h-7 w-auto sm:h-11 xl:h-7 2xl:h-11" />
+          <span aria-hidden="true" lang="bn" className="text-xl leading-none sm:text-3xl xl:text-xl 2xl:text-3xl">জনকথা</span>
+          <span className="sr-only">{t.appName}</span>
         </Link>
-        <nav aria-label={t.navAria} className="hidden lg:block">
+        <nav aria-label={t.navAria} className="hidden xl:block">
           <ul className="flex items-center gap-0.5">
             {items.map((i) => {
               const active = isActivePath(path, i.href);
@@ -39,7 +41,7 @@ export default function TopNav({ isStaff, userId = null, picker, account }: { is
                   <Link
                     href={i.href}
                     aria-current={active ? "page" : undefined}
-                    className={cx("inline-flex min-h-11 items-center gap-2 border-b-[3px] px-2.5 text-[0.9375rem] font-medium", active ? "border-amber font-semibold text-white" : "border-transparent text-white/90 hover:bg-white/10 hover:text-white", ringOnDark)}
+                    className={cx("inline-flex min-h-11 items-center gap-2 whitespace-nowrap border-b-[3px] px-1.5 2xl:px-2.5 text-[0.9375rem] font-medium", active ? "border-amber font-semibold text-white" : "border-transparent text-white/90 hover:bg-white/10 hover:text-white", ringOnDark)}
                   >
                     {i.label}
                   </Link>
@@ -49,14 +51,15 @@ export default function TopNav({ isStaff, userId = null, picker, account }: { is
             <li><MoreMenu path={path} /></li>
           </ul>
         </nav>
-        <div className="order-last flex w-full lg:order-none lg:ms-auto lg:w-auto">{picker}</div>
-        <div className="ms-auto flex shrink-0 items-center gap-1 text-sm lg:ms-0 lg:gap-2">
+        <div className="order-last flex w-full xl:order-none xl:ms-auto xl:w-auto xl:min-w-0 xl:shrink">{picker}</div>
+        <div className="ms-auto flex shrink-0 items-center gap-1 text-sm xl:ms-0 xl:gap-2">
           {/* Wrappers hide: `hidden` loses to the inline-flex inside Badge and buttonClass. */}
-          <div className="hidden 2xl:block"><Badge tone="warning">{t.demoBadge}</Badge></div>
+          <div className="hidden 2xl:block"><Badge tone="warningOnDark">{t.demoBadge}</Badge></div>
           <NotificationBell userId={userId} />
-          <div className="hidden shrink-0 lg:block"><Link href="/report" className={cx("inline-flex min-h-11 items-center rounded-full bg-amber px-5 font-semibold text-ink hover:bg-[#f7b55a]", ringOnDark)}>{t.reportCta}</Link></div>
+          {/* Outline, not filled: the one filled red button on a page is the main report action (hero, bottom tab bar); two filled colours for one action split attention. */}
+          <div className="hidden shrink-0 xl:block"><Link href="/report" className={cx("inline-flex min-h-11 items-center whitespace-nowrap rounded-full border-2 border-amber px-3.5 font-semibold 2xl:px-5 text-amber hover:bg-amber hover:text-ink", ringOnDark)}>{t.reportCta}</Link></div>
           {/* Route handler (sets the cookie, redirects back), so a plain anchor is intended. */}
-          <a href="/lang" aria-label={t.navLangSwitch} className={cx("inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-white/50 px-3 text-sm font-medium text-white hover:bg-white/10", ringOnDark)}>
+          <a href="/lang" aria-label={t.navLangSwitch} className={cx("inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-white/50 px-2.5 text-sm font-medium text-white 2xl:px-3 hover:bg-white/10", ringOnDark)}>
             {t.switchLang}
           </a>
           {account}

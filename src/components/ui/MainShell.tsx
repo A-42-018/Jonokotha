@@ -5,7 +5,7 @@ import { cx } from "./cx";
 import { tabBarHidden } from "./nav";
 
 /**
- * Page container. Browsing and workspace pages use the full desktop width (to 120rem, matching the header); forms and reading pages keep a narrow column.
+ * Page container. Browsing and workspace pages use the full desktop width (capped at 90rem, matching the header, so a 1920px screen keeps readable line lengths and one left edge); forms and reading pages keep a narrow column.
  * On phones it reserves room for the fixed bottom tab bar (64px bar + raised button + safe area).
  */
 export default function MainShell({ children, footer }: { children: ReactNode; footer?: ReactNode }) {
@@ -17,8 +17,8 @@ export default function MainShell({ children, footer }: { children: ReactNode; f
       id="main"
       className={cx(
         "mx-auto w-full px-4 pt-6 sm:px-6",
-        wide ? "max-w-[120rem] lg:px-8" : "max-w-3xl",
-        tabBarHidden(path) ? "pb-6" : "pb-[calc(6rem+env(safe-area-inset-bottom))] lg:pb-6",
+        wide ? "max-w-[90rem] lg:px-8" : "max-w-3xl",
+        tabBarHidden(path) ? "pb-6" : "pb-[calc(6rem+env(safe-area-inset-bottom))] xl:pb-6",
       )}
     >
       {children}
