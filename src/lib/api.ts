@@ -38,7 +38,10 @@ export interface Ctx {
   body: unknown;
 }
 export type DataStatus = "live" | "sample" | "demo" | "planned";
-export interface Result { status?: number; data?: unknown; dataStatus?: DataStatus; page?: { next_cursor: string | null; limit: number }; headers?: Record<string, string> }
+export interface Result {
+  /** Non-JSON answer (CSV, HTML, audio). Used only by the few routes that return a file; `data` is ignored when this is set. */
+  raw?: { body: BodyInit; contentType: string };
+  status?: number; data?: unknown; dataStatus?: DataStatus; page?: { next_cursor: string | null; limit: number }; headers?: Record<string, string> }
 export interface Opts {
   /** Stable route name, e.g. "POST /api/v1/issues"; used for limits, idempotency and logs. */
   name: string;
@@ -170,6 +173,7 @@ export async function run(req: Request, params: Record<string, string>, opts: Op
     }
     const out = await handler({ req, url, rid, ip, sb, user, actor, params, body });
     status = out.status ?? 200;
+    if (out.raw) return new NextResponse(out.raw.body, { status, headers: { "content-type": out.raw.contentType, "x-request-id": rid, "cache-control": "private, no-store", ...out.headers } });
     // Capability label (B5.13): every response says whether its data is live, sample, demo or planned so the UI can label it.
     const data_status = out.dataStatus ?? (flag && flag.data_status !== "live" ? flag.data_status : inferDataStatus(out.data));
     const payload = { data: out.data ?? null, ...(out.page ? { page: out.page } : {}), data_status };

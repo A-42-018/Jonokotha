@@ -1,0 +1,95 @@
+{
+  "measured_at": "2026-11-17T04:34:26.077Z",
+  "runs_per_point": 5,
+  "server": "PostgreSQL 17.11 on aarch64-unknown-linux-gnu, compiled by gcc (GCC) 15.2.0, 64-bit",
+  "age_available_in_this_image": false,
+  "results": [
+    {
+      "edges_total": 13750,
+      "one_chain_depth_8": {
+        "median_ms": 0.43,
+        "min_ms": 0.3,
+        "max_ms": 0.62,
+        "result": {
+          "n": 8
+        }
+      },
+      "five_thousand_roots_depth_8": {
+        "median_ms": 23.02,
+        "min_ms": 22.88,
+        "max_ms": 24.24,
+        "result": {
+          "roots": 5000,
+          "paths": 13743
+        }
+      },
+      "five_thousand_roots_depth_8_nested_loop_index_plan": {
+        "median_ms": 24.12,
+        "min_ms": 23.79,
+        "max_ms": 25.28,
+        "result": {
+          "roots": 5000,
+          "paths": 13743
+        }
+      }
+    },
+    {
+      "edges_total": 137500,
+      "one_chain_depth_8": {
+        "median_ms": 0.45,
+        "min_ms": 0.42,
+        "max_ms": 0.89,
+        "result": {
+          "n": 8
+        }
+      },
+      "five_thousand_roots_depth_8": {
+        "median_ms": 143.97,
+        "min_ms": 141.9,
+        "max_ms": 147.87,
+        "result": {
+          "roots": 5000,
+          "paths": 40000
+        }
+      },
+      "five_thousand_roots_depth_8_nested_loop_index_plan": {
+        "median_ms": 86.61,
+        "min_ms": 80.46,
+        "max_ms": 89.21,
+        "result": {
+          "roots": 5000,
+          "paths": 40000
+        }
+      }
+    },
+    {
+      "edges_total": 1375000,
+      "one_chain_depth_8": {
+        "median_ms": 0.52,
+        "min_ms": 0.52,
+        "max_ms": 0.61,
+        "result": {
+          "n": 8
+        }
+      },
+      "five_thousand_roots_depth_8": {
+        "median_ms": 3481.12,
+        "min_ms": 3424.99,
+        "max_ms": 3542.16,
+        "result": {
+          "roots": 5000,
+          "paths": 40000
+        }
+      },
+      "five_thousand_roots_depth_8_nested_loop_index_plan": {
+        "median_ms": 142.46,
+        "min_ms": 141.47,
+        "max_ms": 143.49,
+        "result": {
+          "roots": 5000,
+          "paths": 40000
+        }
+      }
+    }
+  ]
+}

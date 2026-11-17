@@ -1,7 +1,8 @@
 import { createPrivateKey, sign } from "node:crypto";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { serviceClient } from "../supabase/service";
-import { renderEmail } from "./templates";
+import { sendChannelText } from "../channels/send";
+import { renderEmail, isEssential } from "./templates";
 import { unsubscribeUrl } from "./unsubscribe";
 
 /**
@@ -39,7 +40,7 @@ export async function sendEmail(to: string, subject: string, text: string): Prom
   } catch (e) { return { ok: false, error: (e as Error)?.name ?? "error" }; }
 }
 
-interface Claimed { id: string; channel: "push" | "email"; attempts: number; user_id: string; ref: string | null; type?: string; title: string; body: string | null; data: { en?: { title: string; body: string } } }
+interface Claimed { id: string; channel: "push" | "email" | "sms" | "whatsapp"; attempts: number; user_id: string; ref: string | null; type?: string; title: string; body: string | null; data: { en?: { title: string; body: string } } }
 
 async function deliverOne(svc: SupabaseClient, d: Claimed): Promise<"sent" | "failed" | "skipped"> {
   const finish = async (ok: boolean, error?: string, skip = false) => { await svc.rpc("finish_delivery", { p_id: d.id, p_ok: ok, p_error: error ?? null, p_skip: skip }); };
@@ -58,6 +59,17 @@ async function deliverOne(svc: SupabaseClient, d: Claimed): Promise<"sent" | "fa
     if (any) { await finish(true); return "sent"; }
     if (!lastErr) { await finish(false, "no_device", true); return "skipped"; }
     await finish(false, lastErr); return "failed";
+  }
+  if (d.channel === "sms" || d.channel === "whatsapp") {
+    // B7.4: own-case updates and area alerts by SMS or WhatsApp. Generic title and reference only; destination from the person's confirmed link.
+    const { data: to } = await svc.rpc("channel_destination", { p_user: d.user_id, p_channel: d.channel });
+    if (!to) { await finish(false, "no_link", true); return "skipped"; }
+    const en = d.data?.en;
+    const text = [d.title, d.body, en ? `/ ${en.title}` : ""].filter(Boolean).join(" ");
+    const r = await sendChannelText(svc, { channel: d.channel, linkId: null, to: to as string, text, issueRef: d.ref, essential: isEssential(d.type ?? "") });
+    if (r === "sent") { await finish(true); return "sent"; }
+    if (r === "failed") { await finish(false, "provider_error"); return "failed"; }
+    await finish(false, r === "skipped_budget" ? "budget_reached" : "not_configured", true); return "skipped";
   }
   if (!emailConfigured()) { await finish(false, "not_configured", true); return "skipped"; }
   const { data: u } = await svc.auth.admin.getUserById(d.user_id);

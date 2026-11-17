@@ -52,7 +52,7 @@ export async function setAccount(c: Ctx): Promise<Result> {
 }
 
 // Moderation -----------------------------------------------------------------------------------------------------------------------
-const Target = { type: z.enum(["issue", "idea", "question", "media", "idea_comment"]), ref: z.string().trim().min(3).max(80).regex(/^[A-Za-z0-9-]+$/, "invalid") };
+const Target = { type: z.enum(["issue", "idea", "question", "media", "idea_comment", "idea_argument", "project_checkin"]), ref: z.string().trim().min(3).max(80).regex(/^[A-Za-z0-9-]+$/, "invalid") };
 export async function reportContent(c: Ctx): Promise<Result> {
   const b = parse(z.strictObject({ ...Target, reason: z.enum(["abuse", "personal_data", "spam", "false_information", "unsafe", "other"]), details: z.string().trim().max(500).optional() }), c.body);
   return { status: 201, data: await rpc(c.sb, "report_content", { p_type: b.type, p_ref: b.ref, p_reason: b.reason, p_details: b.details ? redactPii(b.details).text : null }) };
