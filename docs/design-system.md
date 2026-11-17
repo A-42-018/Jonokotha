@@ -62,3 +62,16 @@ Review every primitive and state at `/dev/ui` (bn and en side by side). The page
 - Home: `HomeHero` (blue banner over `public/illustrations/hero-citizens.svg`), `StatTiles` (issues, resolved, in progress, counted from the area's real cases), `ActionCards` (report red, idea green, ask your MP purple; text carries the meaning, tint is decoration). Strings: `strings/refresh.ts`.
 - Icons: `ui/TileIcons.tsx`, two-tone 48px vector icons, decorative only, always beside a printed label.
 - Office and admin: `ui/PanelSidebar` (navy menu from lg, scroll strip on phones) via `app/office/layout.tsx` and `app/admin/layout.tsx`; `AdminShell` no longer draws its own pill menu. Charts: `charts/Donut`, `charts/ColumnChart` (every value printed, SVG donut has a text summary), data from `lib/office-charts.ts`; `OfficeCharts` shows category, status and most reported areas from real counts. No invented numbers; tiles without backend data still say so.
+
+## Homepage redesign (Bangladesh green, Nov 2026)
+
+Plan and prompts: `docs/HOMEPAGE_REDESIGN_PLAN.md`. Branch `ui-home-redesign`.
+
+- **Tokens** (`globals.css`): `civic` is now flag green `#006a4e`; new `brand-deep` (header band, footer), `brick` / `brick-dark` (main report button on cream; never on the deep band, 2.4:1 there), `ink` (fixed dark text for light pastel surfaces in both themes), `ink-2` (body copy, 8.7:1 on cream), `cream` (page), `st-progress`, `st-done` (status accents). Each has a dark-theme value; pairs are checked in `tests/unit/contrast.test.ts`.
+- **Text colour rule:** use `text-foreground` / `text-ink-2` on the page and on `.jk-card` (they switch in the dark theme). Use `text-ink` only on surfaces that stay light in both themes (category tiles, the how-it-works panel, pastel chips).
+- **Helpers:** `.jk-card` (white card with soft shadow instead of a grey border; dark surface in the dark theme), `.jk-body` (17px, line height 1.7 for Bangla body text).
+- **Header:** deep green band; links, picker, bell and account use white text with `ringOnDark` (white focus ring, `ui/cx.ts`). Dropdown panels inside the header set `text-foreground` so they do not inherit white text.
+- **Footer:** a rounded deep green panel inside `<main>` (the shell test keeps the footer in main), with the red `tel:999` strip on top.
+- **Home sections** (`components/citizen/`, all server components): `HomeHero` (`<picture>`: neighbours scene on phones, river panorama from lg), `ActionCards` (idea, ask, track; track is a GET form to `/issue/find`), `HomeSnapshot` (three stat cards; bars only when every count is shown), `CategoryGrid` (12 tiles to `/report?category=…`), `HowItWorks`, then news, ideas, representative and the `ExploreLinks` chips (kept: on phones it is the only way to projects, ask and find-MP).
+- **Art:** `public/illustrations/home/` (AVIF/WebP, not SVG; the Recraft vector traces were 0.1–1.6 MB).
+- **Routes:** `/report?category=<id>` preselects the type (kept through sign-in via `loginUrl`; a saved draft wins). `/issue/find?ref=` normalises the typed number (`lib/issue-ref.ts`, Bangla digits allowed) and redirects, or returns to `/?track=invalid#track`.

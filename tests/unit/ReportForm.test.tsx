@@ -39,6 +39,18 @@ describe("ReportForm", () => {
     expect(await screen.findByRole("alert")).toBeInTheDocument();
   });
 
+  it("preselects the category chosen on a home tile, and a saved draft wins over it", async () => {
+    localStorage.removeItem(DRAFT_KEY);
+    const { unmount } = render(<ToastProvider><ReportForm t={t} lang="bn" constituencyId="sample" initialCategory="water" /></ToastProvider>);
+    await waitFor(() => expect(screen.getByRole("radio", { name: new RegExp(t.cats.water) })).toBeChecked());
+    unmount();
+    localStorage.setItem(DRAFT_KEY, JSON.stringify({ quick: "", values: { category: "drainage", title: "", description: "", area: "" }, ai: [], edited: [], step: 0 }));
+    render(<ToastProvider><ReportForm t={t} lang="bn" constituencyId="sample" initialCategory="water" /></ToastProvider>);
+    await waitFor(() => expect(screen.getByRole("radio", { name: new RegExp(t.cats.drainage) })).toBeChecked());
+    expect(screen.getByRole("radio", { name: new RegExp(t.cats.water) })).not.toBeChecked();
+    localStorage.removeItem(DRAFT_KEY);
+  });
+
   it("recovers an interrupted draft and offers to discard it", async () => {
     localStorage.setItem(DRAFT_KEY, JSON.stringify({ quick: "", values: { category: "drainage", title: "নর্দমা বন্ধ", description: "", area: "" }, ai: [], edited: [], step: 1 }));
     setup();

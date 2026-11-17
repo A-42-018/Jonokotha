@@ -22,7 +22,7 @@ export default function AccountMenu({ email, role, labels }: { email: string | n
 
   if (!email) {
     return (
-      <Link href="/login" className="inline-flex min-h-11 items-center rounded-lg border-2 border-civic bg-white px-3 font-medium text-civic hover:bg-civic/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-civic">
+      <Link href="/login" className="inline-flex min-h-11 items-center rounded-lg border-2 border-white bg-white px-3 font-medium text-civic hover:bg-white/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
         {labels.signIn}
       </Link>
     );
@@ -47,13 +47,13 @@ export default function AccountMenu({ email, role, labels }: { email: string | n
         aria-expanded={open}
         aria-label={`${labels.account}: ${email}`}
         onClick={() => setOpen((v) => !v)}
-        className="inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-civic"
+        className="inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-full border border-white/50 bg-white/10 px-2 text-white hover:bg-white/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:pe-3"
       >
-        <span aria-hidden className="flex h-7 w-7 items-center justify-center rounded-full bg-civic text-sm font-semibold uppercase text-white">{email[0]}</span>
+        <span aria-hidden className="flex h-7 w-7 items-center justify-center rounded-full bg-amber text-sm font-semibold uppercase text-ink">{email[0]}</span>
         <span className="hidden max-w-40 truncate sm:inline">{email}</span>
       </button>
       {open && (
-        <div role="menu" className="absolute end-0 z-20 mt-2 w-64 rounded-xl border border-slate-200 bg-white p-3 shadow-lg">
+        <div role="menu" className="absolute end-0 z-20 mt-2 w-64 rounded-xl border border-slate-200 bg-white p-3 text-foreground shadow-lg">
           <p className="truncate text-sm text-slate-600">{email}</p>
           <p className="mt-1 inline-block rounded-full bg-teal/15 px-2 py-0.5 text-xs text-teal-strong">{role === "admin" ? labels.admin : role === "staff" ? labels.staff : labels.citizen}</p>
           <button

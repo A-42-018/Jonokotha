@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { cx, focusRing } from "./cx";
+import { cx, ringOnDark } from "./cx";
 import { BellIcon } from "./NavIcons";
 import { useLang } from "./useLang";
 import { useT } from "./useT";
@@ -41,7 +41,7 @@ export default function NotificationBell({ userId = null }: { userId?: string | 
   const unread = count ?? 0;
   const label = unread > 0 ? `${t.navBell}, ${fillNum(t.lvUnread, { n: unread }, lang)}` : t.navBell;
   return (
-    <Link href="/notifications" aria-label={label} className={cx("relative inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg text-civic hover:bg-slate-100", focusRing)}>
+    <Link href="/notifications" aria-label={label} className={cx("relative inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg text-white hover:bg-white/10", ringOnDark)}>
       <BellIcon />
       {unread > 0 && <span aria-hidden data-unread className="absolute end-0.5 top-0.5 min-w-5 rounded-full bg-danger px-1 text-center text-xs font-semibold leading-5 text-white">{unread > 99 ? `${fmtNum(99, lang)}+` : fmtNum(unread, lang)}</span>}
     </Link>

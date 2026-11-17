@@ -61,11 +61,11 @@ function readSaved(): Saved | null {
   return null;
 }
 
-export default function ReportForm(props: { t: Dict; lang: Lang; constituencyId: string }) {
+export default function ReportForm(props: { t: Dict; lang: Lang; constituencyId: string; initialCategory?: Category }) {
   return <QueryProvider><ReportFormInner {...props} /></QueryProvider>;
 }
 
-function ReportFormInner({ t, lang, constituencyId }: { t: Dict; lang: Lang; constituencyId: string }) {
+function ReportFormInner({ t, lang, constituencyId, initialCategory }: { t: Dict; lang: Lang; constituencyId: string; initialCategory?: Category }) {
   const toast = useToast();
   const schema = useMemo(() => reportSchema(t), [t]);
   const { register, control, setValue, reset, trigger, handleSubmit, getValues, formState: { errors } } = useForm<ReportValues, unknown, ReportData>({
@@ -126,12 +126,16 @@ function ReportFormInner({ t, lang, constituencyId }: { t: Dict; lang: Lang; con
           setWho(isAffected(d.who) ? d.who : "");
           setStep(Math.min(Math.max(d.step ?? 0, 0), LAST));
           setRestored(true);
+          loaded.current = true;
+          return;
         }
       }
+      // No draft to recover: a type chosen on the home page tiles is preselected (a saved draft always wins).
+      if (initialCategory) setValue("category", initialCategory, { shouldDirty: true });
       loaded.current = true;
     }, 0);
     return () => clearTimeout(id);
-  }, [reset]);
+  }, [reset, setValue, initialCategory]);
 
   useEffect(() => {
     if (!loaded.current || sentRef || queued) return;
