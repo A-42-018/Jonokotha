@@ -10,7 +10,7 @@ export default async function Consent() {
   const t = dict[lang];
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold text-civic">{t.r2AsConsentTitle}</h1>
+      <h1 className="jk-h1">{t.r2AsConsentTitle}</h1>
       {!VOLUNTEER_RULES.reviewed && <p role="note" className="rounded-xl border border-amber/60 bg-amber/10 p-3 text-sm">{t.r2AsDraft}</p>}
       <p className="text-sm text-muted">{VOLUNTEER_RULES.consent_version}</p>
       <p className="whitespace-pre-line text-lg">{VOLUNTEER_RULES.consent[lang]}</p>

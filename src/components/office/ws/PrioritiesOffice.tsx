@@ -61,7 +61,7 @@ function NewRound({ constituency }: { constituency: string }) {
   }
   return (
     <form noValidate onSubmit={(e) => { e.preventDefault(); submit(); }} className="space-y-3 rounded-2xl border border-line bg-white p-4">
-      <h2 className="text-lg font-semibold">{t.prxoNew}</h2>
+      <h2 className="jk-h2">{t.prxoNew}</h2>
       <Input label={t.prxoName} maxLength={150} value={f.title} error={err.title} onChange={(e) => setF((s) => ({ ...s, title: e.target.value }))} />
       <Textarea label={t.prxoDesc} optional rows={2} maxLength={600} value={f.desc} onChange={(e) => setF((s) => ({ ...s, desc: e.target.value }))} />
       <Textarea label={t.prxoItems} rows={5} value={f.items} error={err.items} onChange={(e) => setF((s) => ({ ...s, items: e.target.value }))} />

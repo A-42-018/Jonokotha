@@ -17,7 +17,7 @@ export default async function Volunteer({ searchParams }: PageProps<"/volunteer"
   try { signedIn = !!(await currentUser()).user; } catch { /* signed out */ }
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold text-civic">{t.r2AsTitle}</h1>
+      <h1 className="jk-h1">{t.r2AsTitle}</h1>
       <p className="text-muted">{t.r2AsLead}</p>
       {sp.idle === "1" && <p role="status" className="rounded-xl border border-amber/60 bg-amber/10 p-3">{t.r2AsKioskIdle}</p>}
       <VolunteerHub constituency={(await getConstituencyId()) ?? DEMO_CONSTITUENCY.id} signedIn={signedIn} />

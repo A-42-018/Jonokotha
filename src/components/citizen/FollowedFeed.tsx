@@ -38,7 +38,7 @@ function FeedInner({ signedIn }: { signedIn: boolean }) {
   if (!signedIn) {
     return (
       <section aria-labelledby="home-feed" className="space-y-3">
-        <h2 id="home-feed" className="text-xl font-semibold text-foreground">{t.fdTitle}</h2>
+        <h2 id="home-feed" className="jk-h2">{t.fdTitle}</h2>
         <Card tone="info"><p className="mb-3">{t.fdNeedsSignIn}</p><Link href={`/login?need=1&next=${encodeURIComponent("/")}`} className={buttonClass()}>{t.signIn}</Link></Card>
       </section>
     );
@@ -46,7 +46,7 @@ function FeedInner({ signedIn }: { signedIn: boolean }) {
   const rows = feed.data ?? [];
   return (
     <section aria-labelledby="home-feed" className="space-y-3">
-      <h2 id="home-feed" className="text-xl font-semibold text-foreground">{t.fdTitle}</h2>
+      <h2 id="home-feed" className="jk-h2">{t.fdTitle}</h2>
       <fieldset className="space-y-2">
         <legend className="text-sm font-medium">{t.fdPickCats}</legend>
         <div className="flex flex-wrap gap-2">
@@ -80,7 +80,7 @@ function FeedInner({ signedIn }: { signedIn: boolean }) {
             <li key={i.ref}>
               <Card as="article" padded={false} className="flex items-center gap-3 p-3">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img loading="lazy" decoding="async" src={`/illustrations/cat-${i.category}.svg`} alt="" className="size-12 shrink-0" />
+                <img loading="lazy" decoding="async" src={`/illustrations/home/cat-${i.category}.webp`} alt="" className="size-12 shrink-0" />
                 <div className="min-w-0 flex-1 space-y-1">
                   <h3 className="font-medium"><Link href={`/issue/${i.ref}`} className="underline-offset-2 hover:underline">{i.title}</Link></h3>
                   <p className="text-sm text-muted">{t.cats[i.category]}{i.area && ` · ${i.area}`} · {fmtAgo(i.createdAt, now, lang)}</p>

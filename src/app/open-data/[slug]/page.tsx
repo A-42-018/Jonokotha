@@ -12,7 +12,7 @@ export default async function OpenDataOne({ params }: PageProps<"/open-data/[slu
   const t = dict[await getLang()];
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold text-civic">{t.r2OdTitle}</h1>
+      <h1 className="jk-h1">{t.r2OdTitle}</h1>
       <OpenDataSet slug={slug} constituency={(await getConstituencyId()) ?? undefined} />
     </div>
   );

@@ -24,7 +24,7 @@ import { ToastView } from "./Toast";
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="space-y-3 border-t border-slate-200 pt-5">
-      <h3 className="text-lg font-semibold text-civic">{title}</h3>
+      <h3 className="jk-h3">{title}</h3>
       {children}
     </section>
   );
@@ -50,7 +50,7 @@ function Panel({ lang }: { lang: Lang }) {
 
   return (
     <div lang={lang} className="min-w-0 space-y-6 rounded-2xl border border-slate-200 bg-background p-4">
-      <h2 className="text-2xl font-semibold text-civic">{lang === "bn" ? "বাংলা" : "English"}</h2>
+      <h2 className="jk-h1">{lang === "bn" ? "বাংলা" : "English"}</h2>
 
       <Section title={d.sButtons}>
         <div className={row}>

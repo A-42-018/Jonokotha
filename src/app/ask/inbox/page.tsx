@@ -21,7 +21,7 @@ export default async function Inbox() {
   }
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold text-civic">{t.askInboxTitle}</h1>
+      <h1 className="jk-h1">{t.askInboxTitle}</h1>
       <p className="text-muted">{t.askInboxLead}</p>
       <AskInbox />
       <Link href="/ask" className={buttonClass({ variant: "secondary" })}>{t.askBackAsk}</Link>

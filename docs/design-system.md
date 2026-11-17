@@ -75,3 +75,14 @@ Plan and prompts: `docs/HOMEPAGE_REDESIGN_PLAN.md`. Branch `ui-home-redesign`.
 - **Home sections** (`components/citizen/`, all server components): `HomeHero` (`<picture>`: neighbours scene on phones, river panorama from lg), `ActionCards` (idea, ask, track; track is a GET form to `/issue/find`), `HomeSnapshot` (three stat cards; bars only when every count is shown), `CategoryGrid` (12 tiles to `/report?category=…`), `HowItWorks`, then news, ideas, representative and the `ExploreLinks` chips (kept: on phones it is the only way to projects, ask and find-MP).
 - **Art:** `public/illustrations/home/` (AVIF/WebP, not SVG; the Recraft vector traces were 0.1–1.6 MB).
 - **Routes:** `/report?category=<id>` preselects the type (kept through sign-in via `loginUrl`; a saved draft wins). `/issue/find?ref=` normalises the typed number (`lib/issue-ref.ts`, Bangla digits allowed) and redirects, or returns to `/?track=invalid#track`.
+
+## Homepage theme on every page (Nov 2026)
+
+The home theme now applies site-wide through the shared pieces, not per page:
+
+- **Headings:** `.jk-h1` / `.jk-h2` / `.jk-h3` (Anek Bangla, page ink colour, 28/36px, 22/24px, 19/20px). Every page `<h1>`, section `<h2>`, `Card` title and `State` heading uses them; green is kept for links and buttons only.
+- **Body text:** `main` is 17px with line height 1.65 (anything with its own `text-*` size keeps it).
+- **Surfaces:** `Card` (default tone), `Table`, `CaseTable`, `StatTiles` and the office case page use `.jk-card` (soft green-tinted shadow, no grey border). Tinted tones (info, warning, danger) keep their border.
+- **Controls:** inputs are `rounded-xl`; primary, secondary, success and danger buttons have hover states (`civic-dark` token `#005a42`) and semibold labels.
+- **Office and admin menu:** `PanelSidebar` is the deep green band (`brand-deep`), not navy.
+- **Art:** category pictures everywhere (report picker, idea cards, explore, followed feed, report form) are the home set `public/illustrations/home/cat-*.webp`. The older spot, state, empty, onboarding and portrait SVGs were re-coloured from blue to the brand greens and the cream page colour (hue rotation, drawings unchanged); new Recraft art for those would be a later pass.

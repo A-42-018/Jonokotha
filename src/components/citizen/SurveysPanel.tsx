@@ -28,7 +28,7 @@ function Inner({ signedIn, loginHref, constituency }: { signedIn: boolean; login
   const q = useQuery({ queryKey: ["surveys", constituency], queryFn: () => fetchSurveys(constituency), retry: false });
   return (
     <section aria-labelledby="sv-h" className="space-y-3">
-      <h2 id="sv-h" className="text-xl font-semibold">{t.svSurveysTitle}</h2>
+      <h2 id="sv-h" className="jk-h2">{t.svSurveysTitle}</h2>
       <p className="text-muted">{t.svSurveysLead}</p>
       <AsyncBlock pending={q.isPending} error={q.error} onRetry={() => void q.refetch()}>
         {q.data?.kind === "planned" ? <PlannedPanel as="h3" title={t.r1PlannedTitle} body={t.r1PlannedBody} /> : q.data && q.data.data.length === 0 ? <EmptyState title={t.svEmpty} body={t.svEmptyBody} /> : q.data && (

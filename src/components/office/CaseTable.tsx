@@ -68,7 +68,7 @@ export default function CaseTable({ cases }: { cases: CaseRecord[] }) {
 
   return (
     <section aria-labelledby="cases-h" className="space-y-3">
-      <h2 id="cases-h" className="text-xl font-semibold">{t.queue}</h2>
+      <h2 id="cases-h" className="jk-h2">{t.queue}</h2>
       <form role="search" onSubmit={(e) => e.preventDefault()} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <Input label={t.odSearch} type="search" hint={t.srBanglish} value={f.q} onChange={(e) => setF({ ...f, q: e.target.value })} />
         <Select label={t.odStatus} value={f.status} onChange={(e) => setF({ ...f, status: e.target.value as CaseFilter["status"] })} options={[{ value: "all", label: t.odAll }, ...STATUSES.map((s) => ({ value: s, label: t.statuses[s] }))]} />
@@ -103,7 +103,7 @@ export default function CaseTable({ cases }: { cases: CaseRecord[] }) {
       <p className="text-xs text-muted">{t.odExportNote}</p>
 
       {rows.length === 0 ? <p className="rounded-xl border border-line/40 bg-white p-4">{t.odNoRows}</p> : (
-        <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div className="overflow-x-auto jk-card">
           <table className="w-full text-left text-sm">
             <caption className="sr-only">{t.ofQueueAria}</caption>
             <thead className="bg-slate-50 text-slate-600">

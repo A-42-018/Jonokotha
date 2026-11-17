@@ -24,7 +24,7 @@ export default function Onboarding() {
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={`/illustrations/${ART[i]}.svg`} alt="" className="w-full max-w-xs" />
       <p className="text-sm text-muted" aria-live="polite">{fillNum(t.obStep, { n: i + 1, total: ART.length }, lang)}</p>
-      <h1 className="text-2xl font-semibold text-civic">{titles[i]}</h1>
+      <h1 className="jk-h1">{titles[i]}</h1>
       <p>{bodies[i]}</p>
       <div className="flex w-full flex-col gap-2">
         {last ? (

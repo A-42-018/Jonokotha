@@ -53,7 +53,7 @@ function Hub({ constituency, signedIn }: { constituency: string; signedIn: boole
               <>
                 {records.length > 0 && (
                   <section aria-labelledby="vol-mine" className="space-y-2">
-                    <h2 id="vol-mine" className="text-lg font-semibold">{t.r2AsMine}</h2>
+                    <h2 id="vol-mine" className="jk-h2">{t.r2AsMine}</h2>
                     <ul className="space-y-2">{records.map((v) => (
                       <li key={v.id} className="flex flex-wrap items-center gap-2 rounded-xl border border-line bg-white p-3">
                         <Badge tone={v.status === "active" ? "success" : v.status === "pending" ? "warning" : "neutral"}>{t[`r2AsSt_${v.status}`]}</Badge>
@@ -65,7 +65,7 @@ function Hub({ constituency, signedIn }: { constituency: string; signedIn: boole
                 )}
                 {!open && (
                   <form noValidate onSubmit={(e) => { e.preventDefault(); if (accept) apply.mutate(r.conduct_version); }} className="space-y-3 rounded-2xl border border-line bg-white p-4">
-                    <h2 className="text-lg font-semibold">{t.r2AsApply}</h2>
+                    <h2 className="jk-h2">{t.r2AsApply}</h2>
                     <p className="text-sm text-muted">{t.r2AsApplyNote}</p>
                     <Checkbox label={t.r2AsAccept} checked={accept} onChange={(e) => setAccept(e.target.checked)} />
                     <Button type="submit" disabled={!accept} loading={apply.isPending}>{t.r2AsApply}</Button>
@@ -107,7 +107,7 @@ function AssistedForm({ constituency, consentText, consentVersion }: { constitue
   if (sent) {
     return (
       <section role="status" className={`space-y-3 rounded-2xl border border-leaf/50 bg-leaf/10 p-4 ${big}`}>
-        <h2 className="text-lg font-semibold">{t.r2AsSentTitle}</h2>
+        <h2 className="jk-h2">{t.r2AsSentTitle}</h2>
         <p>{t.r2AsSentRef} <strong className="text-2xl tracking-wide">{sent.ref}</strong></p>
         <p className="text-sm">{t.r2AsSentNote}</p>
         {sent.emergency && <p role="alert" className="font-semibold text-danger">{t.r2AsEmergency}</p>}
@@ -119,7 +119,7 @@ function AssistedForm({ constituency, consentText, consentVersion }: { constitue
   const consentErr = err === "consent" ? t.r2AsErr_consent : undefined;
   return (
     <form noValidate onSubmit={(e) => { e.preventDefault(); const p = assistedProblem(f, c); setErr(p); if (!p) m.mutate(); }} className={`space-y-3 rounded-2xl border border-line bg-white p-4 ${big}`}>
-      <h2 className="text-lg font-semibold">{t.r2AsReportTitle}</h2>
+      <h2 className="jk-h2">{t.r2AsReportTitle}</h2>
       <p className="text-sm text-muted">{t.r2AsReportLead}</p>
       <Checkbox label={t.r2AsKioskMode} checked={kioskMode} onChange={(e) => setKioskMode(e.target.checked)} />
       {kioskMode && <KioskIdle onIdle={() => { reset(); setSent(null); }} />}
@@ -183,7 +183,7 @@ function MyAssisted() {
   if (q.data?.kind !== "ok" || q.data.data.length === 0) return null;
   return (
     <section aria-labelledby="vol-rep" className="space-y-2">
-      <h2 id="vol-rep" className="text-lg font-semibold">{t.r2AsMyReports}</h2>
+      <h2 id="vol-rep" className="jk-h2">{t.r2AsMyReports}</h2>
       <ul className="space-y-2">{q.data.data.map((r) => <li key={r.ref} className="rounded-xl border border-line bg-white p-3 text-sm"><strong>{r.ref}</strong> · {fmtDay(r.created_at, lang)} · <Badge tone="teal">{t.r2AsLabel}</Badge></li>)}</ul>
     </section>
   );
@@ -212,7 +212,7 @@ function OfficeInner({ constituency }: { constituency: string }) {
       {(d) => (
         <div className="space-y-5">
           <section aria-labelledby="ov-v" className="space-y-3">
-            <h2 id="ov-v" className="text-lg font-semibold">{t.r2AsVolunteers}</h2>
+            <h2 id="ov-v" className="jk-h2">{t.r2AsVolunteers}</h2>
             <Textarea label={t.r2AsDecisionNote} optional rows={2} maxLength={500} value={note} error={noteTooShort(note) ? t.r2NoteShort : undefined} onChange={(e) => setNote(e.target.value)} />
             <Boundary q={q} isEmpty={() => d.volunteers.length === 0} emptyTitle={t.r2AsNoVolunteers}>
               {() => (
@@ -237,7 +237,7 @@ function OfficeInner({ constituency }: { constituency: string }) {
             </Boundary>
           </section>
           <section aria-labelledby="ov-k" className="space-y-3">
-            <h2 id="ov-k" className="text-lg font-semibold">{t.r2AsKiosks}</h2>
+            <h2 id="ov-k" className="jk-h2">{t.r2AsKiosks}</h2>
             <form noValidate onSubmit={(e) => { e.preventDefault(); if (k.label.trim().length >= 3) add.mutate(); }} className="space-y-3 rounded-2xl border border-line bg-white p-4">
               <Input label={t.r2AsKioskLabel} maxLength={80} value={k.label} onChange={(e) => setK((s) => ({ ...s, label: e.target.value }))} />
               <Input label={t.r2AsKioskPlace} optional value={k.place} onChange={(e) => setK((s) => ({ ...s, place: e.target.value }))} />

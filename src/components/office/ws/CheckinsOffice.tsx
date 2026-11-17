@@ -31,7 +31,7 @@ function Inner({ constituency }: { constituency: string }) {
   const list = useQuery({ queryKey: ["office-checkins", ref], queryFn: () => fetchOfficeCheckins(ref), enabled: !!ref, retry: false });
   return (
     <section aria-labelledby="cko-h" className="space-y-3 rounded-2xl border border-line bg-white p-4">
-      <h2 id="cko-h" className="text-lg font-semibold">{t.ckoTitle}</h2>
+      <h2 id="cko-h" className="jk-h2">{t.ckoTitle}</h2>
       <p className="text-sm text-muted">{t.ckoLead}</p>
       <Boundary q={projects} isEmpty={(d) => d.length === 0} emptyTitle={t.ckoNoProjects}>
         {(rows) => <Select label={t.ckoProject} placeholder={t.ckoProject} value={ref} onChange={(e) => setRef(e.target.value)} options={rows.map((p) => ({ value: p.ref, label: p.title }))} />}

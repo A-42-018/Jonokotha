@@ -19,7 +19,7 @@ function Inner({ constituency }: { constituency: string }) {
   if (q.data?.kind === "planned" || (q.data?.kind === "ok" && q.data.data.length === 0)) return null;
   return (
     <section aria-labelledby="aa-h" className="space-y-2 rounded-2xl border border-amber/60 bg-amber/10 p-4">
-      <h2 id="aa-h" className="text-lg font-semibold">{t.chpAlertTitle}</h2>
+      <h2 id="aa-h" className="jk-h2">{t.chpAlertTitle}</h2>
       <AsyncBlock pending={q.isPending} error={q.error} onRetry={() => void q.refetch()}>
         {q.data?.kind === "ok" && (
           <ul className="space-y-2">

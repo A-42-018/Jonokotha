@@ -33,7 +33,7 @@ export default async function Case({ params }: PageProps<"/office/[ref]">) {
       <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:gap-6">
       <div className="space-y-4">
       <header className="space-y-2">
-        <h1 className="text-2xl font-semibold text-civic">{c.title}</h1>
+        <h1 className="jk-h1">{c.title}</h1>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-600">
           <span>{c.ref}</span>
           <StatusChip status={c.status} label={t.statuses[c.status]} />
@@ -42,7 +42,7 @@ export default async function Case({ params }: PageProps<"/office/[ref]">) {
           <span>{fmtDate(c.createdAt, lang)}</span>
         </div>
       </header>
-      <section aria-labelledby="rep-title" className="space-y-2 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <section aria-labelledby="rep-title" className="space-y-2 jk-card p-4">
         <h2 id="rep-title" className="font-semibold text-slate-700">{t.ofReport}</h2>
         <p className="whitespace-pre-wrap break-words">{c.description}</p>
       </section>
@@ -53,7 +53,7 @@ export default async function Case({ params }: PageProps<"/office/[ref]">) {
       <div className="lg:sticky lg:top-4">
       <div className="space-y-4">
         <Copilot c={c} agency={agency} />
-        <section aria-labelledby="act-h" className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <section aria-labelledby="act-h" className="space-y-3 jk-card p-4">
           <h2 id="act-h" className="font-medium">{t.ofActions}</h2>
           <p className="text-xs text-amber-800">{t.humanOnly}</p>
           <OfficeActions cref={c.ref} status={c.status} />

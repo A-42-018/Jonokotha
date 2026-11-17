@@ -16,7 +16,7 @@ export default function StatTiles({ t, lang, cases }: { t: Dict; lang: Lang; cas
     <section aria-label={t.rfStatsAria} className="space-y-2">
       <dl className="grid grid-cols-3 gap-3 lg:gap-5">
         {tiles.map((x) => (
-          <div key={x.label} className="flex flex-col items-center gap-1 rounded-2xl border border-slate-200 bg-white p-3 text-center shadow-sm">
+          <div key={x.label} className="flex flex-col items-center gap-1 jk-card p-3 text-center">
             {x.icon}
             <dd className="order-2 text-2xl font-semibold text-foreground">{fmtNum(x.n, lang)}</dd>
             <dt className="order-3 text-sm text-muted">{x.label}</dt>

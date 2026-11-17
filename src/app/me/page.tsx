@@ -31,7 +31,7 @@ export default async function Me({ searchParams }: PageProps<"/me">) {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold text-civic">{t.meTitle}</h1>
+      <h1 className="jk-h1">{t.meTitle}</h1>
       <Card title={t.account}>
         {email ? (
           <div className="space-y-2">

@@ -11,7 +11,7 @@ export function fieldIds(id: string, { hint, error }: { hint?: string; error?: s
 /** Shared base for text-like controls: 44px min height, 4.5:1 border, red border plus message on error. */
 export const controlClass = (invalid: boolean) =>
   cx(
-    "block w-full min-h-11 rounded-lg border bg-white px-3 py-2 text-base text-foreground placeholder:text-muted",
+    "block w-full min-h-11 rounded-xl border bg-white px-3 py-2 text-base text-foreground placeholder:text-muted",
     "focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-civic",
     "disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-muted",
     invalid ? "border-danger border-2" : "border-line",

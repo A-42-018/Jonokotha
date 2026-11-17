@@ -7,6 +7,8 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-civic: #006a4e;
+  /* Hover for filled civic buttons (white text 8.3:1). */
+  --color-civic-dark: #005a42;
   /* Header and footer band (white text 12.2:1, marigold text 5.9:1). */
   --color-brand-deep: #0b3d2e;
   /* Main report button on cream (white text 5.2:1; hover 7.3:1). Not on the deep band: there it is only 2.4:1. */
@@ -38,6 +40,18 @@ h1, h2, h3 { font-family: var(--font-heading); }
 
 /* Readable Bangla body text (redesign §3.2): 17px with 1.7 line height; never below 15px for meta. */
 .jk-body { font-size: 1.0625rem; line-height: 1.7; }
+/* Site-wide: every page reads like the home page. Plain text inside <main> gets the same 17px and relaxed line height; anything with its own
+   text-* size keeps it. */
+main { font-size: 1.0625rem; line-height: 1.65; }
+/* Headings share the home scale (22/28px sections). Colour is the page ink, so it switches with the theme; green stays for links and buttons. */
+.jk-h1 { font-family: var(--font-heading); font-size: 1.75rem; line-height: 1.25; font-weight: 700; color: var(--foreground); }
+.jk-h2 { font-family: var(--font-heading); font-size: 1.375rem; line-height: 1.3; font-weight: 600; color: var(--foreground); }
+.jk-h3 { font-family: var(--font-heading); font-size: 1.1875rem; line-height: 1.35; font-weight: 600; color: var(--foreground); }
+@media (min-width: 64rem) {
+  .jk-h1 { font-size: 2.25rem; line-height: 1.2; }
+  .jk-h2 { font-size: 1.5rem; }
+  .jk-h3 { font-size: 1.25rem; }
+}
 /* Soft card depth instead of grey borders (redesign §3.3). */
 /* The header is sticky from xl (1280px): keep anchors and keyboard focus clear of it. */
 @media (min-width: 80rem) { html { scroll-padding-top: 5rem; } }

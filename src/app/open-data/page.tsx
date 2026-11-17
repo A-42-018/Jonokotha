@@ -11,7 +11,7 @@ export default async function OpenData() {
   const t = dict[await getLang()];
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold text-civic">{t.r2OdTitle}</h1>
+      <h1 className="jk-h1">{t.r2OdTitle}</h1>
       <p className="text-muted">{t.r2OdLead}</p>
       <OpenDataList />
     </div>

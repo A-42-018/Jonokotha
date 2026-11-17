@@ -29,7 +29,7 @@ function Inner({ constituency, signedIn }: { constituency: string; signedIn: boo
   const rows = q.data?.pages.flatMap((p) => p.items) ?? [];
   return (
     <section aria-labelledby="pq" className="space-y-2">
-      <h2 id="pq" className="text-xl font-semibold text-foreground">{t.pqTitle}</h2>
+      <h2 id="pq" className="jk-h2">{t.pqTitle}</h2>
       <p className="text-sm text-muted">{t.pqLead}</p>
       {q.isPending && <p role="status" className="text-sm text-muted">{t.pqLoading}</p>}
       {q.isError && <div role="alert" className="flex flex-wrap items-center gap-3 text-sm"><p>{t.pqLoadError}</p><Button variant="secondary" onClick={() => void q.refetch()}>{t.exRetry}</Button></div>}

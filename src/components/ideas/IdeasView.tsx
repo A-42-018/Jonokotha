@@ -55,7 +55,7 @@ function IdeasInner({ constituency, signedIn }: { constituency: string; signedIn
     <div className="space-y-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold text-civic">{t.idTitle}</h1>
+          <h1 className="jk-h1">{t.idTitle}</h1>
           <p className="text-muted">{t.idLead}</p>
         </div>
         <Link href="/ideas/new" className={buttonClass()}>{t.idSubmit}</Link>

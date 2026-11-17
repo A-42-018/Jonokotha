@@ -15,7 +15,7 @@ export default async function Budget({ searchParams }: PageProps<"/budget">) {
   const project = typeof sp.project === "string" ? sp.project : undefined;
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold text-civic">{t.r2BgTitle}</h1>
+      <h1 className="jk-h1">{t.r2BgTitle}</h1>
       <p className="text-muted">{t.r2BgLead}</p>
       <BudgetPublic constituency={(await getConstituencyId()) ?? DEMO_CONSTITUENCY.id} project={project} />
     </div>

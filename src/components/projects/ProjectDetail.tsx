@@ -58,12 +58,12 @@ function Inner({ refId, signedIn = false, loginHref = "/login" }: { refId: strin
           <Badge tone={TONE[p.status]}>{t[`pjSt_${p.status}`]}</Badge>
           <CapabilityLabel status={p.capability} />
         </div>
-        <h1 className="break-words text-2xl font-semibold text-civic">{p.title}</h1>
+        <h1 className="break-words jk-h1">{p.title}</h1>
         <p className="text-sm text-muted">{t.pdUpdated} {fmtDay(p.updated_at, lang)}</p>
       </header>
 
       <Card as="section" aria-labelledby="pd-about">
-        <h2 id="pd-about" className="text-lg font-semibold">{t.pdAbout}</h2>
+        <h2 id="pd-about" className="jk-h2">{t.pdAbout}</h2>
         <p className="mt-1 whitespace-pre-line break-words">{p.description || t.pdNoDescription}</p>
         {p.description && <ReadAloud text={p.description} what={t.raWhatProject} />}
         <dl className="mt-2 space-y-0.5 text-sm">
@@ -73,7 +73,7 @@ function Inner({ refId, signedIn = false, loginHref = "/login" }: { refId: strin
       </Card>
 
       <Card as="section" aria-labelledby="pd-budget">
-        <h2 id="pd-budget" className="text-lg font-semibold">{t.pdBudgetTitle}</h2>
+        <h2 id="pd-budget" className="jk-h2">{t.pdBudgetTitle}</h2>
         {p.budget_text ? <p className="mt-1 break-words">{p.budget_text}</p> : <p className="mt-1 text-muted">{t.pdNoBudget}</p>}
         <p className="mt-1 text-sm text-muted">{t.pdBudgetNote}</p>
         <p className="mt-2 text-sm">
@@ -84,7 +84,7 @@ function Inner({ refId, signedIn = false, loginHref = "/login" }: { refId: strin
       </Card>
 
       <section aria-labelledby="pd-ms" className="space-y-2">
-        <h2 id="pd-ms" className="text-lg font-semibold">{t.pdMilestones}</h2>
+        <h2 id="pd-ms" className="jk-h2">{t.pdMilestones}</h2>
         {ms.total === 0 ? <p className="text-muted">{t.pdMsEmpty}</p> : (
           <>
             <p aria-live="polite" className="text-sm">

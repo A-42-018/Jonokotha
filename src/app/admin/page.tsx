@@ -16,7 +16,7 @@ export default async function AdminHome() {
   return (
     <AdminShell t={t} title={t.adTitle} lead={t.acOvLead} current="/admin">
       <KpiPanel />
-      <h2 className="text-xl font-semibold">{t.acOvSections}</h2>
+      <h2 className="jk-h2">{t.acOvSections}</h2>
       <ul className="grid gap-3 md:grid-cols-2">
         {adminSections(t).map((s) => (
           <li key={s.href}>

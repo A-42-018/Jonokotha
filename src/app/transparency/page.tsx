@@ -23,7 +23,7 @@ export default async function Transparency() {
   if (items.length === 0) notFound();
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold text-civic">{t.r2Hub}</h1>
+      <h1 className="jk-h1">{t.r2Hub}</h1>
       <p className="text-muted">{t.r2HubLead}</p>
       <ul className="grid gap-3 md:grid-cols-2">{items.map((i) => <li key={i.href}><Card title={<Link href={i.href} className="underline">{i.title}</Link>} headingAs="h2"><p className="text-muted">{i.lead}</p></Card></li>)}</ul>
     </div>

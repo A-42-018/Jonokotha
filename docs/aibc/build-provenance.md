@@ -95,3 +95,4 @@ There is no `CLAUDE.md`, `.claude/` directory or `.mcp.json` in the repo.
 - **Data sent to model providers:** redacted report text only (`src/lib/pii.ts`; phone, email and ID-number recall 100% on the synthetic set, names and addresses not detected). Details in `docs/aibc/data-sovereignty.md`.
 - **Evaluation data:** 118 synthetic cases written by the team, not real citizen reports.
 - **Retrieval:** pgvector with HNSW indexes, 1024-dimension embeddings, checksummed chunks re-ingested only when changed (`src/lib/ai/knowledge.ts`). Graph relations are Postgres edges (`graph_edges`), not a graph database.
+- **Boundary data:** district outlines for "find my seat from my location" come from geoBoundaries gbOpen BGD ADM2 (build 12 Dec 2023, CC BY 3.0 IGO, https://www.geoboundaries.org/), simplified to about 330 m and bundled as `src/lib/data/bd-districts.json` (server only). Seat boundaries are not bundled; the person chooses the seat within the district.

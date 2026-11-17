@@ -40,7 +40,7 @@ function Inner() {
   if (q.isError && isNotOn(q.error)) return <PlannedPanel as="h2" title={t.inNotOnTitle} body={t.inNotOnBody} />;
   return (
     <section aria-labelledby="in-h" className="space-y-3">
-      <h2 id="in-h" className="text-xl font-semibold">{t.inTitle}</h2>
+      <h2 id="in-h" className="jk-h2">{t.inTitle}</h2>
       <p className="text-muted">{t.inLead}</p>
       <Boundary q={q} isEmpty={(d) => d.length === 0} emptyTitle={t.inEmpty}>
         {(rows: InsightBrief[]) => (

@@ -63,7 +63,7 @@ function NewCommitment({ constituency }: { constituency: string }) {
   const ok = f.title.trim().length >= 5 && f.title.trim().length <= 150;
   return (
     <form noValidate onSubmit={(e) => { e.preventDefault(); if (!ok) { setErr(t.tkoName); return; } if (!publish) m.mutate(); }} className="space-y-3 rounded-2xl border border-line bg-white p-4">
-      <h2 className="text-lg font-semibold">{t.tkoNew}</h2>
+      <h2 className="jk-h2">{t.tkoNew}</h2>
       <Input label={t.tkoName} maxLength={150} value={f.title} error={err || undefined} onChange={set("title")} />
       <Textarea label={t.tkoDesc} optional rows={3} maxLength={1500} value={f.desc} onChange={set("desc")} />
       <Input type="date" label={t.tkoDue} optional value={f.due} onChange={set("due")} />

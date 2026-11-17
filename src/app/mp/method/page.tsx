@@ -6,7 +6,7 @@ export default async function Method() {
   const t = dict[await getLang()];
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold text-civic">{t.mpMethodTitle}</h1>
+      <h1 className="jk-h1">{t.mpMethodTitle}</h1>
       <Card>
         <ul className="list-disc space-y-2 ps-5">
           <li>{t.mpMethodBody1}</li><li>{t.mpMethodBody2}</li><li>{t.mpMethodBody3}</li><li>{t.mpMethodBody4}</li><li>{t.mpMethodBody5}</li>

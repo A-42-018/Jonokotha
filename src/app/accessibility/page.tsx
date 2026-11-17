@@ -11,7 +11,7 @@ export default async function Accessibility() {
   const list = (items: string[]) => <ul className="list-disc space-y-1 ps-5">{items.map((x) => <li key={x}>{x}</li>)}</ul>;
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold text-civic">{t.a11yTitle}</h1>
+      <h1 className="jk-h1">{t.a11yTitle}</h1>
       <p className="text-muted">{t.a11yLead}</p>
       <Card title={t.a11yStandardTitle}><p>{t.a11yStandard}</p></Card>
       <Card title={t.a11yDoneTitle}>{list([t.a11yDone1, t.a11yDone2, t.a11yDone3, t.a11yDone4, t.a11yDone5, t.a11yDone6, t.a11yDone7, t.a11yDone8])}</Card>

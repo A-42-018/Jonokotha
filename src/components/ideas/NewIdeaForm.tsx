@@ -80,7 +80,7 @@ function NewIdeaInner({ constituency, signedIn }: { constituency: string; signed
       <div className="mx-auto max-w-md space-y-3 text-center">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img loading="lazy" decoding="async" src="/illustrations/spot-idea.svg" alt="" className="mx-auto w-44" />
-        <h1 role="status" className="text-2xl font-semibold text-civic">{t.idDoneTitle}</h1>
+        <h1 role="status" className="jk-h1">{t.idDoneTitle}</h1>
         <p>{t.idDoneBody}</p>
         <p className="rounded-xl border border-amber/60 bg-amber/10 p-3 text-sm">{t.idDonePending}</p>
         {removed && <p role="status" className="text-sm text-muted">{t.idPiiRemoved}</p>}
@@ -103,7 +103,7 @@ function NewIdeaInner({ constituency, signedIn }: { constituency: string; signed
   return (
     <form onSubmit={submit} noValidate className="space-y-4">
       <div>
-        <h1 className="text-2xl font-semibold text-civic">{t.idNewTitle}</h1>
+        <h1 className="jk-h1">{t.idNewTitle}</h1>
         <p className="text-muted">{t.idNewLead}</p>
       </div>
       <Input label={t.idFTitle} maxLength={120} value={f.title} error={errors.title} onChange={(e) => set("title", e.target.value)} />

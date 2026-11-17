@@ -56,7 +56,7 @@ function Row({ constituency, idea }: { constituency: string; idea: ApiIdea }) {
         <span className="text-sm text-muted">{fmtNum(i.supports, lang)} {t.owIdeaSupports}</span>
         {pastThreshold && <Badge tone="warning" icon="⏳">{t.ipReached}</Badge>}
       </div>
-      <h2 className="text-lg font-semibold">{i.title}</h2>
+      <h2 className="jk-h2">{i.title}</h2>
       <p className="whitespace-pre-line text-muted">{i.summary}</p>
       {i.reason && <p className="text-sm"><span className="font-medium">{t.owIdeaReason}:</span> {i.reason}</p>}
       <form className="space-y-2 border-t border-line pt-3" onSubmit={(e) => { e.preventDefault(); submit(); }}>

@@ -31,7 +31,7 @@ export default function ProjectCheckins({ refId, signedIn, loginHref }: { refId:
     <section aria-labelledby="ck-h" className="space-y-3">
       <div className="flex items-center gap-3">
         <Photo src="/illustrations/spot-checkin.svg" alt="" width={80} height={80} loading="lazy" className="size-16 shrink-0" />
-        <h2 id="ck-h" className="text-lg font-semibold">{t.ckTitle}</h2>
+        <h2 id="ck-h" className="jk-h2">{t.ckTitle}</h2>
       </div>
       <p className="text-sm text-muted">{t.ckLead}</p>
       <p className="rounded-xl bg-slate-100 p-2 text-sm">{t.ckNotOfficial}</p>

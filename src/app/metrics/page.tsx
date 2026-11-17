@@ -7,7 +7,7 @@ export default async function Metrics() {
   const t = dict[await getLang()];
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold text-civic">{t.mxTitle}</h1>
+      <h1 className="jk-h1">{t.mxTitle}</h1>
       <p className="text-muted">{t.mxLead}</p>
       <Card tone="info">
         <ul className="list-disc space-y-1 ps-5"><li>{t.mxNoRank}</li><li>{t.mxSmall}</li><li>{t.mxSample}</li></ul>

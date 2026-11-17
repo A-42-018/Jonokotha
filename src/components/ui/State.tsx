@@ -29,7 +29,7 @@ export default function State({ kind, title, body, children, compact = false, li
     <section role={live === "assertive" ? "alert" : live ? "status" : undefined} className={`mx-auto flex max-w-md flex-col items-center text-center ${compact ? "gap-2 py-4" : "gap-3 py-8"}`}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={`/illustrations/${ART[kind]}.svg`} alt="" className={compact ? "w-32" : "w-48 sm:w-56"} />
-      <Heading className="text-2xl font-semibold text-civic">{title}</Heading>
+      <Heading className="jk-h1">{title}</Heading>
       {body && <p className="text-muted">{body}</p>}
       {children && <div className="mt-2 flex w-full flex-col items-stretch justify-center gap-2 sm:w-auto sm:flex-row">{children}</div>}
     </section>

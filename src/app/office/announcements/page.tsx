@@ -15,7 +15,7 @@ export default async function Announcements() {
   return (
     <div className="space-y-4">
       <Link href="/office" className="inline-flex min-h-11 items-center text-civic underline">← {t.anBack}</Link>
-      <h1 className="text-2xl font-semibold text-civic">{t.anTitle}</h1>
+      <h1 className="jk-h1">{t.anTitle}</h1>
       <p className="text-muted">{t.anLead}</p>
       <AnnouncementComposer constituency={(await getConstituencyId()) ?? DEMO_CONSTITUENCY.id} />
       {(FLAGS.channels || FLAGS.officeRelease11) && <AreaAlertComposer constituency={(await getConstituencyId()) ?? DEMO_CONSTITUENCY.id} />}

@@ -8,7 +8,7 @@ export default async function Terms() {
   const t = dict[lang];
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold text-civic">{t.tmTitle}</h1>
+      <h1 className="jk-h1">{t.tmTitle}</h1>
       <p role="note" className="rounded-xl border border-danger/40 bg-danger/5 p-3 font-medium">{t.tmEmergency}</p>
       <LegalMeta t={t} lang={lang} />
       <Card><ol className="list-decimal space-y-2 ps-5">{[t.tm1, t.tm2, t.tm3, t.tm4, t.tm5, t.tm6, t.tm7, t.tm8].map((x) => <li key={x}>{x}</li>)}</ol></Card>

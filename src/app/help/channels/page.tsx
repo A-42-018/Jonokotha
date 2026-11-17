@@ -19,7 +19,7 @@ export default async function Channels() {
       <div className="flex items-center gap-3">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/illustrations/spot-channels.svg" alt="" width={96} height={96} decoding="async" className="size-20 shrink-0 sm:size-24" />
-        <h1 className="text-2xl font-semibold text-civic">{t.chnTitle}</h1>
+        <h1 className="jk-h1">{t.chnTitle}</h1>
       </div>
       <p className="text-muted">{t.chnLead}</p>
       {!wa && !sms && <PlannedPanel title={t.chnPlanned} body={t.chnPlannedBody} />}

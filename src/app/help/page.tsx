@@ -10,7 +10,7 @@ export default async function Help() {
   };
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold text-civic">{t.hpTitle}</h1>
+      <h1 className="jk-h1">{t.hpTitle}</h1>
       <Card id="emergency" tone="danger" title={t.hpEmergencyTitle}><p className="font-medium">{t.hpEmergencyBody}</p></Card>
       <Card title={t.hpHowTitle}>{list([t.hpHow1, t.hpHow2, t.hpHow3], true)}</Card>
       <Card title={t.hpSafetyTitle}>{list([t.hpSafety1, t.hpSafety2, t.hpSafety3])}</Card>

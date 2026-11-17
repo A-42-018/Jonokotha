@@ -20,7 +20,7 @@ export default function ClarityHelper({ title, text, live = featureStatus("ideaC
   const err = ask.error;
   return (
     <section aria-labelledby="cl-h" className="space-y-2 rounded-2xl border border-line bg-white p-3">
-      <h2 id="cl-h" className="text-lg font-semibold">{t.clTitle}</h2>
+      <h2 id="cl-h" className="jk-h2">{t.clTitle}</h2>
       <p className="text-sm text-muted">{t.clLead}</p>
       <Button variant="secondary" loading={ask.isPending} disabled={tooShort} onClick={() => ask.mutate()}>{ask.isPending ? t.clWorking : t.clAsk}</Button>
       {tooShort && <p className="text-sm text-muted">{t.clNeedText}</p>}

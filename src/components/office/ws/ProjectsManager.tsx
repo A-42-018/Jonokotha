@@ -57,7 +57,7 @@ function NewProjectForm({ constituency }: { constituency: string }) {
   };
   return (
     <form noValidate className="space-y-3 rounded-2xl border border-line bg-white p-4" onSubmit={(e) => { e.preventDefault(); submit(); }}>
-      <h2 className="text-lg font-semibold">{t.owPNew}</h2>
+      <h2 className="jk-h2">{t.owPNew}</h2>
       <Input label={t.owPName} value={f.title ?? ""} onChange={set("title")} maxLength={150} error={err.title} />
       <Textarea label={t.owPDesc} value={f.description ?? ""} onChange={set("description")} rows={3} maxLength={3000} optional />
       <Select label={t.owPStatus} value={f.status} onChange={set("status")} options={PROJECT_STATUSES.map((s) => ({ value: s, label: label(t, "owPStatus_", s) }))} />
@@ -83,7 +83,7 @@ function ProjectCard({ p }: { p: ProjectItem }) {
         <Badge tone="info">{label(t, "owPStatus_", p.status)}</Badge>
         {p.is_sample && <Badge>{t.owSample}</Badge>}
       </div>
-      <h2 className="text-lg font-semibold">{p.title}</h2>
+      <h2 className="jk-h2">{p.title}</h2>
       <Button variant="secondary" aria-expanded={open} onClick={() => setOpen(!open)}>{t.owMilestones}<span className="sr-only">: {p.title}</span></Button>
       {open && <Milestones refId={p.ref} />}
     </article>

@@ -45,14 +45,14 @@ function Inner({ constituency, project }: { constituency: string; project?: stri
                   <Select label={t.r2BgKinds} value={kind} onChange={(e) => setKind(e.target.value as EntryKind | "")} options={[{ value: "", label: t.r2FyAll }, ...ENTRY_KINDS.map((k) => ({ value: k, label: t[`r2BgKind_${k}`] }))]} />
                 </div>
                 <section aria-labelledby="bg-entries" className="space-y-3">
-                  <h2 id="bg-entries" className="text-lg font-semibold">{t.r2BgEntries}</h2>
+                  <h2 id="bg-entries" className="jk-h2">{t.r2BgEntries}</h2>
                   {ent.data?.kind === "ok" && ent.data.data.length === 0 ? <p className="text-muted">{t.r2BgNoEntries}</p> : (
                     <ul className="space-y-3">{(ent.data?.kind === "ok" ? ent.data.data : []).map((e) => <li key={e.id}><Entry e={e} lang={lang} /></li>)}</ul>
                   )}
                 </section>
                 {!project && (
                   <section aria-labelledby="bg-sources" className="space-y-3">
-                    <h2 id="bg-sources" className="text-lg font-semibold">{t.r2BgSources}</h2>
+                    <h2 id="bg-sources" className="jk-h2">{t.r2BgSources}</h2>
                     <ul className="space-y-3">{sources.filter((s) => !fy || s.fiscal_year === fy).map((s) => <li key={s.ref}><Source s={s} lang={lang} /></li>)}</ul>
                   </section>
                 )}

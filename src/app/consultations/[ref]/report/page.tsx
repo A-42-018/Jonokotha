@@ -15,7 +15,7 @@ export default async function Report({ params }: PageProps<"/consultations/[ref]
       <div className="flex items-center gap-3">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/illustrations/spot-you-said.svg" alt="" width={96} height={96} decoding="async" className="size-20 shrink-0 sm:size-24" />
-        <h1 className="text-2xl font-semibold text-civic">{t.rpTitle}</h1>
+        <h1 className="jk-h1">{t.rpTitle}</h1>
       </div>
       <ConsultationReport refId={ref} />
     </div>
