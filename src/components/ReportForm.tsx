@@ -398,7 +398,7 @@ function ReportFormInner({ t, lang, constituencyId, initialCategory }: { t: Dict
 
       <div
         style={{ bottom: inset, paddingBottom: inset > 0 ? 0 : "env(safe-area-inset-bottom)" }}
-        className="fixed inset-x-0 z-30 border-t border-line/40 bg-white/95 backdrop-blur"
+        className="fixed inset-x-0 z-30 mb-0 border-t border-line/40 bg-white/95 backdrop-blur"
       >
         <div className="mx-auto flex max-w-3xl items-center gap-3 px-4 py-3">
           {step > 0 && <Button variant="secondary" onClick={() => setStep((s) => s - 1)} disabled={submitting}>{t.wizBack}</Button>}
