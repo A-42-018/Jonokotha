@@ -8,7 +8,7 @@ export default function DemoLogin({ bn, failed = false }: { bn: boolean; failed?
       {failed && <p className="text-sm text-red-700" role="alert">{bn ? "ডেমো লগইন কাজ করেনি।" : "Demo login failed."}</p>}
       <div className="grid grid-cols-2 gap-2">
         <button name="role" value="citizen" className="rounded-lg border border-civic px-4 py-3 text-civic">{bn ? "নাগরিক" : "Citizen"}</button>
-        <button name="role" value="staff" className="rounded-lg border border-leaf px-4 py-3 text-leaf">{bn ? "অফিস কর্মী" : "Office staff"}</button>
+        <button name="role" value="staff" className="rounded-lg border border-leaf-strong px-4 py-3 text-leaf-strong">{bn ? "অফিস কর্মী" : "Office staff"}</button>
       </div>
     </form>
   );

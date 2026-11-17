@@ -22,7 +22,7 @@ describe("F.8: every screen has its error, empty and offline states", () => {
     const files = walk(path.join(root, "src")).filter((f) => /\.(tsx|ts)$/.test(f) && /useQuery|useInfiniteQuery/.test(readFileSync(f, "utf8")));
     expect(files.length).toBeGreaterThan(10);
     // Mutation-only helpers and map layers hold no list: named here so a new data component cannot slip past.
-    const exempt = ["useFollows.ts", "NewIdeaForm.tsx", "IssueActions.tsx", "Copilot.tsx", "HotspotMapLive.tsx", "NotesAndAssign.tsx", "AnnouncementComposer.tsx", "DataRights.tsx", "RepProfile.tsx", "MpFinder.tsx", "KpiPanel.tsx", "OfficeKpis.tsx", "PushSettings.tsx", "NoticeTypePrefs.tsx"];
+    const exempt = ["useFollows.ts", "NewIdeaForm.tsx", "IssueActions.tsx", "Copilot.tsx", "HotspotMapLive.tsx", "NotesAndAssign.tsx", "AnnouncementComposer.tsx", "DataRights.tsx", "RepProfile.tsx", "MpFinder.tsx", "KpiPanel.tsx", "OfficeKpis.tsx", "PushSettings.tsx", "NoticeTypePrefs.tsx", "ProjectFeedback.tsx"];   // ProjectFeedback is a summary line plus a form, not a list: with no feedback yet it says how many answers there are
     const missing: string[] = [];
     for (const f of files) {
       const name = path.basename(f);

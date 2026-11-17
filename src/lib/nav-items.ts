@@ -1,7 +1,7 @@
 import { FLAGS } from "./flags";
 
 /** One place for citizen navigation (masterplan 6.1 and 6.2), used by the desktop top bar and the "more" lists. */
-export interface NavItem { href: string; key: "navHome" | "navArea" | "navProjects" | "navIdeas" | "navAskMp" | "navFindMp" | "navPolls" | "navHelp" | "navConsult" | "navTerms" | "navAbout" }
+export interface NavItem { href: string; key: "navHome" | "navArea" | "navProjects" | "navIdeas" | "navAskMp" | "navFindMp" | "navPolls" | "navHelp" | "navConsult" | "navTerms" | "navAbout" | "navCommit" | "navPriority" }
 
 export function primaryNav(flags: { consultations: boolean } = FLAGS): NavItem[] {
   return [
@@ -16,9 +16,11 @@ export function primaryNav(flags: { consultations: boolean } = FLAGS): NavItem[]
 }
 
 /** Pages that do not fit the bar: polls, help and about, terms. Shown under "More" on desktop and as a list on the home page. */
-export function moreNav(): NavItem[] {
+export function moreNav(flags: { commitments: boolean; priorities: boolean } = FLAGS): NavItem[] {
   return [
     { href: "/polls", key: "navPolls" },
+    ...(flags.commitments ? [{ href: "/commitments", key: "navCommit" } as NavItem] : []),
+    ...(flags.priorities ? [{ href: "/priorities", key: "navPriority" } as NavItem] : []),
     { href: "/help", key: "navHelp" },
     { href: "/about", key: "navAbout" },
     { href: "/terms", key: "navTerms" },

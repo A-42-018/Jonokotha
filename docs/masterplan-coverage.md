@@ -34,7 +34,7 @@ Status: **Done**, **Partial**, **Open**, as of 2026-11-16.
 | 3.3 | All supporting KPIs, incl. accessibility task completion and copilot vs no-copilot time | M.11, B6.6 | F.7, F6.3 | Open |
 | 4.1 | Preliminary slice | Phase 0 | Phase 0 | Done |
 | 4.2 | MVP list | Phases 1–2, 5 | Phases 1–3, F.1, 5 | Partial (frontend wiring) |
-| 4.3 | Release 1.1 list | Phase 7 | Phase 7 | Open |
+| 4.3 | Release 1.1 list | Phase 7 | Phase 7 | Frontend built behind flags (see frontend.md Phase 7); needs `claude/backend-phase7` merged and run |
 | 4.4 | Release 2 list | Phase 8 | Phase 8 | Open |
 | 4.5 | Out of scope (no native apps, no leaderboards, no auto decisions) | guard in DoD | guard in DoD | Ongoing |
 | 5.1 | Citizen rights incl. abuse report, data deletion, reopen within review period | existing, 0021 | F5.3, F.6 | Partial |
@@ -58,9 +58,9 @@ Status: **Done**, **Partial**, **Open**, as of 2026-11-16.
 | 7.11 | Moderation actions incl. request edit, appeal path | existing | F.1 | Partial |
 | 7.12 | 12 states on every screen | — | existing | Done |
 | 7.13 | Find your MP: district → upazila/city → ward/union picker, boundary uncertainty | B5.7 | F5.9 | Partial |
-| 7.14 | Consultations with consensus mapping | B7.1 | F7.1 | Backend done (B7.1, 2026-11-17); frontend open |
-| 7.15 | WhatsApp/SMS intake, area alerts | B7.2 | F7.2 | Backend done except live providers (B7.2, B7.4); frontend open |
-| 7.16 | Project check-ins | B7.3 | F7.3 | Backend done (B7.3); frontend open |
+| 7.14 | Consultations with consensus mapping | B7.1 | F7.1 | Backend done (B7.1); frontend built, flagged, not run together |
+| 7.15 | WhatsApp/SMS intake, area alerts | B7.2 | F7.2 | Backend done except live providers (B7.2, B7.4); frontend built, flagged |
+| 7.16 | Project check-ins | B7.3 | F7.3 | Backend done (B7.3); frontend built, not run together |
 | 8.1–8.9 | MVP workflows end to end | existing | F.1, F.2 | Partial |
 | 8.5 | Public project lifecycle incl. budget source, procurement, delay explanation, post-completion feedback | B5.5 | F5.10 | Partial |
 | 8.10–8.12 | Release 1.1 workflows | B7 | F7 | Backend done except live providers; frontend open |
@@ -88,7 +88,7 @@ Status: **Done**, **Partial**, **Open**, as of 2026-11-16.
 | 18.4 | Data sovereignty and governance, data-protection owner | existing doc, B6.3 | — | Partial |
 | 19.1 | Bangla-first incl. Bangla/Latin numeral setting, ৳ lakh/crore, Banglish search, digit-agnostic phone/OTP | B5.11 | F5.16 | Partial |
 | 19.2–19.5 | Style, glossary, status, category labels | existing | existing | Done (native review open) |
-| 19.6 | Bangla AI and voice; read-aloud (R1.1) | existing | F7.9 | Partial |
+| 19.6 | Bangla AI and voice; read-aloud (R1.1) | existing | F7.9 | Read-aloud built, flagged; voice quality not evaluated |
 | 19.7 | Fonts, conjunct rendering in PDFs and exports, SMS length | B7.4 | F5.16 | Backend: SMS length and CSV done; PDF open (font and renderer) |
 | 19.8 | WCAG 2.2 AA | — | Phase 3 | Partial |
 | 19.9 | First-glance tests with citizens of different districts and ages | — | F6.3 | Open |

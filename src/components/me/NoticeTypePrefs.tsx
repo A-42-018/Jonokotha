@@ -7,7 +7,8 @@ import Card from "@/components/ui/Card";
 import { Checkbox } from "@/components/ui/Choice";
 import { useToast } from "@/components/ui/Toast";
 import { useT } from "@/components/ui/useT";
-import { MUTABLE_TYPES, toggleMuted, type NoticeType } from "@/lib/notifications-api";
+import { useFeature } from "@/components/ui/useFeature";
+import { MUTABLE_R11, MUTABLE_TYPES, toggleMuted, type NoticeType } from "@/lib/notifications-api";
 import { fetchPrefs, savePrefs, type Prefs } from "@/lib/push";
 
 /** Settings: which kinds of notification to receive, saved on the account (`muted_types`). Switching one off is the unsubscribe. */
@@ -19,6 +20,7 @@ function Inner({ signedIn }: { signedIn: boolean }) {
   const t = useT();
   const toast = useToast();
   const qc = useQueryClient();
+  const r11 = useFeature("consultations");
   const prefs = useQuery({ queryKey: ["me-prefs-types"], queryFn: fetchPrefs, enabled: signedIn });
   const save = useMutation({
     mutationFn: (muted: string[]) => savePrefs({ muted_types: muted }),
@@ -46,7 +48,7 @@ function Inner({ signedIn }: { signedIn: boolean }) {
       <p className="mb-2 text-muted">{t.ntpLead}</p>
       <fieldset className="min-w-0 border-0 p-0">
         <legend className="sr-only">{t.ntpTitle}</legend>
-        {MUTABLE_TYPES.map((type: NoticeType) => (
+        {[...MUTABLE_TYPES, ...(r11 ? MUTABLE_R11 : [])].map((type: NoticeType) => (
           <Checkbox key={type} label={t[`ntp_${type}` as keyof typeof t] as string} checked={!muted.includes(type)} disabled={save.isPending}
             onChange={(e) => save.mutate(toggleMuted(muted, type, e.target.checked))} />
         ))}

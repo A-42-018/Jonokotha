@@ -17,3 +17,9 @@ Element.prototype.scrollIntoView = vi.fn();
 import { registerFallbackDicts } from "@/components/ui/I18nProvider";
 import { dict } from "@/lib/i18n";
 registerFallbackDicts(dict as unknown as Parameters<typeof registerFallbackDicts>[0]);
+
+// jsdom has no modal <dialog>; the shared Dialog component calls these.
+if (typeof HTMLDialogElement !== "undefined") {
+  HTMLDialogElement.prototype.showModal ??= function (this: HTMLDialogElement) { this.setAttribute("open", ""); };
+  HTMLDialogElement.prototype.close ??= function (this: HTMLDialogElement) { this.removeAttribute("open"); };
+}

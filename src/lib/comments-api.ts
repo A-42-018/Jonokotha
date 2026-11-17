@@ -14,11 +14,15 @@ export const commentsUnavailable = (e: unknown) => e instanceof ApiError && e.st
 export async function fetchComments(ref: string, cursor?: string) {
   const q = new URLSearchParams({ limit: "20" });
   if (cursor) q.set("cursor", cursor);
-  const { data, page } = await api<IdeaComment[]>(`/ideas/${encodeURIComponent(ref)}/comments?${q}`);
-  return { items: data, next: page?.next_cursor ?? null };
+  const { data, page } = await api<Partial<IdeaComment>[]>(`/ideas/${encodeURIComponent(ref)}/comments?${q}`);
+  // The server's list (B5.5) has only id, body and created_at, and only published comments: fill in what it leaves out.
+  return { items: data.map((c) => ({ ...c, status: c.status ?? "published", mine: c.mine ?? false }) as IdeaComment), next: page?.next_cursor ?? null };
 }
 
-export const postComment = (ref: string, body: string, key: string) =>
-  api<IdeaComment>(`/ideas/${encodeURIComponent(ref)}/comments`, { body: { body: body.trim() }, idempotencyKey: key }).then((r) => r.data);
+/** The server answers `{id, idea, status}`; the comment shown to its author is built from what they typed and that status. */
+export const postComment = (ref: string, body: string, key: string): Promise<IdeaComment> =>
+  api<Partial<IdeaComment>>(`/ideas/${encodeURIComponent(ref)}/comments`, { body: { body: body.trim() }, idempotencyKey: key })
+    .then((r) => ({ id: r.data.id ?? key, body: r.data.body ?? body.trim(), status: r.data.status ?? "pending_review", created_at: r.data.created_at ?? new Date().toISOString(), mine: true, ...(r.data.pii_removed ? { pii_removed: r.data.pii_removed } : {}) }));
 
-export const validComment = (s: string) => s.trim().length >= 3 && s.trim().length <= 1000;
+/** The server accepts 2 to 500 characters. */
+export const validComment = (s: string) => s.trim().length >= 3 && s.trim().length <= 500;

@@ -1,4 +1,5 @@
 "use client";
+import ReadAloud from "@/components/ui/ReadAloud";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRef, useState } from "react";
@@ -87,6 +88,7 @@ function Thread({ q }: { q: MyQuestion }) {
                   <li key={i} className={m.author_kind === "office" ? "rounded-xl border border-civic/30 bg-civic/5 p-3" : "rounded-xl border border-line/40 p-3"}>
                     <p className="text-sm font-medium">{m.author_kind === "office" ? t.askFromOffice : t.askFromYou} · <span className="font-normal text-muted">{fmtDate(m.created_at, lang)}</span></p>
                     <p className="whitespace-pre-wrap break-words">{m.body}</p>
+                    {m.author_kind === "office" && <ReadAloud text={m.body} what={t.raWhatMessage} />}
                   </li>
                 ))}
               </ol>

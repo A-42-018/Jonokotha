@@ -1,4 +1,5 @@
 import PanelSidebar from "@/components/ui/PanelSidebar";
+import { FLAGS } from "@/lib/flags-more";
 import { dict, getLang } from "@/lib/i18n";
 
 /** Office workspace frame (masterplan §6.3): navy side menu from lg, a scrolling strip on phones. Each page still guards the staff role itself. */
@@ -12,6 +13,9 @@ export default async function OfficeLayout({ children }: LayoutProps<"/office">)
     { href: "/office/questions", label: t.owNavQuestions },
     { href: "/office/projects", label: t.owNavProjects },
     { href: "/office/polls", label: t.owNavPolls },
+    ...(FLAGS.consultations || FLAGS.officeRelease11 ? [{ href: "/office/consultations", label: t.ofcTitle }] : []),
+    ...(FLAGS.commitments || FLAGS.officeRelease11 ? [{ href: "/office/commitments", label: t.tkoTitle }] : []),
+    ...(FLAGS.priorities || FLAGS.officeRelease11 ? [{ href: "/office/priorities", label: t.prxoTitle }] : []),
     { href: "/office/analytics", label: t.owNavAnalytics },
     { href: "/office/announcements", label: t.odAnnouncements },
     { href: "/office/agency", label: t.lsNav },

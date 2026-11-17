@@ -13,7 +13,7 @@ import { ApiError } from "@/lib/api-client";
 import { reportContent, type ReportReason } from "@/lib/engagement-api";
 
 const REASONS = ["Spam", "Abuse", "Private", "False", "Other"] as const;
-export type ReportType = "issue" | "idea" | "question" | "media";
+export type ReportType = "issue" | "idea" | "question" | "media" | "idea_argument" | "idea_comment";
 
 /** "Report this" for public content, sent to moderation through `POST /api/v1/reports`. Signed-out visitors get a sign-in link. */
 export default function ReportContent(props: { type: ReportType; refId: string; signedIn: boolean; next: string }) {
@@ -28,7 +28,7 @@ function ReportInner({ type, refId, signedIn, next }: { type: ReportType; refId:
   const [reason, setReason] = useState("");
   const [note, setNote] = useState("");
   const [error, setError] = useState("");
-  const title = type === "issue" ? t.rcIssue : type === "idea" ? t.rcIdea : t.rcQuestion;
+  const title = type === "issue" ? t.rcIssue : type === "idea" ? t.rcIdea : type === "idea_argument" ? t.ixReportPoint : type === "idea_comment" ? t.cmTitle : t.rcQuestion;
   const label: Record<(typeof REASONS)[number], string> = { Spam: t.isReasonSpam, Abuse: t.isReasonAbuse, Private: t.isReasonPrivate, False: t.isReasonFalse, Other: t.isReasonOther };
 
   function close() { setOpen(false); setReason(""); setNote(""); setError(""); }

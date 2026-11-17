@@ -6,8 +6,10 @@ import Badge, { type BadgeTone } from "@/components/ui/Badge";
 import CapabilityLabel from "@/components/ui/CapabilityLabel";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
-import IdeaComments from "@/components/ideas/IdeaComments";
+import IdeaDiscussion from "@/components/ideas/IdeaDiscussion";
+import IdeaThreshold from "@/components/ideas/IdeaThreshold";
 import ReportContent from "@/components/ReportContent";
+import ReadAloud from "@/components/ui/ReadAloud";
 import TranslatedText from "@/components/ui/TranslatedText";
 import { useLocalValue } from "@/components/ui/useLocalValue";
 import { useLang } from "@/components/ui/useLang";
@@ -65,12 +67,14 @@ export default function IdeaCard({ idea, signedIn, heading: H = "h2" }: { idea: 
         </div>
       </div>
       <TranslatedText text={idea.summary} signedIn={signedIn} next={`/ideas/${encodeURIComponent(idea.id)}`} />
+      <ReadAloud text={idea.summary} what={t.raWhatIdea} />
       <div className="flex flex-wrap items-center gap-2">
         <Badge tone={TONE[idea.status]} icon={ICON[idea.status]}>{ideaStatusLabel(t, idea.status)}</Badge>
         {idea.sample && <CapabilityLabel status="sample" />}
         <span className="text-sm text-muted">{fillNum(t.idSupportCount, { n: count }, lang)}</span>
       </div>
       <p className="text-sm text-muted">{t[`idHelp_${idea.status}` as keyof Dict] as string}</p>
+      {idea.threshold && <IdeaThreshold threshold={idea.threshold} supports={count} />}
       {idea.reason && <p className="rounded-xl bg-slate-100 p-3 text-sm"><span className="font-medium">{t.idReason}: </span>{idea.reason}</p>}
       <div className="flex flex-wrap items-center gap-2">
         {signedIn ? (
@@ -81,7 +85,7 @@ export default function IdeaCard({ idea, signedIn, heading: H = "h2" }: { idea: 
         <Button variant="ghost" onClick={() => void share()}>{t.shareLink}</Button>
         {!idea.sample && <ReportContent type="idea" refId={idea.id} signedIn={signedIn} next="/ideas" />}
       </div>
-      {!idea.sample && idea.status !== "moderation" && <IdeaComments refId={idea.id} signedIn={signedIn} />}
+      {!idea.sample && idea.status !== "moderation" && <IdeaDiscussion refId={idea.id} signedIn={signedIn} />}
     </Card>
   );
 }

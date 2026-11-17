@@ -33,8 +33,8 @@ describe("project detail (F5.10)", () => {
     expect(screen.getByText(t.pdBudgetNote)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: t.pdSourceOpen })).toHaveAttribute("href", "https://lged.example/p1");
     expect(screen.getByText(/যাচাইয়ের তারিখ/)).toBeInTheDocument();
-    // follow is not on the server: text only, no button
-    expect(screen.getByText(t.pdFollowTitle)).toBeInTheDocument();
+    // follow is on the server since B5.5: a signed-out visitor gets a sign-in link, not a dead button
+    expect(screen.getByRole("link", { name: t.ckFollowSignIn })).toBeInTheDocument();
     expect(screen.queryByText(t.pdFeedbackTitle)).toBeNull();
   });
   it("a delayed step without a note says the office has not explained; unsafe or missing source is not a link", async () => {
@@ -49,7 +49,8 @@ describe("project detail (F5.10)", () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(json(200, { data: proj({ status: "completed", milestones: [] }) })));
     render(<ProjectDetail refId="PR-1" />);
     expect(await screen.findByText(t.pdEvidenceTitle)).toBeInTheDocument();
-    expect(screen.getByText(t.pdFeedbackTitle)).toBeInTheDocument();
+    // feedback after completion is live since B5.5: the real form (with its own sign-in link), not a gap panel
+    expect(await screen.findByText(t.pfTitle)).toBeInTheDocument();
     expect(screen.getByText(t.pdMsEmpty)).toBeInTheDocument();
   });
   it("404 is not-found, other errors are an alert with retry, offline says so", async () => {

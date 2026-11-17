@@ -110,7 +110,7 @@ test.describe("phase 2 public pages", () => {
     await expect(page.getByText("জনকথায় নতুন?")).toHaveCount(0);
     await page.getByRole("link", { name: "সাহায্য" }).last().click();
     await expect(page.getByRole("heading", { name: "সাহায্য ও নিরাপত্তা" })).toBeVisible();
-    await expect(page.getByText("৯৯৯")).toBeVisible();
+    await expect(page.getByText("৯৯৯").first()).toBeVisible();   // the help card, the quiet note and the footer all say it
   });
 
   test("notifications ask a signed-out visitor to sign in; settings can clear device data", async ({ page }) => {

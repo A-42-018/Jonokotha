@@ -8,6 +8,7 @@ import BottomTabBar from "@/components/ui/BottomTabBar";
 import SiteFooter from "@/components/SiteFooter";
 import I18nProvider from "@/components/ui/I18nProvider";
 import PersonalizationApplier from "@/components/ui/PersonalizationApplier";
+import ThemeApplier from "@/components/ui/ThemeApplier";
 import QueueSync from "@/components/offline/QueueSync";
 import MainShell from "@/components/ui/MainShell";
 import OfflineBanner from "@/components/ui/OfflineBanner";
@@ -72,6 +73,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           }
         />
           <PersonalizationApplier />
+          <ThemeApplier />
           <OfflineBanner />
           <RegisterSW />
           <ToastProvider>

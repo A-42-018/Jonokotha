@@ -1,45 +1,46 @@
 import { api, ApiError } from "@/lib/api-client";
+import { readOrPlanned, type OrPlanned } from "@/lib/r11";
 
 /**
- * Citizen polls, built to the B5.5 contract (not on the server yet; see docs/frontend.md "F5.11 progress").
- * GET /polls?limit= and POST /polls/{id}/vote {option_id}. One vote per person is the server's rule (a second vote is 409);
- * the client also shows a voted poll without a vote button. Counts (`votes`) arrive only when the office setting allows results.
+ * Citizen polls, to the shipped B5.5 contract (docs/api-v1.md "Ideas, polls, projects, snapshot"):
+ *   GET /polls?constituency=&status=       -> rows without options
+ *   GET /polls/{ref}                       -> row + options + `results` (my_option_id, results_shown, total_votes, options with votes only when shown)
+ *   POST /polls/{ref}/vote {option_id}     -> 201; 409-style `already_voted`, `poll_closed`
+ * One vote per verified account. Results show only after closing (or when the office chose "always") and only with 5 or more votes.
  */
-export interface PollOption { id: string; label: string; label_en: string | null; votes: number | null }
-export interface Poll { id: string; question: string; question_en: string | null; status: "open" | "closed"; closes_at: string | null; options: PollOption[]; my_vote: string | null; results_visible: boolean; is_sample?: boolean }
+export interface PollRow { ref: string; constituency_key: string; question: string; status: "open" | "closed"; results_visibility: "after_close" | "always"; closes_at: string | null; opened_at: string | null; closed_at: string | null; is_sample?: boolean }
+export interface PollOption { id: string; label: string; position: number }
+export interface PollResults { ref: string; status: string; total_votes: number; my_option_id: string | null; results_shown: boolean; options: { id: string; label: string; votes: number }[] | null }
+export interface PollDetail extends PollRow { options: PollOption[]; results: PollResults }
 
-const str = (v: unknown) => (typeof v === "string" && v ? v : null);
-const num = (v: unknown) => (typeof v === "number" && Number.isFinite(v) && v >= 0 ? v : null);
-
-/** Anything unexpected is dropped, never guessed: a poll without a question or with fewer than two options is not shown. */
-export function normalizePoll(raw: unknown): Poll | null {
-  const r = raw as Record<string, unknown> | null;
-  if (!r || typeof r !== "object") return null;
-  const id = str(r.id), question = str(r.question);
-  const opts = (Array.isArray(r.options) ? r.options : []).flatMap((o): PollOption[] => {
-    const x = o as Record<string, unknown>;
-    const oid = str(x?.id), label = str(x?.label);
-    return oid && label ? [{ id: oid, label, label_en: str(x.label_en), votes: num(x.votes) }] : [];
-  });
-  if (!id || !question || opts.length < 2) return null;
-  const visible = r.results_visible === true && opts.every((o) => o.votes !== null);
-  return { id, question, question_en: str(r.question_en), status: r.status === "closed" ? "closed" : "open", closes_at: str(r.closes_at), options: opts, my_vote: str(r.my_vote), results_visible: visible, ...(r.is_sample === true ? { is_sample: true } : {}) };
-}
-
-export type PollsResult = { kind: "planned" } | { kind: "ok"; polls: Poll[] };
-/** A 404 or 501 means the server has no polls yet: that is "not switched on", not an error. */
-export async function fetchPolls(): Promise<PollsResult> {
-  try {
-    const { data } = await api<unknown[]>("/polls?limit=20");
-    return { kind: "ok", polls: (Array.isArray(data) ? data : []).map(normalizePoll).filter((p): p is Poll => p !== null) };
-  } catch (e) {
-    if (e instanceof ApiError && (e.status === 404 || e.status === 501)) return { kind: "planned" };
-    throw e;
-  }
-}
-
-export const votePoll = (id: string, optionId: string, key: string) =>
-  api<unknown>(`/polls/${encodeURIComponent(id)}/vote`, { body: { option_id: optionId }, idempotencyKey: key });
+const q = encodeURIComponent;
+export const fetchPolls = (constituency: string): Promise<OrPlanned<PollRow[]>> =>
+  readOrPlanned<PollRow[]>(`/polls?${new URLSearchParams({ constituency, limit: "20" })}`).then((r) => (r.kind === "ok" && !Array.isArray(r.data) ? { ...r, data: [] } : r));
+export const fetchPoll = (ref: string) => api<PollDetail>(`/polls/${q(ref)}`).then((r) => r.data);
+export const votePoll = (ref: string, optionId: string, key: string) => api<{ voted: boolean }>(`/polls/${q(ref)}/vote`, { body: { option_id: optionId }, idempotencyKey: key });
 
 /** Share of the votes for one option, whole percent; 0 when nobody has voted. */
 export const percent = (votes: number, total: number) => (total > 0 ? Math.round((votes / total) * 100) : 0);
+
+/** Why results are not shown: the poll is still running, or fewer than 5 people have voted. */
+export type WhyHidden = "until_close" | "few_votes";
+export const whyHidden = (r: Pick<PollResults, "status" | "total_votes">, visibility: PollRow["results_visibility"]): WhyHidden =>
+  (r.status === "closed" || visibility === "always") && r.total_votes < 5 ? "few_votes" : "until_close";
+
+export type VoteProblem = "auth" | "again" | "closed" | "fail";
+export function voteProblem(e: unknown): VoteProblem {
+  if (!(e instanceof ApiError)) return "fail";
+  const d = e.fieldErrors._ ?? "";
+  if (e.status === 401) return "auth";
+  if (d === "already_voted" || e.status === 409) return "again";
+  if (d === "poll_closed" || e.status === 410) return "closed";
+  return "fail";
+}
+
+// Office (B5.5) -------------------------------------------------------------------------------------------------------------------------------------
+export interface OfficePoll { ref: string; question: string; status: "draft" | "open" | "closed" | "cancelled"; results_visibility: "after_close" | "always"; closes_at: string | null; created_at: string; constituency?: string }
+export const fetchOfficePolls = (): Promise<OrPlanned<OfficePoll[]>> => readOrPlanned("/office/polls");
+export const createPoll = (b: { constituency: string; question: string; options: string[]; closes_at?: string; results_visibility: "after_close" | "always" }, key: string) =>
+  api<{ ref: string; status: string }>("/office/polls", { body: b, idempotencyKey: key }).then((r) => r.data);
+export const pollAction = (ref: string, a: "publish" | "close" | "cancel") => api<unknown>(`/office/polls/${q(ref)}/${a}`, { body: {} });
+export const officePollResults = (ref: string) => api<PollResults>(`/office/polls/${q(ref)}/results`).then((r) => r.data);

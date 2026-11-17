@@ -3,11 +3,15 @@ import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import QueryProvider from "@/components/QueryProvider";
 import Badge, { type BadgeTone } from "@/components/ui/Badge";
-import Button, { buttonClass } from "@/components/ui/Button";
+import Button from "@/components/ui/Button";
 import CapabilityLabel from "@/components/ui/CapabilityLabel";
 import Card from "@/components/ui/Card";
 import EmptyState from "@/components/ui/EmptyState";
 import PlannedPanel from "@/components/ui/PlannedPanel";
+import ReadAloud from "@/components/ui/ReadAloud";
+import FollowProject from "@/components/projects/FollowProject";
+import ProjectFeedback from "@/components/projects/ProjectFeedback";
+import ProjectCheckins from "@/components/projects/ProjectCheckins";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useLang } from "@/components/ui/useLang";
 import { useShare } from "@/components/ui/useShare";
@@ -21,11 +25,11 @@ const TONE: Record<ProjectStatus, BadgeTone> = { planned: "neutral", in_progress
 const MS_TONE: Record<MilestoneStatus, BadgeTone> = { pending: "neutral", done: "success", delayed: "warning" };
 const MS_ICON: Record<MilestoneStatus, string> = { pending: "○", done: "✓", delayed: "⚠" };
 
-export default function ProjectDetail(props: { refId: string }) {
+export default function ProjectDetail(props: { refId: string; signedIn?: boolean; loginHref?: string }) {
   return <QueryProvider><Inner {...props} /></QueryProvider>;
 }
 
-function Inner({ refId }: { refId: string }) {
+function Inner({ refId, signedIn = false, loginHref = "/login" }: { refId: string; signedIn?: boolean; loginHref?: string }) {
   const t = useT();
   const lang = useLang();
   const q = useQuery({ queryKey: ["project", refId], queryFn: () => fetchProject(refId), retry: (n, e) => !(e instanceof ApiError && e.status === 404) && n < 2 });
@@ -61,6 +65,7 @@ function Inner({ refId }: { refId: string }) {
       <Card as="section" aria-labelledby="pd-about">
         <h2 id="pd-about" className="text-lg font-semibold">{t.pdAbout}</h2>
         <p className="mt-1 whitespace-pre-line break-words">{p.description || t.pdNoDescription}</p>
+        {p.description && <ReadAloud text={p.description} what={t.raWhatProject} />}
         <dl className="mt-2 space-y-0.5 text-sm">
           {p.start_date && <div><dt className="inline text-muted">{t.pdStart} </dt><dd className="inline">{fmtDay(p.start_date, lang)}</dd></div>}
           {p.expected_end_date && <div><dt className="inline text-muted">{t.pdEnd} </dt><dd className="inline">{fmtDay(p.expected_end_date, lang)}</dd></div>}
@@ -111,13 +116,11 @@ function Inner({ refId }: { refId: string }) {
       {p.status === "completed" && (
         <>
           <PlannedPanel title={t.pdEvidenceTitle} body={t.pdEvidenceBody} />
-          <PlannedPanel title={t.pdFeedbackTitle} body={t.pdFeedbackBody} />
+          <ProjectFeedback refId={refId} signedIn={signedIn} loginHref={loginHref} />
         </>
       )}
-      <PlannedPanel title={t.pdFollowTitle} body={t.pdFollowBody}>
-        <Link href="/area" className={buttonClass({ variant: "secondary" })}>{t.navArea}</Link>
-      </PlannedPanel>
-      <div><Button variant="ghost" onClick={() => void share()}>{t.shareLink}</Button></div>
+      <ProjectCheckins refId={refId} signedIn={signedIn} loginHref={loginHref} />
+      <div className="flex flex-wrap items-center gap-2"><FollowProject refId={refId} signedIn={signedIn} loginHref={loginHref} /><Button variant="ghost" onClick={() => void share()}>{t.shareLink}</Button></div>
     </div>
   );
 }

@@ -14,7 +14,8 @@ walk(dict.en, "", en);
 const text = (s: string) => s.replace(/\{[a-zA-Z0-9]+\}/g, "");
 
 // Latin text allowed inside Bangla strings: language names, file formats and a data credit that must keep its proper name.
-const LATIN_OK = new Set(["switchLang", "navLangSwitch", "stLangSwitch", "errPhotoType", "exMapCredit", "odExport"]);
+// Release 1.1 adds the product name WhatsApp and the file names CSV and PDF, which people know in Latin letters.
+const LATIN_OK = new Set(["switchLang", "navLangSwitch", "stLangSwitch", "errPhotoType", "exMapCredit", "odExport", "chnTitle", "chnNavLink", "chnWaNumber", "chnOpenWa", "chnPlannedBody", "chpChannel_whatsapp", "chpLead", "xpCsv", "xpPrintNote", "xpCsvNote"]);
 // "AI-এর পরামর্শ" is the glossary form (§19.3) only where it already appears as বাংলা এআই; reference codes stay Latin.
 
 describe("Bangla strings follow §19.1 and §19.2", () => {

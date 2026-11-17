@@ -1,5 +1,5 @@
 import { api } from "@/lib/api-client";
-import type { Idea, IdeaStatus } from "@/lib/ideas";
+import type { Idea, IdeaStatus, IdeaThreshold, ResponseState } from "@/lib/ideas";
 import type { Category } from "@/lib/types";
 
 /** One idea from `GET /api/v1/ideas` (docs/api-v1.md). `support_count` is a count only, never who. */
@@ -7,6 +7,14 @@ export interface ApiIdea {
   ref: string; constituency_key: string; category: Category | null; title: string; body: string;
   status: "pending_review" | "published" | "under_consideration" | "planned" | "declined";
   decision_note: string | null; created_at: string; is_sample?: boolean; support_count: number;
+  /** B7.5 (present when the office set a threshold for the area). */
+  support_threshold?: number | null; threshold_reached_at?: string | null; response_due_at?: string | null; responded_at?: string | null; response_state?: ResponseState | null;
+}
+
+const STATES: readonly string[] = ["awaiting_response", "overdue", "answered", "answered_late"];
+export function thresholdOf(i: ApiIdea): IdeaThreshold | undefined {
+  if (typeof i.support_threshold !== "number" || i.support_threshold < 1) return undefined;
+  return { target: i.support_threshold, reachedAt: i.threshold_reached_at ?? null, dueAt: i.response_due_at ?? null, respondedAt: i.responded_at ?? null, state: i.response_state && STATES.includes(i.response_state) ? i.response_state : null };
 }
 
 // API statuses to the labels citizens see: a published idea is open for support, a decline is "not planned".
@@ -18,7 +26,7 @@ export function toIdea(i: ApiIdea): Idea {
   return {
     id: i.ref, title: i.title, summary: i.body, category: i.category ?? "other", area: "", supports: i.support_count,
     status: STATUS[i.status] ?? "submitted", createdAt: i.created_at,
-    ...(i.decision_note ? { reason: i.decision_note } : {}), ...(i.is_sample ? { sample: true } : {}),
+    ...(i.decision_note ? { reason: i.decision_note } : {}), ...(i.is_sample ? { sample: true } : {}), ...(thresholdOf(i) ? { threshold: thresholdOf(i) } : {}),
   };
 }
 

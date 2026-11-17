@@ -1,8 +1,10 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
-const PAGES = ["/", "/login", "/me", "/area", "/ideas", "/ideas/new", "/mp", "/mp/method", "/ask", "/ask/inbox", "/notifications", "/welcome", "/settings", "/help", "/privacy", "/terms", "/challenge", "/metrics", "/projects", "/projects/PR-DEMO", "/ideas/ID-DEMO", "/polls", "/accessibility", "/about", "/help/contact", "/offline"];
+const PAGES: string[] = ["/", "/login", "/me", "/area", "/ideas", "/ideas/new", "/mp", "/mp/method", "/ask", "/ask/inbox", "/notifications", "/welcome", "/settings", "/help", "/privacy", "/terms", "/challenge", "/metrics", "/projects", "/projects/PR-DEMO", "/ideas/ID-DEMO", "/polls", "/accessibility", "/about", "/help/contact", "/offline"];
 
+// Release 1.1 pages exist only with their flags (PW_RELEASE11=1). Here they are checked with no data (error and empty states); release11.spec.ts checks them with data, in light and dark.
+if (process.env.PW_RELEASE11 === "1") PAGES.push("/consultations", "/consultations/CN-DEMO", "/consultations/CN-DEMO/report", "/commitments", "/commitments/CM-DEMO", "/priorities", "/help/channels");
 for (const path of PAGES) {
   test(`axe: no serious or critical violations on ${path}`, async ({ page }) => {
     await page.goto(path, { waitUntil: "load" });
