@@ -460,3 +460,107 @@ New types (mutable unless noted): `consultation_opened`, `consultation_report`, 
 
 ### Frontend handoff for Phase 7 (backend cannot do these)
 Screens for each section above; the privacy notice and consent text for linking a number; badges "citizen-submitted", "office commitment", "non-binding"; the print stylesheet for the HTML export; read-aloud buttons that call `GET /ai/speak` and fall back to `speechSynthesis`.
+
+## Phase 8 (Release 2; migrations 0080–0083)
+
+Common rules as before: session identity, strict Zod bodies, per-user and per-IP rate limits, structured errors, `request_id`, CSRF origin check, MFA gate on `/admin/*` and `/office/*`, `Idempotency-Key` accepted on creates. Permission is decided by the database. Each feature has a flag (`GET /features`); flags marked **off** stay off until the named condition is met. Shapes: `src/lib/types.ts` "Phase 8".
+
+### Budget and expenditure transparency (B8.1; flag `budget_transparency`, on)
+Figures are public only while their source document is **verified by a different moderator or administrator** than the person who recorded it. The platform never adds up, estimates or compares amounts.
+
+| Method and path | Body | Notes |
+|---|---|---|
+| `GET /budget/sources?constituency=&fiscal_year=2026-27` | | Public. Verified sources only: title, publisher, link, kind, fiscal year, optional SHA-256 of the archived copy |
+| `GET /budget/entries?constituency=&fiscal_year=&kind=allocated\|released\|spent&project=&source=` | | Public. Each entry names its source, the page (`source_page`) and the link. A withdrawn source or a retracted entry disappears at once |
+| `GET\|POST /office/budget/sources` | `{constituency, title 5..200, publisher, doc_kind, source_url (https), published_on?, fiscal_year (YYYY-YY), doc_sha256?}` | Office with `publish`. Starts `pending`. GET lists with entry counts |
+| `POST /office/budget/sources/{ref}/entries` | `{kind, label 3..150, amount ≥ 0, source_page, project_ref?}` | Source must be pending or verified; `public: true` only when verified |
+| `POST /office/budget/sources/{ref}/withdraw` | `{reason 5..500}` | Hides the source and all its entries |
+| `POST /office/budget/entries/{id}/retract` | `{reason 5..300}` | Hides one entry |
+| `GET /admin/budget/sources` | | Moderator or admin: the verification queue (all areas) |
+| `POST /admin/budget/sources/{ref}/verify` | `{decision: verify\|reject, note? (reject needs 5+)}` | Moderator or admin, never the recorder (409/422 `self_verification`). Audited |
+
+### Agency integrations and signed receipts (B8.2; flag `official_registration`, **off**)
+"Officially registered" (B5.4) still needs a **confirmed** integration. The only automatic path is a receipt signed by the agency's own system (Ed25519); we keep the public key only. Nothing is registered until an agency actually does this.
+
+| Method and path | Body | Notes |
+|---|---|---|
+| `GET /admin/agency-integrations` | | Admin. Integrations with `has_key`, `key_fingerprint` (never the key), `receipts` count |
+| `POST /admin/agency-integrations` | `{agency_id, kind, status, note?}` | As in Phase 5 |
+| `PUT /admin/agency-integrations/{id}/key` | `{public_key_pem}` | Admin. Ed25519 SPKI PEM only (422 otherwise). Audited |
+| `POST /integrations/agency/receipts` | `{integration_id, referral_id, agency_reference 1..120, issued_at (ISO, ≤ 7 days old), signature (base64)}` | Public but signed. Signed text: `jonokotha-receipt-v1\n{integration_id}\n{referral_id}\n{agency_reference}\n{issued_at}`. Every failure is the same 403 (unknown integration, wrong key, other agency's referral, stale). Success sets `officially_registered` with the signed receipt as proof; a replay answers `already: true`. 30 per minute per IP |
+
+### Assisted reporting: volunteers and kiosks (B8.3; flag `assisted_reporting`, **off**)
+A volunteer is a verified account an office manager approved for one area; it carries no office permission. A report for someone else needs the full consent, stored with the case in one transaction. The person's identity is not stored; the case belongs to the volunteer's account, is labelled `assisted` for the office, and follows every normal rule. Texts are drafts (`reviewed: false`).
+
+| Method and path | Body | Notes |
+|---|---|---|
+| `GET /volunteers/rules` | | Public. `conduct_version`, `consent_version`, conduct points and consent text (bn, en) |
+| `POST /volunteers/apply` | `{constituency, accept_conduct: true, conduct_version}` | Verified account. 409 if already applied |
+| `GET /volunteers/me` | | Own records |
+| `POST /volunteers/{id}/withdraw` | | Own record only |
+| `GET /kiosks?constituency=` | | Public help points (label and place) |
+| `GET /office/volunteers?constituency=` | | Office with `assign`: volunteers (with 30-day report counts) and kiosks |
+| `POST /office/volunteers/{id}/decision` | `{decision: approve\|reject\|suspend\|reinstate, note? (reject and suspend need 5+)}` | |
+| `POST /office/kiosks`, `POST /office/kiosks/{id}/retire` | `{constituency, label 3..80, place_text?}` | Office with `assign` |
+| `POST /volunteer/reports` | `{constituency, kiosk_id?, consent: {method: read_aloud_agreed\|signed_paper\|kiosk_screen, version, agreed_to_file: true, agreed_to_publish: true, understands_no_account: true, language}, title, category, description, area?, lat?, lng?}` | Approved volunteer of that area only (403 otherwise). `Idempotency-Key` required. Personal data removed; daily cap per volunteer (`app_settings.assisted_reports_per_day`, default 30, `daily_limit`). Returns the reference to give the person; an emergency phrase returns `emergency` guidance and flags the case |
+| `GET /volunteer/reports` | | The volunteer's own assisted cases |
+
+### Open-data portal (B8.4; flag `open_data`, **off** until counsel confirms the licence)
+| Method and path | Notes |
+|---|---|
+| `GET /open-data` | Public catalogue, `licence` (`code`, `url`, `reviewed`), attribution text, `min_group_size: 5` |
+| `GET /open-data/{slug}?format=json\|csv&constituency=&from=&to=` | Datasets: `issues-monthly`, `resolution-monthly`, `projects`, `budget-entries`. Aggregates drop any cell under 5 and report `hidden_cells` (also header `x-hidden-cells`); header `x-licence`. CSV is UTF-8 with BOM and formula-safe. 30 per minute per IP |
+
+### Regional administration (B8.5; flag `regional_admin`, on)
+A regional administrator is a staff account an administrator scopes to one administrative unit (and everything below it). They see **aggregate counts per area**, never cases, reporters or notes; no policy elsewhere is widened.
+
+| Method and path | Body | Notes |
+|---|---|---|
+| `GET /office/regions/mine` | | Own units |
+| `GET /office/regions/overview?unit=CODE` | | Per area: `open_issues`, `new_30d`, `resolved_30d`, `overdue_first_response`, `active_staff`, `has_mp`. 403 without a scope |
+| `GET\|POST /admin/regional-admins` | `{user_id, unit_code, level, note?}` | Admin. The person must be an active staff account. Audited |
+| `POST /admin/regional-admins/{id}/revoke` | | Admin |
+
+### Participatory budgeting (B8.6; flag `participatory_budgeting`, **off**)
+Only for an office that controls a real budget and pledged to follow the result. A cycle needs a **verified budget source** (B8.1) of the same area, a public pledge, options costing at least half the budget, and the MP's (or an administrator's) approval. Approval voting, one ballot per verified local account, results after closing and with 5+ voters; the office must then record whether it followed the result (a "no" needs a public reason).
+
+| Method and path | Body | Notes |
+|---|---|---|
+| `GET /participatory-budgets?constituency=&status=open\|closed`, `GET /participatory-budgets/{ref}` | | Public; options carry `approvals` and `funded` only after closing with a valid result; `my_ballot` for the signed-in citizen |
+| `PUT /participatory-budgets/{ref}/ballot` | `{option_ids[1..max_choices]}` | Verified account that follows the area; replaceable until closing |
+| `GET\|POST /office/participatory-budgets` | `{constituency, budget_source_ref, title, description?, budget_amount, pledge 20..1000, max_choices 1..10, closes_at (≤ 120 days), options[2..30]: {title, description?, cost}}` | Office with `publish` |
+| `GET /office/participatory-budgets/{ref}` | | Office view with live participant count |
+| `POST /office/participatory-budgets/{ref}/request-open` \| `decision` `{decision: approve\|reject, note?}` (MP or admin) \| `close` \| `outcome` `{followed, reason? (10+ when false)}` \| `cancel` `{reason}` | Funding rule at close: options by approvals (ties: lower cost), while the budget lasts; under 5 voters nothing is funded and `result_valid` is false |
+
+### Right to Information helper (B8.7; flag `rti_helper`, **off** until counsel reviews wording and deadlines)
+The platform drafts and tracks; it **never files or sends** anything and stores no applicant name, address or ID: the draft has bracketed placeholders for the citizen to fill in. Dates are self-reported and labelled so. Working days skip Friday and Saturday only; holidays are unknown, so a due date is the earliest possible.
+
+| Method and path | Body | Notes |
+|---|---|---|
+| `GET /rti/guide` | | Public: steps (bn, en), deadlines from `app_settings.rti_rules` with `reviewed`, official channels with `verified`, `we_never_file: true` |
+| `POST /rti/drafts` | `{agency_id? or agency_name?, subject 5..150, info_requested 20..2000, period?, format: electronic\|paper_copy\|inspection, language: bn\|en}` | Verified account; 50 drafts max. Personal data in the text is removed (`personal_data_removed`). Returns `draft_text` |
+| `GET /rti/drafts`, `GET\|PATCH\|DELETE /rti/drafts/{id}` | PATCH `{action: mark_filed\|mark_answered\|mark_appealed\|close, on?, channel?, agency_reference?}` | Owner only (404 for anyone else). `timeline` = `state`, `earliest_due_on`, `self_reported: true` |
+
+### MP activity from official records (B8.8; flag `mp_records`, **off**)
+Individual records only (question asked, bill introduced, committee membership, debate contribution, other), each with an official source name, link and check date. Written by moderators or administrators (never the MP's own office) and published only by a **second** person who stands behind the plain-Bangla summary. The AI draft is optional, kept only if every number is in the excerpt and no evaluative word is used. **No count, rank, rating or score exists anywhere**; attendance is deliberately not a kind.
+
+| Method and path | Body | Notes |
+|---|---|---|
+| `GET /mp-records?representative_id=&kind=`, `GET /mp-records/{ref}` | | Public, newest first, with a neutrality `note`. Any other query parameter (for example `sort`, `rank`) is refused with 422 |
+| `GET\|POST /admin/mp-records` | `{representative_id, kind, title, occurred_on, session_label?, source_name, source_url (https), source_checked_at, excerpt? ≤ 1500}` | Moderator or admin |
+| `POST /admin/mp-records/{ref}/summary` | `{}` | Needs the excerpt. Returns `summary_draft` (`ai_summary_source: ai_draft`) or `none`. 5 per minute |
+| `POST /admin/mp-records/{ref}/publish` | `{summary_bn 10..800, from_draft?}` | A different person than the creator (409 `self_review`); evaluative wording is a 422 on `summary_bn` |
+| `POST /admin/mp-records/{ref}/withdraw` | `{reason}` | |
+
+### Open311 GeoReport v2, read side (B8.9; flag `open311_api`, **off** until the operator decides to expose it)
+Base `/api/v1/open311/v2/`, `.json` or `.xml` on every path: `discovery`, `services`, `services/{service_code}`, `requests`, `requests/{service_request_id}`. Fields follow the standard; data is the public report view only (approximate points, no reporter, no title). `requests` filters: `service_request_id`, `service_code`, `start_date`, `end_date` (ISO), `status=open,closed`, `jurisdiction_id` (area key); default window 90 days, at most 1000. Sample data is hidden unless `include_sample=true` (not standard). `POST` answers 403 in Open311's error format: a report needs a verified account.
+
+### Second-country readiness (B8.10)
+| Method and path | Body | Notes |
+|---|---|---|
+| `GET /admin/countries/{code}/readiness` | | Admin. Five gates: `legal_review`, `electoral_review`, `data_protection_review`, `language_review`, `hosting_residency`; `ready` |
+| `PUT /admin/countries/{code}/gates/{gate}` | `{status: open\|cleared, evidence_ref 5..300, reviewer 3..150, note?}` | Admin. Clearing needs the document reference and the named external reviewer. Not for `BD` |
+| `POST /country` | as in Phase 5 | Activating any country other than `BD` now needs all five gates cleared (409 `country_not_ready`) |
+
+### Frontend handoff for Phase 8 (backend cannot do these)
+Screens for each section; the labels "assisted report", "verified source", "advisory until the office's pledge is recorded", "self-reported date"; the volunteer conduct and consent screens and the printed consent sheet (texts are drafts); the open-data page with licence and attribution; the MP-record cards (no numbers, no sorting by performance); a kiosk mode (large text, auto-clear after a report) if kiosks are used.
