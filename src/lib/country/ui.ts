@@ -6,8 +6,8 @@
  * Not on the server yet (B5.12): the documented `GET /config/country` that will replace this built-in table. Until then
  * `NEXT_PUBLIC_COUNTRY` (an ISO code present in ADAPTERS) picks the adapter, and the default is "BD".
  */
-import type { Lang } from "./i18n";
-import { digitSet } from "./numerals";
+import type { Lang } from "../i18n";
+import { digitSet } from "../numerals";
 
 type Pair = { bn: string; en: string };
 

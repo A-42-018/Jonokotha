@@ -43,14 +43,14 @@ describe("notification events", () => {
     as(follower); expect((await call(addFollow, "POST", "/api/v1/me/follows", { body: { type: "issue", target: i.ref } })).status).toBe(201);
     as(manager);
     await manager.sb.rpc("transition_issue", { p_issue: i.id, p_to: "acknowledged", p_fields: {} }).throwOnError();
-    const r = await notes(reporter), f = await notes(follower), m = await notes(manager);
+    const r = (await notes(reporter)).filter((n) => n.type === "issue_status"), f = await notes(follower), m = await notes(manager);   // the reporter also gets "report submitted" (Phase 5)
     expect(r).toHaveLength(1); expect(f).toHaveLength(1); expect(m).toHaveLength(0);
     expect(r[0]).toMatchObject({ type: "issue_status", ref: i.ref, title: "অফিস আপনার সমস্যাটি দেখেছে" });
     expect(JSON.stringify(r[0])).not.toMatch(/SECRET/); expect(r[0].data.en.title).toBe("The office has seen your issue");
     // the same event cannot notify twice (dedupe key = event id)
     const { data: ev } = await admin.from("issue_events").select("id").eq("issue_id", i.id).eq("event_type", "status_change");
     await admin.rpc("notify_user", { p_user: reporter.id, p_type: "issue_status", p_title: "x", p_body: "x", p_data: {}, p_dedupe: `ev:${ev![0].id}` });
-    expect(await notes(reporter)).toHaveLength(1);
+    expect((await notes(reporter)).filter((n) => n.type === "issue_status")).toHaveLength(1);
   });
   it("area and category followers hear about new public issues at most once a day; the reporter never", async () => {
     as(stranger); await call(addFollow, "POST", "/api/v1/me/follows", { body: { type: "area", target: A.key } });

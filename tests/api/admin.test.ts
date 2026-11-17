@@ -148,10 +148,10 @@ describe("invitations", () => {
     await sneaky.sb.from("profiles").update({ role: "staff" }).eq("id", sneaky.id);
     expect((await admin.from("profiles").select("role").eq("id", sneaky.id).single()).data!.role).toBe("citizen");
     const second = await makeUser("citizen");
-    const r = await inv(manager, { email: second.email, constituency: A.key, role: "agency_liaison" });
+    const r = await inv(manager, { email: second.email, constituency: A.key, role: "case_officer" });
     as(manager); expect((await call(revokeInv, "POST", `/api/v1/office/invitations/${r.json.data.id}/revoke`, { params: { id: r.json.data.id } })).json.data.revoked).toBe(true);
     expect((await accept(second, r.json.data.invite_token)).status).toBe(404);
-    const third = await makeUser("citizen"); const r3 = await inv(manager, { email: third.email, constituency: A.key, role: "agency_liaison" });
+    const third = await makeUser("citizen"); const r3 = await inv(manager, { email: third.email, constituency: A.key, role: "case_officer" });
     await admin.from("office_invitations").update({ expires_at: new Date(Date.now() - 1000).toISOString() }).eq("id", r3.json.data.id);
     expect((await accept(third, r3.json.data.invite_token)).status).toBe(404);
     expect((await admin.from("profiles").select("role").eq("id", third.id).single()).data!.role).toBe("citizen");

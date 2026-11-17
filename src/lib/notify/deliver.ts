@@ -1,6 +1,8 @@
 import { createPrivateKey, sign } from "node:crypto";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { serviceClient } from "../supabase/service";
+import { renderEmail } from "./templates";
+import { unsubscribeUrl } from "./unsubscribe";
 
 /**
  * Delivery worker for queued push and email notifications (migration 0018). Called by a scheduled job through
@@ -37,7 +39,7 @@ export async function sendEmail(to: string, subject: string, text: string): Prom
   } catch (e) { return { ok: false, error: (e as Error)?.name ?? "error" }; }
 }
 
-interface Claimed { id: string; channel: "push" | "email"; attempts: number; user_id: string; ref: string | null; title: string; body: string | null; data: { en?: { title: string; body: string } } }
+interface Claimed { id: string; channel: "push" | "email"; attempts: number; user_id: string; ref: string | null; type?: string; title: string; body: string | null; data: { en?: { title: string; body: string } } }
 
 async function deliverOne(svc: SupabaseClient, d: Claimed): Promise<"sent" | "failed" | "skipped"> {
   const finish = async (ok: boolean, error?: string, skip = false) => { await svc.rpc("finish_delivery", { p_id: d.id, p_ok: ok, p_error: error ?? null, p_skip: skip }); };
@@ -63,8 +65,8 @@ async function deliverOne(svc: SupabaseClient, d: Claimed): Promise<"sent" | "fa
   if (!to) { await finish(false, "no_email", true); return "skipped"; }
   const app = process.env.NEXT_PUBLIC_APP_URL || "";
   const en = d.data?.en;
-  const text = `${d.title}\n${d.body ?? ""}\n\n${en ? `${en.title}\n${en.body}\n\n` : ""}${app ? `${app}/me/notifications` : ""}`.trim();
-  const r = await sendEmail(to, d.title, text);
+  const { subject, text } = renderEmail({ type: d.type ?? "issue_status", title: d.title, body: d.body, en, appUrl: app || undefined, unsubscribeUrl: app ? unsubscribeUrl(app, d.user_id, d.type ?? "issue_status") : undefined });
+  const r = await sendEmail(to, subject, text);
   if (r.ok) { await finish(true); return "sent"; }
   await finish(false, r.error); return "failed";
 }

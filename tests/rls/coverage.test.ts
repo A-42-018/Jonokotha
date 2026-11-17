@@ -12,20 +12,29 @@ const COVERED = [
   "knowledge_chunks", "knowledge_sources", "notifications", "office_members", "office_permissions", "profiles",
   "representative_constituencies", "representatives", "user_preferences", "sla_policies", "issue_sla", "issue_sla_pauses", "deletion_requests",
 ];
+// Phase 6 (migrations 0060-0062); kept on their own lines so merges with other phases stay trivial.
+const PHASE6_TABLES = ["ingestion_sources", "ingestion_runs", "ingestion_records", "helplines", "retention_policies", "legal_holds", "service_notices", "pentest_findings", "pilot_sites", "pilot_budget_lines", "pilot_cost_entries", "eval_candidates", "ai_thresholds", "stt_test_runs", "kpi_baselines"];
+const PHASE6_VIEWS = ["public_data_sources", "public_helplines", "public_retention_policies", "public_service_notices", "public_kpi_baselines"];
 const PUBLIC_VIEWS = ["public_analytics_reports", "public_announcements", "public_case_events", "public_cases", "public_ideas", "public_project_milestones", "public_projects", "public_question_messages", "public_questions"];
 const ANON_READABLE = ["agencies", "constituencies", "issue_categories", "issue_transitions", "knowledge_sources", "office_permissions", "representative_constituencies", "representative_fields", "representatives"];
+
+// Phase 5 (migrations 0030-0036). Each table has RLS tests in tests/rls/phase5.test.ts.
+COVERED.push("admin_units", "agency_integrations", "approval_requests", "background_jobs", "constituency_units", "country_adapters", "feature_flags", "idea_comments", "integration_settings", "location_change_requests",
+  "office_inbox_counts", "office_tasks", "platform_invitations", "poll_options", "poll_votes", "polls", "product_events", "project_feedback", "security_events");
+PUBLIC_VIEWS.push("public_case_referrals", "public_idea_comments", "public_open311_requests", "public_open311_services", "public_poll_options", "public_polls", "public_project_feedback");
+ANON_READABLE.push("admin_units", "constituency_units", "country_adapters");
 
 describe("RLS coverage guard", () => {
   it("every public table has RLS enabled and RLS tests", () => withClient(async (c) => {
     const { rows } = await c.query("select c.relname, c.relrowsecurity from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='public' and c.relkind='r'");
-    expect(rows.map((r) => r.relname).sort()).toEqual([...COVERED].sort());
+    expect(rows.map((r) => r.relname).sort()).toEqual([...COVERED, ...PHASE6_TABLES].sort());
     expect(rows.filter((r) => !r.relrowsecurity).map((r) => r.relname)).toEqual([]);
   }));
 
   it("anonymous visitors hold no privileges except on reference tables and the two public views", () => withClient(async (c) => {
     const { rows } = await c.query(
       `select table_name from information_schema.role_table_grants where grantee='anon' and table_schema='public' group by table_name order by 1`);
-    expect(rows.map((r) => r.table_name)).toEqual([...ANON_READABLE, ...PUBLIC_VIEWS].sort());
+    expect(rows.map((r) => r.table_name)).toEqual([...ANON_READABLE, ...PUBLIC_VIEWS, ...PHASE6_VIEWS].sort());
     const { rows: w } = await c.query("select 1 from information_schema.role_table_grants where grantee='anon' and table_schema='public' and privilege_type <> 'SELECT'");
     expect(w).toEqual([]);
   }));

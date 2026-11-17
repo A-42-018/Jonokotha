@@ -44,3 +44,7 @@ next-env.d.ts
 /test-results/
 /playwright-report/
 /tests/ai/out/
+
+# consented real evaluation examples (never commit)
+/tests/ai/real/
+*.eval-real.json

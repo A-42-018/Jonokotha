@@ -14,10 +14,10 @@ const requireAdmin = (c: Ctx) => { if (c.actor?.role !== "admin") throw new ApiE
 const idParam = (c: Ctx) => { const r = UUID.safeParse(c.params.id); if (!r.success) throw new ApiError("not_found", "Not found."); return r.data; };
 
 // Invitations -----------------------------------------------------------------------------------------------------------------
-const Invite = z.strictObject({ email: z.email().max(200), constituency: KEY, role: z.enum(["case_officer", "office_manager", "mp", "agency_liaison"]), representative_id: UUID.optional() });
+const Invite = z.strictObject({ email: z.email().max(200), constituency: KEY, role: z.enum(["case_officer", "office_manager", "mp", "agency_liaison"]), representative_id: UUID.optional(), agency_id: UUID.optional() });
 export async function createInvitation(c: Ctx): Promise<Result> {
   const b = parse(Invite, c.body);
-  const out = await rpc<{ id: string; token: string; expires_at: string }>(c.sb, "create_office_invitation", { p_email: b.email, p_constituency: b.constituency, p_role: b.role, p_representative: b.representative_id ?? null });
+  const out = await rpc<{ id: string; token: string; expires_at: string }>(c.sb, "create_office_invitation", { p_email: b.email, p_constituency: b.constituency, p_role: b.role, p_representative: b.representative_id ?? null, p_agency: b.agency_id ?? null });
   let emailed = false;
   if (emailConfigured() && process.env.NEXT_PUBLIC_APP_URL) {
     emailed = (await sendEmail(b.email, "জনকথা: অফিসে যোগ দেওয়ার আমন্ত্রণ", `আপনাকে জনকথায় অফিসের সদস্য হতে আমন্ত্রণ জানানো হয়েছে।\n${process.env.NEXT_PUBLIC_APP_URL}/invite?token=${out.token}\nএই লিংকটি একবার ব্যবহার করা যাবে এবং ৭ দিন পর্যন্ত চলবে। এই ইমেইল ঠিকানা দিয়ে সাইন ইন করে গ্রহণ করুন।`)).ok;
@@ -52,7 +52,7 @@ export async function setAccount(c: Ctx): Promise<Result> {
 }
 
 // Moderation -----------------------------------------------------------------------------------------------------------------------
-const Target = { type: z.enum(["issue", "idea", "question", "media"]), ref: z.string().trim().min(3).max(80).regex(/^[A-Za-z0-9-]+$/, "invalid") };
+const Target = { type: z.enum(["issue", "idea", "question", "media", "idea_comment"]), ref: z.string().trim().min(3).max(80).regex(/^[A-Za-z0-9-]+$/, "invalid") };
 export async function reportContent(c: Ctx): Promise<Result> {
   const b = parse(z.strictObject({ ...Target, reason: z.enum(["abuse", "personal_data", "spam", "false_information", "unsafe", "other"]), details: z.string().trim().max(500).optional() }), c.body);
   return { status: 201, data: await rpc(c.sb, "report_content", { p_type: b.type, p_ref: b.ref, p_reason: b.reason, p_details: b.details ? redactPii(b.details).text : null }) };

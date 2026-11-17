@@ -8,6 +8,7 @@ import { rateLimit } from "./rate-limit";
 import { captureError } from "./monitor";
 import { kickDeliveries } from "./notify/opportunistic";
 import { currentUser } from "./supabase/server";
+import { flagState, inferDataStatus, recordSecurityEvent } from "./capabilities";
 
 /**
  * Shared plumbing for /api/v1 (masterplan §13.10): one error format, request ids, size limits, validation,
@@ -19,7 +20,7 @@ import { currentUser } from "./supabase/server";
 export const ERROR_STATUS = {
   invalid_json: 400, idempotency_key_required: 400, unauthenticated: 401, forbidden: 403, not_found: 404, method_not_allowed: 405,
   invalid_transition: 409, rule_not_met: 409, conflict: 409, idempotency_conflict: 409, idempotency_in_progress: 409,
-  payload_too_large: 413, validation_failed: 422, rate_limited: 429, internal_error: 500, unavailable: 503,
+  payload_too_large: 413, validation_failed: 422, rate_limited: 429, internal_error: 500, unavailable: 503, feature_disabled: 404,
 } as const;
 export type ErrorCode = keyof typeof ERROR_STATUS;
 
@@ -36,7 +37,8 @@ export interface Ctx {
   /** Raw JSON body (already size-checked); {} when the request has none. Validate with `parse`. */
   body: unknown;
 }
-export interface Result { status?: number; data?: unknown; page?: { next_cursor: string | null; limit: number }; headers?: Record<string, string> }
+export type DataStatus = "live" | "sample" | "demo" | "planned";
+export interface Result { status?: number; data?: unknown; dataStatus?: DataStatus; page?: { next_cursor: string | null; limit: number }; headers?: Record<string, string> }
 export interface Opts {
   /** Stable route name, e.g. "POST /api/v1/issues"; used for limits, idempotency and logs. */
   name: string;
@@ -47,6 +49,8 @@ export interface Opts {
   idempotency?: "required" | "optional" | "none";
   /** Uploads: the handler reads `c.req` itself (formData); the body is not parsed here, only its declared size is capped by `maxBytes`. */
   rawBody?: boolean;
+  /** Feature flag key (feature_flags). When the flag is off the route answers 404 `feature_disabled`; otherwise the flag's data_status labels the response. */
+  feature?: string;
 }
 
 const REQUEST_ID = /^[A-Za-z0-9._-]{8,64}$/;
@@ -113,9 +117,10 @@ function log(entry: Record<string, unknown>) {
 /** Runs a v1 handler inside the shared pipeline. */
 export async function run(req: Request, params: Record<string, string>, opts: Opts, handler: (c: Ctx) => Promise<Result>): Promise<Response> {
   const rid = newRequestId(req), started = Date.now(), url = new URL(req.url);
-  let status = 500, actorId: string | undefined, idem: { key: string; sb: SupabaseClient } | null = null;
+  let status = 500, actorId: string | undefined, idem: { key: string; sb: SupabaseClient } | null = null, reqSb: SupabaseClient | null = null, flag: { enabled: boolean; data_status: DataStatus } | null = null;
+  const ip0 = clientIp(req);
   try {
-    const ip = clientIp(req);
+    const ip = ip0;
     if (opts.limit?.ip) {
       const r = rateLimit(`${opts.name}:ip:${ip}`, opts.limit.ip, 60_000);
       if (!r.ok) throw new ApiError("rate_limited", "Too many requests. Try again shortly.", {}, { "Retry-After": String(r.retryAfterSec) });
@@ -123,7 +128,7 @@ export async function run(req: Request, params: Record<string, string>, opts: Op
     if (opts.rawBody && Number(req.headers.get("content-length") ?? 0) > (opts.maxBytes ?? 16 * 1024)) throw new ApiError("payload_too_large", `Body is limited to ${opts.maxBytes} bytes.`);
     const { data: body, raw } = opts.rawBody ? { data: {}, raw: "" } : await readBody(req, opts.maxBytes ?? 16 * 1024);
     const { sb, user, actor } = await currentUser(rid);
-    actorId = user?.id;
+    actorId = user?.id; reqSb = sb;
     // CSRF, second layer (the first is SameSite=Lax on the session cookie): a browser request that changes data must come from this site.
     // Requests without an Origin header (server-to-server, tests, curl) are not browser cross-site requests and carry no ambient cookies of a victim.
     if (req.method !== "GET" && req.method !== "HEAD" && !sameOrigin(req.headers.get("origin"), url.host)) throw new ApiError("forbidden", "Cross-site requests are not allowed.", { _: "cross_site" });
@@ -159,9 +164,15 @@ export async function run(req: Request, params: Record<string, string>, opts: Op
       idem = { key, sb };
     }
 
+    if (opts.feature) {
+      flag = await flagState(sb, opts.feature);
+      if (flag && !flag.enabled) throw new ApiError("feature_disabled", "This feature is not switched on.", { _: opts.feature });
+    }
     const out = await handler({ req, url, rid, ip, sb, user, actor, params, body });
     status = out.status ?? 200;
-    const payload = { data: out.data ?? null, ...(out.page ? { page: out.page } : {}) };
+    // Capability label (B5.13): every response says whether its data is live, sample, demo or planned so the UI can label it.
+    const data_status = out.dataStatus ?? (flag && flag.data_status !== "live" ? flag.data_status : inferDataStatus(out.data));
+    const payload = { data: out.data ?? null, ...(out.page ? { page: out.page } : {}), data_status };
     if (idem) { await idem.sb.rpc("idempotency_finish", { p_key: idem.key, p_endpoint: opts.name, p_status: status, p_body: payload }); idem = null; }
     if (req.method !== "GET" && req.method !== "HEAD") kickDeliveries();
     return NextResponse.json({ ...payload, request_id: rid }, { status, headers: { "x-request-id": rid, ...out.headers } });
@@ -174,6 +185,7 @@ export async function run(req: Request, params: Record<string, string>, opts: Op
     }
     const api = err ?? new ApiError("internal_error", "Something went wrong. Quote the request_id if you contact support.");
     status = ERROR_STATUS[api.code];
+    await recordSecurityEvent(reqSb, api, opts.name, ip0);
     return problem(api, rid);
   } finally {
     log({ level: status >= 500 ? "error" : "info", request_id: rid, route: opts.name, method: req.method, path: url.pathname, status, ms: Date.now() - started, actor: actorId });

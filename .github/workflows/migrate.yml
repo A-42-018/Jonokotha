@@ -1,0 +1,58 @@
+name: Migrate
+# Reviewed database migration flow (backend plan B6.4, docs/aibc/runbooks/deploy-and-rollback.md).
+# Manual only. Choose the environment; `production` should have required reviewers configured on its GitHub Environment,
+# so the apply job waits for approval after the dry-run has been shown. Secrets live in the Environment, not the repository:
+# SUPABASE_ACCESS_TOKEN, SUPABASE_DB_PASSWORD, and the variable SUPABASE_PROJECT_REF for that environment.
+# Needs a GitHub Actions budget; scripts/migrate-env.sh does the same from a laptop.
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Target environment
+        type: choice
+        options: [staging, production]
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}-plan
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npm run lint:migrations
+      - uses: supabase/setup-cli@v1
+        with: { version: latest }
+      - name: Dry run (lists the migrations that would be applied)
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: |
+          supabase link --project-ref "${{ vars.SUPABASE_PROJECT_REF }}"
+          supabase db push --dry-run | tee plan.txt
+      - uses: actions/upload-artifact@v4
+        with: { name: migration-plan, path: plan.txt }
+
+  apply:
+    needs: plan
+    runs-on: ubuntu-latest
+    # Required reviewers on this Environment are the approval gate.
+    environment: ${{ inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with: { version: latest }
+      - name: Apply
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: |
+          supabase link --project-ref "${{ vars.SUPABASE_PROJECT_REF }}"
+          supabase db push
+      - name: Health check
+        run: curl -fsS --max-time 30 "${{ vars.APP_URL }}/api/health"

@@ -77,11 +77,16 @@ export async function listIssuePhotos(sb: SupabaseClient, ref: string) {
     issueId = pub?.id;
   }
   if (!issueId) return [];
-  let q = svc.from("issue_media").select("id,storage_path,caption,width,height,visibility,moderation_status,created_at").eq("issue_id", issueId).order("created_at");
+  let q = svc.from("issue_media").select("id,storage_path,caption,width,height,visibility,moderation_status,created_at,media_type,duration_seconds,poster_path").eq("issue_id", issueId).eq("upload_status", "ready").order("created_at");
   if (!all) q = q.eq("visibility", "public").eq("moderation_status", "approved");
   const { data: rows } = await q;
-  if (!rows?.length) return [];
-  const { data: signed } = await svc.storage.from(BUCKET).createSignedUrls(rows.map((r) => r.storage_path), 300);
-  const url = new Map((signed ?? []).map((s) => [s.path, s.signedUrl]));
-  return rows.map((r) => ({ id: r.id, url: url.get(r.storage_path) ?? null, caption: r.caption, width: r.width, height: r.height, ...(all ? { visibility: r.visibility, moderation_status: r.moderation_status } : {}) }));
+  const ready = (rows ?? []).filter((r) => r.media_type !== "video" || r.moderation_status !== "rejected");
+  if (!ready.length) return [];
+  const sign = async (bucket: string, paths: string[]) => new Map(((await svc.storage.from(bucket).createSignedUrls(paths, 300)).data ?? []).map((s) => [s.path, s.signedUrl]));
+  const photoUrls = await sign(BUCKET, ready.filter((r) => r.media_type !== "video").map((r) => r.storage_path));
+  const videos = ready.filter((r) => r.media_type === "video");
+  const videoUrls = videos.length ? await sign("issue-video", videos.flatMap((r) => [r.storage_path, ...(r.poster_path ? [r.poster_path] : [])])) : new Map<string, string>();
+  return ready.map((r) => ({ id: r.id, type: r.media_type === "video" ? "video" : "image", url: (r.media_type === "video" ? videoUrls : photoUrls).get(r.storage_path) ?? null,
+    ...(r.media_type === "video" ? { poster_url: r.poster_path ? videoUrls.get(r.poster_path) ?? null : null, duration_seconds: r.duration_seconds } : {}),
+    caption: r.caption, width: r.width, height: r.height, ...(all ? { visibility: r.visibility, moderation_status: r.moderation_status } : {}) }));
 }
