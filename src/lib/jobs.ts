@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { deliverDue } from "./notify/deliver";
 import { scanForMalware } from "./media";
+import { runRelease11Maintenance, runWeeklyBriefs } from "./briefs";
 
 /**
  * Background job runner (B5.8; masterplan §10.1, §20). One queue (background_jobs, migration 0034) for notifications, media processing,
@@ -8,7 +9,7 @@ import { scanForMalware } from "./media";
  * exponential backoff and land in the dead-letter state after max_attempts (admin can requeue). Handlers must be idempotent.
  * Run it from a scheduled route (POST /api/internal/jobs/run, daily on Vercel Hobby, more often elsewhere) or opportunistically.
  */
-export type JobKind = "notify_deliver" | "media_scan" | "ai_task" | "ingest" | "poll_maintenance" | "purge";
+export type JobKind = "notify_deliver" | "media_scan" | "ai_task" | "ingest" | "poll_maintenance" | "purge" | "release11_maintenance" | "weekly_briefs";
 export interface Job { id: string; kind: JobKind; payload: Record<string, unknown>; attempts: number; max_attempts: number }
 export type Handler = (sb: SupabaseClient, payload: Record<string, unknown>) => Promise<unknown>;
 
@@ -26,6 +27,8 @@ export const HANDLERS: Record<JobKind, Handler> = {
     if (paths.length) await sb.storage.from("issue-media").remove(paths);
     return { security_events_purged: sec.data, photos_removed: paths.length };
   },
+  release11_maintenance: async (sb) => runRelease11Maintenance(sb),
+  weekly_briefs: async (sb) => runWeeklyBriefs(sb),
   // Photos stored while no scanner was configured are scanned when one appears. Fails closed: an infected file is marked and made private.
   media_scan: async (sb) => {
     if (!process.env.MALWARE_SCAN_URL) return { skipped: "no scanner configured" };

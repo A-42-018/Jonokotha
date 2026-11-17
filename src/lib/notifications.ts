@@ -4,7 +4,9 @@ import { vapidConfigured } from "./notify/deliver";
 import { PageQuery } from "./pagination";
 import { decodeFeedCursor, encodeFeedCursor } from "./feed-cursor";
 
-export const NOTIFICATION_TYPES = ["issue_status", "new_in_area", "question_reply", "question_message", "idea_decision", "announcement", "project_update"] as const;
+export const NOTIFICATION_TYPES = ["issue_status", "new_in_area", "question_reply", "question_message", "idea_decision", "announcement", "project_update",
+  // Release 1.1 (B7.13): non-essential, so people can mute them
+  "consultation_opened", "consultation_report", "idea_update", "idea_threshold", "idea_response_due", "area_alert", "checkin_response", "brief_ready"] as const;
 const COLS = "id,type,title,body,data,ref,read_at,created_at";
 
 export async function listNotifications(c: Ctx): Promise<Result> {
@@ -40,14 +42,14 @@ export async function markRead(c: Ctx, all: boolean): Promise<Result> {
 
 const Hhmm = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, "HH:MM");
 const Prefs = z.strictObject({
-  channels: z.strictObject({ in_app: z.literal(true).optional(), push: z.boolean().optional(), email: z.boolean().optional() }).optional(),
+  channels: z.strictObject({ in_app: z.literal(true).optional(), push: z.boolean().optional(), email: z.boolean().optional(), sms: z.boolean().optional(), whatsapp: z.boolean().optional() }).optional(),
   muted_types: z.array(z.enum(NOTIFICATION_TYPES)).max(20).optional(),
   quiet_hours: z.strictObject({ start: Hhmm, end: Hhmm }).nullable().optional(),
   timezone: z.string().max(60).refine((tz) => { try { new Intl.DateTimeFormat("en", { timeZone: tz }); return true; } catch { return false; } }, "unknown time zone").optional(),
   personalization_enabled: z.boolean().optional(),
 });
 const prefOut = (r: Record<string, unknown> | null) => ({
-  channels: r?.channels ?? { in_app: true, push: false, email: false }, muted_types: r?.muted_types ?? [], quiet_hours: r?.quiet_hours ?? null,
+  channels: r?.channels ?? { in_app: true, push: false, email: false, sms: false, whatsapp: false }, muted_types: r?.muted_types ?? [], quiet_hours: r?.quiet_hours ?? null,
   timezone: r?.timezone ?? "Asia/Dhaka", personalization_enabled: r?.personalization_enabled ?? true,
 });
 
@@ -59,7 +61,7 @@ export async function putPreferences(c: Ctx): Promise<Result> {
   const b = parse(Prefs, c.body);
   const { data: cur } = await c.sb.from("user_preferences").select("channels").eq("user_id", c.user!.id).maybeSingle();
   const patch: Record<string, unknown> = {};
-  if (b.channels) patch.channels = { in_app: true, push: false, email: false, ...((cur?.channels as object) ?? {}), ...b.channels };
+  if (b.channels) patch.channels = { in_app: true, push: false, email: false, sms: false, whatsapp: false, ...((cur?.channels as object) ?? {}), ...b.channels };
   if (b.muted_types) patch.muted_types = [...new Set(b.muted_types)];
   if (b.quiet_hours !== undefined) patch.quiet_hours = b.quiet_hours;
   if (b.timezone) patch.timezone = b.timezone;

@@ -368,3 +368,95 @@ All routes follow the common rules (session identity, strict Zod bodies, rate li
 4. Optional switch "use my report to test the AI" calling `POST /me/consents {consent_type: "ai_eval_example"}` and `POST /me/eval-examples`; plain Bangla copy that it is optional, redacted, reviewed by a person and removable.
 5. Public "how we measure" page from `GET /kpi-baselines` and `GET /retention-policies`, with definitions and method visible.
 6. Admin screens for the registers above (sources, helplines, holds, notices, pen-test, pilot, eval review, thresholds) can wait; every action works over the API.
+
+## Phase 7 (Release 1.1; migrations 0070–0074)
+
+Common rules as before: session identity, strict Zod bodies, per-user and per-IP rate limits, structured errors, `request_id`, CSRF origin check, MFA gate on `/admin/*` and `/office/*`, `Idempotency-Key` accepted on creates. Permission is decided by the database. Every public figure follows the **5-person rule** (a number that would describe fewer than 5 people is `null` with a `suppressed` flag). Feature flags (`GET /features`): `consultations`, `idea_arguments`, `idea_threshold`, `project_checkins`, `surveys`, `commitments`, `priority_ranking`, `weekly_briefs`, `exports` are on; `whatsapp_intake`, `sms_intake`, `channel_notifications`, `read_aloud` are **planned** (a route behind an off flag answers 404 `feature_disabled`). Error details in `field_errors._`: `consultation_closed`, `statement_limit`, `duplicate`, `moderated`, `not_open`, `published`, `no_report`, `not_closed`, `argument_limit`, `argument_daily_limit`, `own_point`, `checkin_limit`, `checkin_daily_limit`, `photo_not_allowed`, `survey_closed`, `already_answered`, `round_closed`, `address_in_use`, `link_limit`, `alert_limit`, `reviewed`, `tts_not_configured`, `tts_failed`, `mfa_required`.
+
+### Consultations (B7.1)
+Lifecycle: draft → (pending_approval →) open → closed → reported. Where the area requires MP approval and an MP is active, an office manager's "open" waits for the MP or an administrator (the same rule as announcements). Statements are 5–140 characters, no replies. One vote per verified account per statement; a vote can be changed while open.
+
+| Method and path | Body | Notes |
+|---|---|---|
+| `GET /consultations?constituency=&status=open\|closed\|reported` | | Public. `statement_count`, `participant_count` (null under 5) |
+| `GET /consultations/{ref}` | | Public. `statements[]` (`id, text, kind, my_vote`), `next_statement_id` (first one you have not voted on). **No per-statement counts** until the report is published |
+| `POST /consultations/{ref}/statements` | `{text: 5..140}` | Verified account. Goes to `pending_review`; max 3 per consultation, 10 a day. Personal data is removed first |
+| `PUT /consultations/{ref}/statements/{id}/vote` | `{vote: agree\|disagree\|pass}` | Verified account; open consultations only. 409 `consultation_closed` |
+| `GET /consultations/{ref}/report` | | Public, published reports only: groups (A, B; at least 5 people each; `hidden_groups` counts the rest), per-statement agreement overall and per group, `pattern` (`common_ground\|divided\|mixed\|low_support`), `summary_bn`, `you_said_we_did`, `actions` |
+| `GET\|POST /office/consultations` | `{constituency, question 10..200, description?, seed_statements[≤10], closes_at (≤120 days)}` | `publish` permission. Starts as a draft with approved seed statements |
+| `GET /office/consultations/{ref}` | | Draft state, all statements with moderation status, the report draft |
+| `POST /office/consultations/{ref}/status` | `{action: open\|close}` | Open needs 2 approved statements. Returns `pending_approval` when the MP rule applies |
+| `POST /office/consultations/{ref}/decision` | `{decision: approve\|reject, note? (reject needs 5+)}` | MP (`approve` permission) or admin |
+| `POST /office/consultations/{ref}/statements/{id}/moderate` | `{action: approve\|reject, reason? (reject)}` | Office with `publish`, moderator or admin |
+| `POST /office/consultations/{ref}/summary` | `{generate_narrative?: boolean}` | Needs `view_analytics`. Groups the (identity-free) vote matrix, stores an aggregate **draft**; the AI note is kept only if every number in it is in the data. 5 per minute |
+| `PUT /office/consultations/{ref}/report` | `{summary_bn (the reviewed text), you_said_we_did?, actions[], publish?: boolean}` | Review; with `publish: true` (consultation must be closed, `you_said_we_did` 20+ chars) the report goes public, the consultation becomes `reported`, and participants and area followers are notified |
+
+### Messaging channels (B7.2, B7.4)
+A phone number is linked from the app first (so every message maps to a real account). Consent and the privacy notice come first; the case is created only after "হ্যাঁ"/"yes" to the draft.
+
+| Method and path | Body | Notes |
+|---|---|---|
+| `GET /me/channels` | | Own links (`address_hint` is the last 3 digits) |
+| `POST /me/channels` | `{channel: whatsapp\|sms, address (+8801…), accept_privacy: true, policy_version?}` | Records the consent (`channel_whatsapp`/`channel_sms`) and returns a one-time `code` (30 minutes) the person sends **from that number**. 409 `address_in_use`, 429-style `link_limit` |
+| `PATCH /me/channels/{id}` | `{updates_enabled}` | Stop or resume updates on that channel |
+| `DELETE /me/channels/{id}` | | Deletes the number, withdraws the consent, blanks stored messages |
+| `PUT /me/notification-preferences` | `channels: {sms?, whatsapp?}` added | SMS and WhatsApp updates need the switch **and** an active link; they carry only the generic title and reference |
+| `GET\|POST /webhooks/whatsapp` | provider payload | Meta handshake (`hub.challenge`) and inbound messages. `X-Hub-Signature-256` is checked against `WHATSAPP_APP_SECRET` (401 otherwise). Behind flag `whatsapp_intake` |
+| `POST /webhooks/sms` | `{id, from, text}` | Header `x-signature` = HMAC-SHA256(raw body, `SMS_WEBHOOK_SECRET`). Behind flag `sms_intake` |
+| `GET /admin/channels/costs` | | Messages, segments and spend this month per channel; spend counts only messages whose price the operator configured (`messages_without_known_cost`) |
+| `PUT /admin/channels/budget` | `{channel, month?, budget_usd}` | Alert to administrators at 80 % and 100 %; non-essential sends pause at 100 % |
+| `POST /office/area-alerts`, `GET /area-alerts?constituency=` | `{constituency, title_bn, title_en?, body?}` | Office with `publish`; 2 a day per area. Goes to followers of the area in-app and on the channels they switched on |
+
+Inbound conversation (fixed texts, Bangla first): unknown number → "link your account" (nothing stored); a message with a valid code from the claimed number → link and privacy notice; text → emergency guidance if imminent harm is detected (no AI, nothing created), otherwise a draft is sent back; "হ্যাঁ" creates the issue (`source_channel` = `whatsapp`\|`sms`, same reference, timeline, rate limits); "না" cancels. SMS text is limited to 3 parts (UCS-2: 70/67 units per part) and shortened at a grapheme boundary.
+
+### Ideas: for/against points and support threshold (B7.5)
+| Method and path | Body | Notes |
+|---|---|---|
+| `GET /ideas/{ref}/arguments` | | `{for: [], against: []}`, most helpful first |
+| `POST /ideas/{ref}/arguments` | `{side: for\|against, body 5..280}` | Verified; publishes at once, can be reported (`POST /reports` now accepts `type: idea_argument`). 3 per idea, 10 a day |
+| `PUT /ideas/{ref}/arguments/{id}/helpful` | `{on}` | One mark per account; not on your own point |
+| `GET\|PUT /office/constituencies/{key}/idea-policy` | `{support_threshold: 3..100000, response_days: 3..90}` | `decide` permission. Ideas already past the threshold are marked at once |
+| (public ideas) | | `GET /ideas` and `/ideas/{ref}` gain `support_threshold, threshold_reached_at, response_due_at, responded_at, response_state` (`awaiting_response\|overdue\|answered\|answered_late`, computed on read). Only supporters who follow the area count toward the threshold. `POST /office/ideas/{ref}/decision` on such an idea needs a reasoned note (20+) |
+
+### Project check-ins (B7.3)
+| Method and path | Body | Notes |
+|---|---|---|
+| `GET /projects/{ref}/checkins` | | Approved only; `label: "citizen_submitted"`, `photo_url` (signed, 5 min) |
+| `POST /projects/{ref}/checkins` | `{note 5..500, visited_at? (≤60 days back)}` | Verified; 2 per project and 5 a day. Pending until reviewed |
+| `POST /projects/{ref}/checkins/{id}/photo` | multipart `file` | The author, once, while pending. JPEG/PNG/WebP, 8 MB; re-encoded (EXIF and GPS dropped); malware hook |
+| `GET /office/projects/{ref}/checkins` | | All states |
+| `POST /office/checkins/{id}/moderate` | `{action: approve\|hide, reason? (hide)}` | Office `publish`, moderator, admin. Nothing here changes the project's official status |
+| `POST /office/checkins/{id}/response` | `{text 5..500}` | Public office response; the author is notified |
+
+### Surveys, satisfaction, commitments, priorities (B7.6–B7.8)
+| Method and path | Body | Notes |
+|---|---|---|
+| `GET /surveys`, `GET /surveys/{ref}` | | Open and closed surveys with questions |
+| `POST /surveys/{ref}/responses` | `{answers: {<question id>: 1..5 \| "<option>"}}` | Verified; every question answered; once (409 `already_answered`) |
+| `GET /surveys/{ref}/results` | | Office any time; others after closing and with 5+ respondents |
+| `GET\|POST /office/surveys`, `POST /office/surveys/{ref}/status` | `{constituency, title, description?, questions[1..8]: {kind: rating\|choice, prompt, options?}, closes_at?}`; `{status: open\|closed\|cancelled}` | Rating and fixed choices only (no free text) |
+| `GET /analytics/satisfaction?constituency=&days=` | | Public: average and distribution of after-closure ratings; null under 5 ratings |
+| `GET /commitments`, `GET /commitments/{ref}` | `?constituency=&status=` | Public; `label: "office_commitment"`, links to announcement, project and idea, `history[]` |
+| `GET\|POST /office/commitments` | `{constituency, title, description?, due_date?, announcement_ref?, project_ref?, idea_ref?, publish?}` | Links must be in the same area. With the MP rule, publishing waits (`pending_approval`) |
+| `POST /office/commitments/{ref}/decision`, `/status` | `{decision, note?}`; `{status: in_progress\|delivered\|delayed\|dropped, note?, evidence_url? (https), evidence_text?}` | `delivered` needs evidence; `delayed` and `dropped` need a public reason (10+). History is append-only |
+| `GET /priorities`, `GET /priorities/{ref}` | | Non-binding rounds (`label: "non_binding"`) |
+| `PUT /priorities/{ref}/ranking` | `{items: [id…] (1..5, in order)}` | A verified account that follows the area; replaceable until close |
+| `GET /priorities/{ref}/results` | | Points per need (rank 1 = 5 … rank 5 = 1) after closing with 5+ participants; office any time |
+| `GET\|POST /office/priorities`, `POST /office/priorities/{ref}/status` | `{constituency, title, description?, items[3..12], closes_at?}`; `{status}` | |
+
+### Briefs, exports, heatmaps, KPIs, read-aloud (B7.9–B7.13)
+| Method and path | Notes |
+|---|---|
+| `GET /office/briefs`, `POST /office/briefs/{id}/review` `{decision: approve\|withdraw, narrative?}` | Weekly job creates one **draft** per area (counts only; the Insight Agent drafts prose when a key exists and the numbers check passes). Reviewers (`publish`) see drafts; approving shares it with the office and notifies them |
+| `GET /office/exports?kind=cases\|ideas&constituency=&days=&format=csv\|html` | `view_analytics`. CSV is UTF-8 with BOM and formula-injection guard; `html` is print-ready (the browser prints it to PDF with correct Bangla shaping). No titles, descriptions, names or exact locations. Audited with kind, format, row count |
+| `GET /analytics/heatmap?constituency=&days=&category=&cell_m=500..5000` | Public. Cells with 5+ public issues only; `cells_hidden` counts the rest; `emerging` flag |
+| `GET /office/analytics/clusters?...&cell_m=250..5000` | Same rule at finer cells plus `category_clusters` |
+| `GET /office/kpis/release-1-1?constituency=&days=`, `GET /admin/kpis/release-1-1` | Consultation participation and report rate, idea-threshold on-time rate, check-ins, priority and survey participation, channel share, satisfaction, area alerts, commitments delivered. Each with `definition` |
+| `GET /ai/speak` | `{available, lang, max_chars, fallback}`. With `available: false` use the browser's speech synthesis (`bn-BD`) |
+| `POST /ai/speak` | `{text ≤1200, lang?}` → audio. Signed-in; personal data redacted before the provider; 503 `tts_not_configured` without a provider. Behind flag `read_aloud` |
+
+### Notification events (B7.13)
+New types (mutable unless noted): `consultation_opened`, `consultation_report`, `idea_update`, `idea_threshold` (office), `idea_response_due` (office), `area_alert`, `checkin_response`, `brief_ready` (office), `channel_reply` (a public office reply on a WhatsApp/SMS case; carried on the same channel), `channel_cost_alert` (admin). Jobs: `release11_maintenance` (hourly: close due consultations, surveys and rounds, idea reminders 48 h before and once when overdue, channel cost alerts, trim messages older than 90 days, delete files of erased accounts) and `weekly_briefs` (weekly), both run by `POST /api/internal/jobs/run`.
+
+### Frontend handoff for Phase 7 (backend cannot do these)
+Screens for each section above; the privacy notice and consent text for linking a number; badges "citizen-submitted", "office commitment", "non-binding"; the print stylesheet for the HTML export; read-aloud buttons that call `GET /ai/speak` and fall back to `speechSynthesis`.
