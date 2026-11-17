@@ -39,6 +39,24 @@ h1, h2, h3 { font-family: var(--font-heading); }
 /* Readable Bangla body text (redesign §3.2): 17px with 1.7 line height; never below 15px for meta. */
 .jk-body { font-size: 1.0625rem; line-height: 1.7; }
 /* Soft card depth instead of grey borders (redesign §3.3). */
+/* The header is sticky from xl (1280px): keep anchors and keyboard focus clear of it. */
+@media (min-width: 80rem) { html { scroll-padding-top: 5rem; } }
+
+/* Desktop hero (xl+, 1280px): the scene is a full-width background and the headline sits on its empty left side. The art stops 6rem above the hero bottom (the cards
+   lift 6rem over that strip), with a short fade on its bottom edge so the ground dissolves into the page. The scene is light in both themes, so the copy keeps fixed dark ink (the small link uses ink: over the orange water it is 6.0:1 median and 4.7:1 worst case; #004d38 was 4.0 and 3.1). */
+@media (min-width: 80rem) {
+  .jk-hero-pic img {
+    -webkit-mask-image: linear-gradient(to bottom, #000 94%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 94%, transparent 100%);
+  }
+  html[data-theme="dark"] .jk-hero-pic .jk-hero-art { border-radius: 0; }
+  html[data-theme="dark"] .jk-hero-copy h1 { color: var(--color-ink); }
+  html[data-theme="dark"] .jk-hero-copy p { color: var(--color-ink-2); }
+  html[data-theme="dark"] .jk-hero-copy a.text-civic { color: var(--color-ink); }
+}
+
+/* The one elevation recipe (green-tinted). Cards use .jk-card, standalone raised controls such as the hero button use .jk-lift; no Tailwind shadow-md on the home page. */
+.jk-lift { box-shadow: 0 1px 2px rgb(27 42 34 / 0.06), 0 8px 24px rgb(27 42 34 / 0.08); }
 .jk-card { background: #fff; border-radius: 1rem; box-shadow: 0 1px 2px rgb(27 42 34 / 0.06), 0 8px 24px rgb(27 42 34 / 0.08); }
 html[data-theme="dark"] .jk-card { background: var(--dk-surface); box-shadow: 0 0 0 1px var(--dk-s200); }
 

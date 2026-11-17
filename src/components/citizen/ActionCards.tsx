@@ -19,7 +19,7 @@ export default function ActionCards({ t, trackError }: { t: Dict; trackError: bo
     <img src={`${ART}/card-${name}.webp`} alt="" width={320} height={320} loading="lazy" decoding="async" className={cls} />
   );
   return (
-    <section aria-label={t.rfActionsAria} className="relative z-10 mt-6 lg:-mt-16 lg:px-6">
+    <section aria-label={t.rfActionsAria} className="relative z-10 mt-6 xl:-mt-24">
       <ul className="grid gap-3 lg:grid-cols-3 lg:gap-6">
         {cards.map((c) => (
           <li key={c.key} className="jk-card overflow-hidden">

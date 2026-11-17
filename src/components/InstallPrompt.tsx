@@ -50,7 +50,7 @@ export default function InstallPrompt() {
   return (
     <section
       aria-labelledby="install-title"
-      className="fixed inset-x-3 bottom-[5.5rem] z-40 mx-auto lg:bottom-3 max-w-md rounded-2xl border border-slate-200 bg-white p-4 shadow-lg"
+      className="fixed inset-x-3 bottom-[5.5rem] z-40 mx-auto xl:bottom-3 max-w-md rounded-2xl border border-slate-200 bg-white p-4 shadow-lg"
       style={{ marginBottom: "env(safe-area-inset-bottom)" }}
     >
       <h2 id="install-title" className="font-semibold text-slate-900">{t.installTitle}</h2>

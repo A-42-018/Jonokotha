@@ -38,7 +38,7 @@ export function ToastProvider({ children, lang }: { children: ReactNode; lang?: 
   return (
     <Ctx.Provider value={value}>
       {children}
-      <div className="pointer-events-none fixed inset-x-4 bottom-[calc(6rem+env(safe-area-inset-bottom))] z-50 lg:bottom-4 flex justify-center">
+      <div className="pointer-events-none fixed inset-x-4 bottom-[calc(6rem+env(safe-area-inset-bottom))] z-50 xl:bottom-4 flex justify-center">
         {item && <ToastView key={item.id} tone={item.tone} message={item.message} closeLabel={t.uiDismiss} onClose={() => setItem(null)} />}
       </div>
     </Ctx.Provider>

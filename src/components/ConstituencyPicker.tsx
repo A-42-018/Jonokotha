@@ -65,7 +65,7 @@ export default function ConstituencyPicker({ selected, signedIn, lang, labels }:
         aria-haspopup="dialog"
         // WCAG 2.5.3: the visible words (the area name, then the sample badge, with a space between them) are all inside the name.
         aria-label={`${labels.open}: ${name(current)}${current.sample ? ` ${labels.sample}` : ""}`}
-        className="inline-flex min-h-11 max-w-full items-center gap-1.5 rounded-full border border-white/50 bg-white/10 px-3 text-[0.9375rem] font-medium text-white hover:bg-white/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:max-w-72"
+        className="inline-flex min-h-11 min-w-0 max-w-full items-center gap-1.5 rounded-full border border-white/50 bg-white/10 px-3 text-[0.9375rem] font-medium text-white hover:bg-white/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:max-w-72"
       >
         <span aria-hidden>📍</span>
         <span className="truncate">{name(current)}</span>
