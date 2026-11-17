@@ -5,11 +5,14 @@ import { heuristicDraft, draftFromText } from "../../src/lib/intake";
 import { redactPii } from "../../src/lib/pii";
 import { pickAgency, similarity } from "../../src/lib/store";
 import { embed, embeddingModel, embeddingsConfigured, issueEmbeddingText } from "../../src/lib/ai/embeddings";
+import { realExamplesToCases } from "../../src/lib/eval-real/dataset";
 import { DUPLICATE_MIN_SCORE } from "../../src/lib/ai/duplicates";
 
 type Case = { id: string; lang: "bn" | "en" | "banglish"; text: string; category: string; agency: string; area: string; dup_group?: string; pii?: { kind: string; value: string }[]; note?: string };
 const data = JSON.parse(readFileSync("tests/ai/dataset.v0.json", "utf8")) as { version: string; cases: Case[] };
-const cases = data.cases;
+// Optional: consented real examples (npm run eval with EVAL_REAL_EXPORT=path to the file from GET /api/v1/admin/ai/eval-set). The file stays out of git.
+const real = process.env.EVAL_REAL_EXPORT ? realExamplesToCases(JSON.parse(readFileSync(process.env.EVAL_REAL_EXPORT, "utf8")).data ?? JSON.parse(readFileSync(process.env.EVAL_REAL_EXPORT, "utf8"))) : [];
+const cases = [...data.cases, ...real] as Case[];
 const pct = (n: number, d: number) => (d ? `${((100 * n) / d).toFixed(1)}% (${n}/${d})` : "n/a");
 const LANGS = ["bn", "en", "banglish"] as const;
 const digits = (s: string) => s.replace(/[০-৯]/g, (c) => String("০১২৩৪৫৬৭৮৯".indexOf(c))).replace(/\D/g, "");

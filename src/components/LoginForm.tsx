@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { normalizeOtp } from "@/lib/digits";
 import { useRouter } from "next/navigation";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import Button from "@/components/ui/Button";
@@ -25,7 +26,7 @@ export default function LoginForm({ next = "/report" }: { next?: string }) {
   }
   async function verify() {
     setBusy(true); setCodeErr("");
-    const { error } = await supabaseBrowser().auth.verifyOtp({ email, token: code.trim(), type: "email" });
+    const { error } = await supabaseBrowser().auth.verifyOtp({ email, token: normalizeOtp(code), type: "email" });
     setBusy(false);
     if (error) setCodeErr(t.loginVerifyFail); else { router.push(next); router.refresh(); }
   }

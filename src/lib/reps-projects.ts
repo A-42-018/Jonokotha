@@ -79,7 +79,7 @@ const PStatus = z.enum(["planned", "in_progress", "completed", "paused", "cancel
 export async function listProjects(c: Ctx): Promise<Result> {
   const q = Object.fromEntries(c.url.searchParams);
   const f = parse(z.object({ constituency: KEY.optional(), status: PStatus.optional(), limit: z.coerce.number().int().min(1).max(50).default(20) }), q);
-  let sel = c.sb.from("public_projects").select("ref,constituency_key,title,description,status,budget_text,start_date,expected_end_date,source_url,source_checked_at,is_demo,updated_at").order("updated_at", { ascending: false }).limit(f.limit);
+  let sel = c.sb.from("public_projects").select("ref,constituency_key,title,description,status,budget_text,start_date,expected_end_date,source_url,source_checked_at,is_demo,updated_at,budget_source,budget_verified_at,procurement_ref,contractor_name,delay_explanation").order("updated_at", { ascending: false }).limit(f.limit);
   if (f.constituency) sel = sel.eq("constituency_key", f.constituency);
   if (f.status) sel = sel.eq("status", f.status);
   const { data, error } = await sel;
@@ -88,7 +88,7 @@ export async function listProjects(c: Ctx): Promise<Result> {
 }
 export async function getProject(c: Ctx): Promise<Result> {
   const ref = checkRef(c.params.ref);
-  const { data } = await c.sb.from("public_projects").select("ref,constituency_key,title,description,status,budget_text,start_date,expected_end_date,source_url,source_checked_at,is_demo,updated_at").eq("ref", ref).maybeSingle();
+  const { data } = await c.sb.from("public_projects").select("ref,constituency_key,title,description,status,budget_text,start_date,expected_end_date,source_url,source_checked_at,is_demo,updated_at,budget_source,budget_verified_at,procurement_ref,contractor_name,delay_explanation").eq("ref", ref).maybeSingle();
   if (!data) throw new ApiError("not_found", "Project not found.");
   const { data: ms } = await c.sb.from("public_project_milestones").select("id,title,due_date,status,note,completed_at").eq("project_ref", ref).order("due_date", { ascending: true, nullsFirst: false });
   const { is_demo, ...rest } = data;
@@ -102,8 +102,8 @@ export async function createProject(c: Ctx): Promise<Result> {
     p_budget: b.budget_text ?? null, p_start: b.start_date ?? null, p_end: b.expected_end_date ?? null, p_source: b.source_url ?? null, p_checked: b.source_checked_at ?? null }) };
 }
 export async function updateProject(c: Ctx): Promise<Result> {
-  const b = parse(z.strictObject({ status: PStatus.optional(), expected_end_date: day.optional() }), c.body);
-  return { data: await rpc(c.sb, "update_project", { p_ref: checkRef(c.params.ref), p_status: b.status ?? null, p_end: b.expected_end_date ?? null }) };
+  const b = parse(z.strictObject({ status: PStatus.optional(), expected_end_date: day.optional(), delay_explanation: z.string().trim().min(10, "at least 10 characters").max(500).optional() }), c.body);
+  return { data: await rpc(c.sb, "update_project", { p_ref: checkRef(c.params.ref), p_status: b.status ?? null, p_end: b.expected_end_date ?? null, p_delay: b.delay_explanation ? redactPii(b.delay_explanation).text : null }) };
 }
 export async function addMilestone(c: Ctx): Promise<Result> {
   const b = parse(z.strictObject({ title: text(3, 150), due_date: day.optional() }), c.body);

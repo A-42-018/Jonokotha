@@ -66,11 +66,17 @@ export async function draftIntakeV2(raw: string, requested: Language | "auto", c
 }
 
 const Translation = z.object({ translation: z.string().min(1).max(4000) });
-export async function translateText(raw: string, to: Language, ctx: AiContext = {}): Promise<{ available: boolean; translation?: string; target: Language; machine_translated: true }> {
+const HAS_BANGLA = /[ঀ-৿]/;
+export interface Translated { available: boolean; translation?: string; target: Language; source: Language; original: string; machine_translated: true; label: string; reason?: string }
+/** On-demand translation (B5.10). Always labelled as machine translation, the original text is always returned alongside, and a failure says why (timeout, refused, invalid output, no key) so the UI can show the original. */
+export async function translateText(raw: string, to: Language, ctx: AiContext = {}): Promise<Translated> {
   const { text } = redactPii(raw);
+  const source: Language = HAS_BANGLA.test(text) ? "bn" : "en";
+  const base = { target: to, source, original: text, machine_translated: true as const, label: to === "bn" ? "যান্ত্রিক অনুবাদ" : "Machine translation" };
+  if (source === to) return { ...base, available: true, translation: text };   // already in the target language: nothing to do, no model call
   const out = await runAgent({
     agent: "translation", prompt: TRANSLATE_V1, schema: Translation, input: `TARGET_LANGUAGE: ${to}\n---\n${text.slice(0, 2000)}`, maxTokens: 1200, ...ctx,
     tool: { name: "submit_translation", description: "Return the translated text only." },
   });
-  return out.ok ? { available: true, translation: out.data.translation, target: to, machine_translated: true } : { available: false, target: to, machine_translated: true };
+  return out.ok ? { ...base, available: true, translation: out.data.translation } : { ...base, available: false, reason: out.reason };
 }
