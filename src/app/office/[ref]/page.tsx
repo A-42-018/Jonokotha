@@ -22,6 +22,9 @@ export default async function Case({ params }: PageProps<"/office/[ref]">) {
   if (denied) return <NoAccess t={t} email={denied.email} role={denied.role} next={`/office/${ref}`} />;
   const c = await getCase(sb, ref);
   if (!c) notFound();
+  // `public_cases` shows every published case to any signed-in person; the office pages must only open a case this account's own scope can read (the same rule as GET /office/issues/{ref}).
+  const { data: mine } = await sb.from("issues").select("id").eq("ref", ref).maybeSingle();
+  if (!mine) notFound();
   const referral = await readReferral(sb, ref);
   const agency = AGENCIES.find((a) => a.id === c.ai.agencyId);
   return (

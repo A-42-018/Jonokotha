@@ -14,6 +14,8 @@ const env = {
   PW_REUSE_SERVER: "0",
   // Release 1.1 pages (consultations, commitments, priorities, message entry, dark mode) have no link without their flags.
   NEXT_PUBLIC_FLAG_RELEASE11: "1",
+  // Release 2 pages (budget, MP records, RTI helper) likewise.
+  NEXT_PUBLIC_FLAG_RELEASE2: "1",
 };
 // `--mfa` runs only the two-step sign-in spec, alone: it switches enforce_mfa on for the whole local database while it runs.
 const args = process.argv.slice(2);

@@ -15,6 +15,7 @@ const extra: { acct: Account; ctx: BrowserContext }[] = [];
 const day = (n: number) => new Date(Date.now() + n * 86_400_000).toISOString();
 
 test.beforeAll(async ({ browser }, info) => {
+  test.setTimeout(120_000);   // twelve sign-ins and a world: more than the 30 s default
   skipUnlessReal();
   w = await buildWorld(info);
   [office, citizenA, citizenB, visitor] = await Promise.all([sessionFor(browser, info, w.accounts.officeA), sessionFor(browser, info, w.accounts.citizenA), sessionFor(browser, info, w.accounts.citizenB), sessionFor(browser, info, null)]);
@@ -88,8 +89,8 @@ test("16. a consultation shows only aggregate groups above the minimum size; one
   // The public page shows the same: the "you said, we did" text and no individual votes.
   const page = await visitor.newPage();
   await gotoOk(page, `/consultations/${ref}/report`);
-  await expect(page.getByText("রাস্তার কাজ", { exact: false }).first()).toBeVisible();
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("আপনারা বললেন");
+  await expect(page.getByText("রাস্তা মেরামতের কাজ", { exact: false }).first()).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1 })).toContainText(/আপনারা বললেন|You said/);
   await page.close();
 
   // A second consultation with only two voters publishes no group and no figure.

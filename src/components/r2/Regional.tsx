@@ -25,7 +25,9 @@ function Overview() {
   const t = useT();
   const lang = useLang();
   const mine = useQuery({ queryKey: ["my-regions"], queryFn: fetchMyRegions, retry: false });
-  const q = useQuery({ queryKey: ["region-overview"], queryFn: () => fetchRegionOverview(), retry: false });
+  const hasUnits = mine.data?.kind === "ok" && mine.data.data.length > 0;
+  // Only an account with a region may ask for the counts; anyone else would get a 403, so they see the "no region" state instead.
+  const q = useQuery({ queryKey: ["region-overview"], queryFn: () => fetchRegionOverview(), retry: false, enabled: hasUnits });
   const n = (v: number) => fmtNum(v, lang);
   const cols: Column<RegionalArea>[] = [
     { key: "a", header: t.r2RgArea, primary: true, cell: (r) => <span>{lang === "bn" ? r.name_bn : r.name_en}{r.is_sample && <> <Badge tone="neutral">{t.r2Sample}</Badge></>}</span> },
@@ -37,17 +39,21 @@ function Overview() {
     { key: "m", header: t.r2RgMp, cell: (r) => (r.has_mp ? t.r2RgMpYes : t.r2RgMpNo) },
   ];
   return (
-    <Gate data={q.data}>
-      {() => (
+    <Boundary q={mine} emptyTitle={t.r2RgNoScope}>
+      {(m) => <Gate data={m}>
+      {(units) => (
         <div className="space-y-3">
-          {mine.data?.kind === "ok" && mine.data.data.length > 0 && <p className="text-sm text-muted">{t.r2RgUnits}: {mine.data.data.map((u) => (lang === "bn" ? u.name_bn : u.name_en)).join(", ")}</p>}
-          <Boundary q={q} isEmpty={(d) => d.kind === "ok" && d.data.length === 0} emptyTitle={t.r2RgNoScope}>
-            {(d) => d.kind === "ok" ? <Table caption={t.r2RgTitle} columns={cols} rows={[...d.data].sort((a, b) => a.name_en.localeCompare(b.name_en))} rowKey={(r) => r.constituency} /> : null}
+          {units.length > 0 && <p className="text-sm text-muted">{t.r2RgUnits}: {units.map((u) => (lang === "bn" ? u.name_bn : u.name_en)).join(", ")}</p>}
+          {units.length === 0 ? <p role="status" className="text-muted">{t.r2RgNoScope}</p> : (
+          <Boundary q={q} isEmpty={(d) => d.kind === "ok" && d.data.areas.length === 0} emptyTitle={t.r2RgNoScope}>
+            {(d) => d.kind === "ok" ? <Table caption={t.r2RgTitle} columns={cols} rows={[...d.data.areas].sort((a, b) => a.name_en.localeCompare(b.name_en))} rowKey={(r) => r.constituency} /> : null}
           </Boundary>
+          )}
           <p className="text-sm text-muted">{t.r2RgNotRank}</p>
         </div>
       )}
-    </Gate>
+      </Gate>}
+    </Boundary>
   );
 }
 

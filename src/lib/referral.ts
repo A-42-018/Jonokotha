@@ -40,14 +40,20 @@ export function hasReferralStory(s: ReferralStages): boolean {
  * Referral row the signed-in session may read: RLS gives the reporter their own `public` rows and staff every row
  * of their office. Anyone else gets null, which the page shows as "not published", not as "no referral".
  */
+const BASE_COLS = "agency_name,external_reference,forwarded_at";
+const PROOF_COLS = "registration_status,registration_reference,registration_proof,registered_at";
+
 export async function readReferral(sb: SupabaseClient, ref: string): Promise<ReferralInfo | null> {
   try {
     const { data: issue } = await sb.from("issues").select("id").eq("ref", ref).maybeSingle();
     if (!issue) return null;
-    const { data } = await sb.from("issue_agency_referrals").select("agency_name,external_reference,forwarded_at,registration_status,registration_reference,registration_proof,registered_at")
-      .eq("issue_id", (issue as { id: string }).id).order("forwarded_at", { ascending: false }).limit(1).maybeSingle();
-    if (!data) return null;
-    const r = data as { agency_name: string | null; external_reference: string | null; forwarded_at: string | null; registration_status?: string | null; registration_reference?: string | null; registration_proof?: string | null; registered_at?: string | null };
+    const issueId = (issue as { id: string }).id;
+    const read = (cols: string) => sb.from("issue_agency_referrals").select(cols).eq("issue_id", issueId).order("forwarded_at", { ascending: false }).limit(1).maybeSingle();
+    let { data, error } = await read(`${BASE_COLS},${PROOF_COLS}`);
+    // A database without migration 0030 has no registration columns: keep showing the forwarded stage instead of hiding the referral.
+    if (error) ({ data, error } = await read(BASE_COLS));
+    if (error || !data) return null;
+    const r = data as unknown as { agency_name: string | null; external_reference: string | null; forwarded_at: string | null; registration_status?: string | null; registration_reference?: string | null; registration_proof?: string | null; registered_at?: string | null };
     // "Registered" only when the database holds the proof (the signed receipt text or a typed proof) next to the status (B8.2 / 0030, 0083).
     const registered = r.registration_status === "officially_registered" && r.registration_proof
       ? { at: r.registered_at ?? null, proof_url: /^https?:\/\//.test(r.registration_proof) ? r.registration_proof : null, proof_text: r.registration_proof, agency_reference: r.registration_reference ?? null }

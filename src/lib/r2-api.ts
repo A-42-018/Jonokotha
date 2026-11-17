@@ -21,7 +21,8 @@ export const DOC_KINDS: readonly BudgetDocKind[] = ["annual_budget", "adp", "ten
 export const ENTRY_KINDS = ["allocated", "released", "spent"] as const;
 export type EntryKind = (typeof ENTRY_KINDS)[number];
 export const fetchBudgetSources = (constituency: string, fiscal_year?: string) => readOrPlanned<BudgetSource[]>(`/budget/sources${qs({ constituency, fiscal_year })}`).then(list);
-export const fetchBudgetEntries = (constituency: string, f: { fiscal_year?: string; kind?: EntryKind; project?: string; source?: string } = {}) => readOrPlanned<BudgetEntry[]>(`/budget/entries${qs({ constituency, ...f })}`).then(list);
+/** `constituency` may be left out: a project's figures are looked up by the project alone, wherever it is. */
+export const fetchBudgetEntries = (constituency: string | undefined, f: { fiscal_year?: string; kind?: EntryKind; project?: string; source?: string } = {}) => readOrPlanned<BudgetEntry[]>(`/budget/entries${qs({ constituency, ...f })}`).then(list);
 
 export interface OfficeSource { ref: string; constituency: string; title: string; publisher: string; doc_kind: BudgetDocKind; source_url: string; fiscal_year: string; status: "pending" | "verified" | "rejected" | "withdrawn"; verification_note: string | null; created_at: string; entries: number }
 export const fetchOfficeSources = () => readOrPlanned<OfficeSource[]>("/office/budget/sources").then(list);
@@ -41,7 +42,7 @@ const HTTPS = /^https:\/\/[^\s]+$/;
 /** The server's own rules, checked first so a person is told in words before anything is sent. */
 export function sourceProblem(s: { title: string; publisher: string; source_url: string; fiscal_year: string; doc_sha256?: string }): "title" | "publisher" | "url" | "year" | "hash" | null {
   if (s.title.trim().length < 5 || s.title.trim().length > 200) return "title";
-  if (s.publisher.trim().length < 2) return "publisher";
+  if (s.publisher.trim().length < 3 || s.publisher.trim().length > 150) return "publisher";
   if (!HTTPS.test(s.source_url.trim())) return "url";
   if (!FY.test(ascii(s.fiscal_year))) return "year";
   if (s.doc_sha256 && !/^[a-f0-9]{64}$/i.test(s.doc_sha256.trim())) return "hash";
@@ -60,6 +61,9 @@ export function money(n: number, currency: string, lang: "bn" | "en"): string {
   const digits = lang === "bn" ? "beng" : "latn";
   return `${sym} ${n.toLocaleString(lang === "bn" ? "bn-BD" : "en-BD", { numberingSystem: digits, maximumFractionDigits: 2 } as Intl.NumberFormatOptions)}`;
 }
+
+/** An optional reason or note: empty is fine, otherwise the server wants at least 5 characters. */
+export const noteTooShort = (s: string) => { const n = s.trim().length; return n > 0 && n < 5; };
 
 // B8.3 Assisted reporting -----------------------------------------------------------------------------------------------------------------------------
 export interface VolunteerRules { reviewed: boolean; conduct_version: string; consent_version: string; conduct: { bn: string[]; en: string[] }; consent: { bn: string; en: string } }
@@ -95,7 +99,10 @@ export const datasetUrl = (slug: string, format: "csv" | "json", constituency?: 
 // B8.5 Regional ---------------------------------------------------------------------------------------------------------------------------------------
 export interface RegionalUnit { code: string; level: string; name_en: string; name_bn: string }
 export const fetchMyRegions = () => readOrPlanned<RegionalUnit[]>("/office/regions/mine").then(list);
-export const fetchRegionOverview = (unit?: string) => readOrPlanned<RegionalArea[]>(`/office/regions/overview${qs({ unit })}`).then(list);
+export interface RegionOverviewBody { areas: RegionalArea[]; definition: string }
+/** The server answers `{ areas, definition }`, not a bare list. */
+export const fetchRegionOverview = (unit?: string) => readOrPlanned<RegionOverviewBody>(`/office/regions/overview${qs({ unit })}`)
+  .then((r): OrPlanned<RegionOverviewBody> => (r.kind === "ok" ? { ...r, data: { areas: Array.isArray(r.data?.areas) ? r.data.areas : [], definition: r.data?.definition ?? "" } } : r));
 export interface RegionalAdminRow { id: string; user_id: string; unit_code: string; level: string; unit_name_en: string; status: string; created_at: string }
 export const fetchRegionalAdmins = () => readOrPlanned<RegionalAdminRow[]>("/admin/regional-admins").then(list);
 export const grantRegionalAdmin = (b: { user_id: string; unit_code: string; level: string; note?: string }) => api<unknown>("/admin/regional-admins", { body: b });
@@ -104,12 +111,12 @@ export const revokeRegionalAdmin = (id: string) => api<unknown>(`/admin/regional
 // B8.6 Participatory budgeting -------------------------------------------------------------------------------------------------------------------------
 export interface PbFull extends PbCycle { options: PbOption[]; my_ballot: { option_ids: string[]; submitted_at: string } | null }
 export const fetchPbList = (constituency: string) => readOrPlanned<PbCycle[]>(`/participatory-budgets${qs({ constituency })}`).then(list);
-export const fetchPb = (ref: string) => api<PbFull>(`/participatory-budgets/${q(ref)}`).then((r) => ({ ...r.data, options: Array.isArray(r.data.options) ? r.data.options : [] }));
+export const fetchPb = (ref: string) => readOrPlanned<PbFull>(`/participatory-budgets/${q(ref)}`).then((r): OrPlanned<PbFull> => (r.kind === "ok" ? { ...r, data: { ...r.data, options: Array.isArray(r.data.options) ? r.data.options : [] } } : r));
 export const submitBallot = (ref: string, option_ids: string[]) => api<unknown>(`/participatory-budgets/${q(ref)}/ballot`, { method: "PUT", body: { option_ids } });
 export interface OfficePb { ref: string; constituency: string; title: string; status: string; closes_at: string; outcome_recorded: boolean }
 export interface OfficePbView extends Omit<OfficePb, "title"> { title: string; fiscal_year: string; budget_amount: number; pledge: string; participants: number; result_valid: boolean | null; followed_result: boolean | null; options: PbOption[] }
 export const fetchOfficePbs = () => readOrPlanned<OfficePb[]>("/office/participatory-budgets").then(list);
-export const fetchOfficePb = (ref: string) => api<OfficePbView>(`/office/participatory-budgets/${q(ref)}`).then((r) => r.data);
+export const fetchOfficePb = (ref: string) => readOrPlanned<OfficePbView>(`/office/participatory-budgets/${q(ref)}`);
 export interface PbInput { constituency: string; budget_source_ref: string; title: string; description?: string; budget_amount: number; pledge: string; max_choices: number; closes_at: string; options: { title: string; description?: string; cost: number }[] }
 export const createPb = (b: PbInput, key: string) => api<{ ref: string }>("/office/participatory-budgets", { body: b, idempotencyKey: key }).then((r) => r.data);
 export const pbAct = (ref: string, action: "request-open" | "decision" | "close" | "outcome" | "cancel", body: Record<string, unknown> = {}) => api<unknown>(`/office/participatory-budgets/${q(ref)}/${action}`, { body });
@@ -119,9 +126,10 @@ export function pbProblem(b: { title: string; budget: number; pledge: string; ma
   if (!(b.budget > 0)) return "budget";
   if (b.pledge.trim().length < 20 || b.pledge.trim().length > 1000) return "pledge";
   const o = b.options.filter((x) => x.title.trim());
-  if (o.length < 2 || o.length > 30 || o.some((x) => !(x.cost >= 0))) return "options";
+  // Server: each option title 3-120 characters and a cost above zero.
+  if (o.length < 2 || o.length > 30 || o.some((x) => x.title.trim().length < 3 || x.title.trim().length > 120 || !(x.cost > 0))) return "options";
   if (o.reduce((s, x) => s + x.cost, 0) < b.budget / 2) return "cost";
-  if (b.maxChoices < 1 || b.maxChoices > Math.min(10, o.length)) return "choices";
+  if (!Number.isInteger(b.maxChoices) || b.maxChoices < 1 || b.maxChoices > Math.min(10, o.length)) return "choices";
   return null;
 }
 
