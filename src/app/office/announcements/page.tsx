@@ -1,8 +1,10 @@
 import Link from "next/link";
 import AnnouncementComposer from "@/components/office/AnnouncementComposer";
+import AreaAlertComposer from "@/components/channels/AreaAlertComposer";
 import NoAccess from "@/components/ui/NoAccess";
 import { getConstituencyId } from "@/lib/constituency-server";
 import { DEMO_CONSTITUENCY } from "@/lib/demo-data";
+import { FLAGS } from "@/lib/flags-more";
 import { guardStaff } from "@/lib/guard";
 import { dict, getLang } from "@/lib/i18n";
 
@@ -16,6 +18,7 @@ export default async function Announcements() {
       <h1 className="text-2xl font-semibold text-civic">{t.anTitle}</h1>
       <p className="text-muted">{t.anLead}</p>
       <AnnouncementComposer constituency={(await getConstituencyId()) ?? DEMO_CONSTITUENCY.id} />
+      {(FLAGS.channels || FLAGS.officeRelease11) && <AreaAlertComposer constituency={(await getConstituencyId()) ?? DEMO_CONSTITUENCY.id} />}
     </div>
   );
 }

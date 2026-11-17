@@ -3,8 +3,9 @@
 import { readdirSync, readFileSync, statSync, existsSync } from "node:fs";
 import path from "node:path";
 
-const root = path.join(process.cwd(), ".next/static");
-if (!existsSync(root)) { console.error("No .next/static: run `npm run build` first."); process.exit(2); }
+const dist = process.env.NEXT_DIST_DIR ?? ".next";   // a build made beside a dev server uses its own folder
+const root = path.join(process.cwd(), dist, "static");
+if (!existsSync(root)) { console.error(`No ${dist}/static: run \`npm run build\` first.`); process.exit(2); }
 
 function* files(dir) {
   for (const name of readdirSync(dir)) {
@@ -49,4 +50,4 @@ for (const f of files(root)) {
   }
 }
 if (problems.length) { console.error(`Secrets found in the browser bundle:\n- ${problems.join("\n- ")}`); process.exit(1); }
-console.log(`OK: ${scanned} files in .next/static checked, ${secrets.size} server-only values compared, no secrets found.`);
+console.log(`OK: ${scanned} files in ${dist}/static checked, ${secrets.size} server-only values compared, no secrets found.`);

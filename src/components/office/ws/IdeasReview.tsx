@@ -42,8 +42,10 @@ function Row({ constituency, idea }: { constituency: string; idea: ApiIdea }) {
     onError: (e) => toast("error", saveError(t, e)),
   });
   const i = toIdea(idea);
+  const pastThreshold = !!idea.threshold_reached_at;   // B7.5: the server wants a reasoned note (20+) on an idea past the threshold
   const submit = () => {
     if (decisionNeedsNote(d) && note.trim().length < 5) { setErr(t.owIdeaReasonNeeded); return; }
+    if (pastThreshold && note.trim().length < 20) { setErr(t.ipNeedLong); return; }
     setErr("");
     m.mutate();
   };
@@ -52,6 +54,7 @@ function Row({ constituency, idea }: { constituency: string; idea: ApiIdea }) {
       <div className="flex flex-wrap items-center gap-2">
         <Badge tone="info">{label(t, "idSub_", i.status)}</Badge>
         <span className="text-sm text-muted">{fmtNum(i.supports, lang)} {t.owIdeaSupports}</span>
+        {pastThreshold && <Badge tone="warning" icon="⏳">{t.ipReached}</Badge>}
       </div>
       <h2 className="text-lg font-semibold">{i.title}</h2>
       <p className="whitespace-pre-line text-muted">{i.summary}</p>
@@ -59,7 +62,7 @@ function Row({ constituency, idea }: { constituency: string; idea: ApiIdea }) {
       <form className="space-y-2 border-t border-line pt-3" onSubmit={(e) => { e.preventDefault(); submit(); }}>
         <Select label={t.owIdeaDecision} value={d} onChange={(e) => setD(e.target.value as IdeaDecision)}
           options={IDEA_DECISIONS.map((x) => ({ value: x, label: label(t, "owDecision_", x) }))} />
-        <Textarea label={t.owIdeaReason} hint={t.owIdeaReasonHint} value={note} onChange={(e) => setNote(e.target.value)} rows={3} maxLength={1000} error={err || undefined} optional={!decisionNeedsNote(d)} />
+        <Textarea label={t.owIdeaReason} hint={t.owIdeaReasonHint} value={note} onChange={(e) => setNote(e.target.value)} rows={3} maxLength={1000} error={err || undefined} optional={!decisionNeedsNote(d) && !pastThreshold} />
         <p className="text-sm text-muted">{t.owPublicWarn}</p>
         <Button type="submit" disabled={m.isPending}>{t.owIdeaSubmit}</Button>
       </form>

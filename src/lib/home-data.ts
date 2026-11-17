@@ -36,16 +36,16 @@ export async function loadPopularIdeas(sb: SupabaseClient, key: string, limit = 
   } catch { return { ok: false }; }
 }
 
-export interface HomeRep { id: string; full_name: string; office_title: string | null; source_url: string | null; verified_at: string | null; is_demo: boolean }
+export interface HomeRep { id: string; full_name: string; full_name_bn: string | null; office_title: string | null; source_url: string | null; verified_at: string | null; is_demo: boolean }
 
 /** The verified current representative of the area, or null when none is published (RLS shows verified rows only). */
 export async function loadAreaRep(sb: SupabaseClient, key: string): Promise<Loaded<HomeRep | null>> {
   try {
     const { data, error } = await sb.from("representatives")
-      .select("id,full_name,office_title,source_url,verified_at,is_demo,representative_constituencies!inner(valid_to,constituencies!inner(key))")
+      .select("id,full_name,full_name_bn,office_title,source_url,verified_at,is_demo,representative_constituencies!inner(valid_to,constituencies!inner(key))")
       .eq("verification_status", "verified").eq("representative_constituencies.constituencies.key", key).is("representative_constituencies.valid_to", null).limit(1);
     if (error) return { ok: false };
     const r = (data ?? [])[0] as (HomeRep & Record<string, unknown>) | undefined;
-    return { ok: true, data: r ? { id: r.id, full_name: r.full_name, office_title: r.office_title, source_url: r.source_url, verified_at: r.verified_at, is_demo: r.is_demo } : null };
+    return { ok: true, data: r ? { id: r.id, full_name: r.full_name, full_name_bn: r.full_name_bn, office_title: r.office_title, source_url: r.source_url, verified_at: r.verified_at, is_demo: r.is_demo } : null };
   } catch { return { ok: false }; }
 }

@@ -70,7 +70,7 @@ export function AreaRepCard({ t, lang, rep, areaName }: { t: Dict; lang: Lang; r
         <p className="text-sm text-slate-600">{areaName}</p>
         {!rep.ok ? <p role="alert" className="text-slate-700">{t.hvRepError}</p> : !rep.data ? <p className="text-slate-700">{t.hvRepNone}</p> : (
           <>
-            <p className="break-words font-medium">{rep.data.full_name}{rep.data.is_demo && <span className="ms-2 rounded-full bg-amber/20 px-2 py-0.5 text-xs text-amber-900">{t.capSample}</span>}</p>
+            <p className="break-words font-medium">{lang === "bn" ? rep.data.full_name_bn || rep.data.full_name : rep.data.full_name}{rep.data.is_demo && <span className="ms-2 rounded-full bg-amber/20 px-2 py-0.5 text-xs text-amber-900">{t.capSample}</span>}</p>
             {rep.data.office_title && <p className="text-sm text-slate-600">{rep.data.office_title}</p>}
             <p className="text-sm text-slate-600">{t.mpVerified}{rep.data.verified_at && <> · {fillNum(t.mpVerifiedOn, { date: fmtDay(rep.data.verified_at, lang) }, lang)}</>}{host && <> · {t.mpSource}: {host}</>}</p>
             <Link href={`/mp/${rep.data.id}`} className="inline-flex min-h-11 items-center text-civic underline">{t.mpProfile}</Link>

@@ -11,7 +11,7 @@
   --color-amber: #f2a33a;
   /* AA-safe variants for text and for fills behind white text (brand teal/leaf are 4.1 / 3.4 on white). */
   --color-teal-strong: #0b6b6d;
-  --color-leaf-strong: #287a44;
+  --color-leaf-strong: #25723f;
   --color-danger: #b42318;
   /* Muted text (7.1 on background) and form-control borders (4.5 on white, above the 3:1 non-text minimum). */
   --color-muted: #475569;
@@ -36,3 +36,39 @@ h1, h2, h3 { font-family: var(--font-heading); }
 /* Simple-language mode (F5.15): extra explanations are hidden, the task and its buttons stay; pictures get bigger. */
 html[data-simple="true"] .jk-more { display: none; }
 html[data-simple="true"] main img[src^="/illustrations/card-"] { width: 8rem; height: 8rem; }
+
+/*
+ * Dark theme (F7.10). Switched on by data-theme="dark" on <html> (ThemeApplier, behind the darkMode flag).
+ * The light tokens above are not changed. Fills that carry white text (bg-civic, bg-danger, bg-leaf-strong, bg-teal-strong) keep their colour;
+ * only surfaces, text colours and borders move. Pairs are checked in tests/unit/contrast.test.ts (--dk-* are the dark tokens).
+ */
+:root {
+  --dk-bg: #0e1621; --dk-fg: #e6edf5; --dk-surface: #17222f; --dk-s50: #131d29; --dk-s100: #1d2a39; --dk-s200: #2a3b4f; --dk-s300: #3a4f67;
+  --dk-muted: #b3c1d1; --dk-line: #8fa3b8; --dk-civic: #8ab8f0; --dk-teal: #6fd0d2; --dk-leaf: #86d9a2; --dk-danger: #ff9f94; --dk-amber-text: #f6c76b;
+}
+html[data-theme="dark"] { color-scheme: dark; --background: var(--dk-bg); --foreground: var(--dk-fg); --color-muted: var(--dk-muted); --color-line: var(--dk-line); }
+/* Tailwind inlines the theme colours (@theme inline), so changing the variables above would not reach these two utilities; they are set directly. */
+html[data-theme="dark"] .text-muted { color: var(--dk-muted); }
+html[data-theme="dark"] [class*="border-line"] { border-color: var(--dk-line); }
+html[data-theme="dark"] .bg-white { background-color: var(--dk-surface); }
+html[data-theme="dark"] .bg-slate-50 { background-color: var(--dk-s50); }
+html[data-theme="dark"] .bg-slate-100 { background-color: var(--dk-s100); }
+html[data-theme="dark"] .bg-slate-200 { background-color: var(--dk-s200); }
+html[data-theme="dark"] .bg-slate-300 { background-color: var(--dk-s300); }
+html[data-theme="dark"] .border-slate-200, html[data-theme="dark"] .border-slate-300 { border-color: var(--dk-s300); }
+html[data-theme="dark"] .divide-slate-100 > :not(:last-child) { border-color: var(--dk-s200); }
+html[data-theme="dark"] .text-slate-600, html[data-theme="dark"] .text-slate-700 { color: var(--dk-muted); }
+html[data-theme="dark"] .text-slate-800, html[data-theme="dark"] .text-slate-900 { color: var(--dk-fg); }
+html[data-theme="dark"] .text-civic { color: var(--dk-civic); }
+html[data-theme="dark"] .border-civic { border-color: var(--dk-civic); }
+html[data-theme="dark"] .text-teal-strong { color: var(--dk-teal); }
+html[data-theme="dark"] .text-leaf-strong { color: var(--dk-leaf); }
+html[data-theme="dark"] .text-danger { color: var(--dk-danger); }
+html[data-theme="dark"] .text-amber-900, html[data-theme="dark"] .text-amber-800 { color: var(--dk-amber-text); }
+/* Buttons and chips that sit on a light-blue (civic) tint keep readable text; filled civic buttons keep their white text. */
+html[data-theme="dark"] .bg-civic { background-color: #1d5fa8; }
+html[data-theme="dark"] button[aria-pressed="false"].bg-white, html[data-theme="dark"] .bg-white.text-civic { color: var(--dk-civic); }
+html[data-theme="dark"] dialog { background-color: var(--dk-surface); color: var(--dk-fg); }
+html[data-theme="dark"] dialog::backdrop { background-color: rgb(0 0 0 / 0.65); }
+/* Photos and drawings keep their own colours; they only get a little dimmer so a bright picture does not glare in a dark room. */
+html[data-theme="dark"] main img { filter: brightness(0.92); }

@@ -2,7 +2,7 @@ import { api } from "@/lib/api-client";
 
 /** Client side of Web Push (F.10). The server sends a push with no payload; public/sw.js wakes, asks for the news count and shows a generic alert. */
 
-export interface Prefs { channels: { in_app: true; push: boolean; email: boolean }; muted_types: string[]; quiet_hours: { start: string; end: string } | null; timezone: string; personalization_enabled: boolean }
+export interface Prefs { channels: { in_app: true; push: boolean; email: boolean; sms?: boolean; whatsapp?: boolean }; muted_types: string[]; quiet_hours: { start: string; end: string } | null; timezone: string; personalization_enabled: boolean }
 export type PushSupport = "ok" | "unsupported";
 
 export function pushSupport(env: { window?: Window & typeof globalThis } = { window: typeof window === "undefined" ? undefined : window }): PushSupport {
@@ -26,7 +26,7 @@ export function quietError(start: string, end: string): "pushQuietBad" | null {
 }
 
 export const fetchPrefs = async () => (await api<Prefs>("/me/notification-preferences")).data;
-export const savePrefs = async (patch: Partial<Pick<Prefs, "quiet_hours" | "timezone" | "muted_types" | "personalization_enabled">> & { channels?: { push?: boolean } }) =>
+export const savePrefs = async (patch: Partial<Pick<Prefs, "quiet_hours" | "timezone" | "muted_types" | "personalization_enabled">> & { channels?: { push?: boolean; sms?: boolean; whatsapp?: boolean } }) =>
   (await api<Prefs>("/me/notification-preferences", { method: "PUT", body: patch })).data;
 
 export type EnableResult = "on" | "denied" | "unavailable" | "unsupported";

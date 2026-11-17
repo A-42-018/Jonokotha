@@ -11,6 +11,8 @@ import EmptyState from "@/components/ui/EmptyState";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import StatusChip from "@/components/ui/StatusChip";
+import HeatPanel from "@/components/explore/HeatPanel";
+import { useHeat } from "@/components/explore/useHeat";
 import Tabs from "@/components/ui/Tabs";
 import { useLang } from "@/components/ui/useLang";
 import { ApiError } from "@/lib/api-client";
@@ -29,11 +31,11 @@ const ExploreMap = dynamic(() => import("./ExploreMap"), { ssr: false });
 const STATUSES: Status[] = ["received", "acknowledged", "referred", "resolved"];
 
 /** Explore issues (§7.6): list/map toggle, search, filters, sort, "data last updated". Client-side over a public list. */
-export default function ExploreView() {
-  return <QueryProvider><ExploreInner /></QueryProvider>;
+export default function ExploreView({ constituency = "demo-1" }: { constituency?: string }) {
+  return <QueryProvider><ExploreInner constituency={constituency} /></QueryProvider>;
 }
 
-function ExploreInner() {
+function ExploreInner({ constituency }: { constituency: string }) {
   const t = useT();
   const lang = useLang();
   const [filters, setFilters] = useState<Filters>(NO_FILTERS);
@@ -44,7 +46,8 @@ function ExploreInner() {
   const toast = useToast();
   const { isFollowing, toggle: toggleFollow, follows } = useFollows(true);
   const [now] = useState(() => Date.now());
-  const AREA = "demo-1";
+  const AREA = constituency;
+  const [heatOn, setHeatOn] = useState(false);
   const followingArea = isFollowing("area", AREA);
 
   // Category and date range are filtered by the server; status and text search work on what is loaded.
@@ -55,6 +58,7 @@ function ExploreInner() {
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (last) => last.next ?? undefined,
   });
+  const heatQ = useHeat(AREA, filters.category);
   const issues = useMemo<ExploreIssue[]>(() => query.data?.pages.flatMap((p) => p.items) ?? [], [query.data]);
   const loadFailed = query.isError;
   const hasSample = issues.some((i) => i.sample);
@@ -108,7 +112,9 @@ function ExploreInner() {
 
   const map = (
     <div className="space-y-3">
-      <ExploreMap issues={shown} onSelect={setSelected} origin={origin} />
+      <ExploreMap issues={shown} onSelect={setSelected} origin={origin} heat={heatOn && heatQ.data?.kind === "ok" ? heatQ.data.data.cells : undefined} />
+      {heatQ.data?.kind === "ok" && <HeatPanel data={heatQ.data.data} on={heatOn} setOn={setHeatOn} />}
+      {heatQ.isError && <p role="alert" className="text-sm text-muted">{t.hmError}</p>}
       <p className="text-sm text-muted">{t.exMapApprox} {t.exMapCredit}</p>
       {pick && (
         <Card title={pick.title} headingAs="h3">

@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import OfficeTour from "@/components/office/OfficeTour";
 import NoAccess from "@/components/ui/NoAccess";
 import { getConstituencyId } from "@/lib/constituency-server";
 import { DEMO_CONSTITUENCY } from "@/lib/demo-data";
@@ -16,6 +17,7 @@ export async function officePage(path: string, title: (t: ReturnType<typeof tOf>
       <h1 className="text-2xl font-semibold text-civic">{title(t)}</h1>
       {lead && <p className="text-muted">{lead(t)}</p>}
       {body(constituency)}
+      <OfficeTour />
     </div>
   );
 }

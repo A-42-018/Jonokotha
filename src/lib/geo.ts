@@ -17,7 +17,7 @@ export const LocationInput = z.object({
   locationAccuracyM: z.number().int().min(0).max(100_000).optional(),
 });
 
-export interface AreaMatch { key: string; name_bn: string; name_en: string; district: string | null; is_demo: boolean; method?: string }
+export interface AreaMatch { key: string; name_bn: string; name_en: string; district: string | null; is_demo: boolean; method?: string; seat_no?: number | null; seat_status?: "serving" | "vacant"; district_bn?: string | null; division?: string | null }
 
 export async function lookupByPoint(sb: SupabaseClient, lat: number, lng: number): Promise<AreaMatch[]> {
   const { data, error } = await sb.rpc("lookup_constituency", { p_lat: lat, p_lng: lng });

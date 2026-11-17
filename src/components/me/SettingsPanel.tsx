@@ -8,6 +8,9 @@ import MyAreaCard from "@/components/me/MyAreaCard";
 import DataRights from "@/components/me/DataRights";
 import PersonalizationPanel from "@/components/me/PersonalizationPanel";
 import PushSettings from "@/components/me/PushSettings";
+import ThemePanel from "@/components/me/ThemePanel";
+import ChannelsPanel from "@/components/channels/ChannelsPanel";
+import { FLAGS } from "@/lib/flags-more";
 import NoticeTypePrefs from "@/components/me/NoticeTypePrefs";
 import Dialog from "@/components/ui/Dialog";
 import { useToast } from "@/components/ui/Toast";
@@ -39,7 +42,9 @@ export default function SettingsPanel({ email, role, statusUrl = null }: { email
       </Card>
       )}
       <PersonalizationPanel signedIn={!!email} />
+      <ThemePanel />
       <PushSettings signedIn={!!email} />
+      {FLAGS.channels && <ChannelsPanel signedIn={!!email} />}
       <Card title={t.stAccount}>
         {email ? <p className="break-all font-medium">{email}{role ? ` · ${role}` : ""}</p> : (
           <div className="space-y-2"><p className="text-muted">{t.stSignedOut}</p><Link href="/login" className="inline-flex min-h-11 items-center text-civic underline">{t.signIn}</Link></div>

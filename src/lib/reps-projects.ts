@@ -9,12 +9,12 @@ const text = (min: number, max: number) => z.string().trim().min(min, `at least 
 const day = z.iso.date();
 
 // Representatives -------------------------------------------------------------------------------------------------------
-type RepRow = { id: string; full_name: string; office_title: string | null; party_name: string | null; official_contact: string | null; source_url: string | null; verified_at: string | null; is_demo: boolean;
+type RepRow = { id: string; full_name: string; full_name_bn: string | null; party_name_bn: string | null; photo_path: string | null; role_note: string | null; office_title: string | null; party_name: string | null; official_contact: string | null; source_url: string | null; verified_at: string | null; is_demo: boolean;
   representative_constituencies: { valid_from: string; valid_to: string | null; constituencies: { key: string; name_bn: string; name_en: string } | null }[];
   representative_fields?: { field: string; value: string; source_url: string; source_checked_at: string }[] };
-const REP_SEL = "id,full_name,office_title,party_name,official_contact,source_url,verified_at,is_demo,representative_constituencies(valid_from,valid_to,constituencies(key,name_bn,name_en))";
+const REP_SEL = "id,full_name,full_name_bn,party_name_bn,photo_path,role_note,office_title,party_name,official_contact,source_url,verified_at,is_demo,representative_constituencies(valid_from,valid_to,constituencies(key,name_bn,name_en))";
 const toRep = (r: RepRow) => ({
-  id: r.id, full_name: r.full_name, office_title: r.office_title, party_name: r.party_name, official_contact: r.official_contact, source_url: r.source_url, verified_at: r.verified_at, is_sample: r.is_demo,
+  id: r.id, full_name: r.full_name, full_name_bn: r.full_name_bn, party_name_bn: r.party_name_bn, photo_path: r.photo_path, role_note: r.role_note, office_title: r.office_title, party_name: r.party_name, official_contact: r.official_contact, source_url: r.source_url, verified_at: r.verified_at, is_sample: r.is_demo,
   constituencies: r.representative_constituencies.filter((m) => m.constituencies).map((m) => ({ ...m.constituencies!, valid_from: m.valid_from, valid_to: m.valid_to })),
   ...(r.representative_fields ? { fields: r.representative_fields.map((f) => ({ field: f.field, value: f.value, source_url: f.source_url, checked_at: f.source_checked_at })) } : {}),
 });

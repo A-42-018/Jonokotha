@@ -18,7 +18,12 @@ export interface Idea {
   /** Public reason for a rejected or deferred idea (§7.7). */
   reason?: string;
   sample?: boolean;
+  /** F7.5: the office's support threshold and answer date for this area, when the office has set them. */
+  threshold?: IdeaThreshold;
 }
+
+export type ResponseState = "awaiting_response" | "overdue" | "answered" | "answered_late";
+export interface IdeaThreshold { target: number; reachedAt: string | null; dueAt: string | null; respondedAt: string | null; state: ResponseState | null }
 
 export type IdeaTab = "popular" | "newest" | "review";
 

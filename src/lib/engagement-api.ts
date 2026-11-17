@@ -1,6 +1,6 @@
 import { api } from "@/lib/api-client";
 
-export type FollowType = "issue" | "area" | "category";
+export type FollowType = "issue" | "area" | "category" | "project";
 export interface FollowRow { id: string; type: FollowType; target: string; label?: string; created_at: string }
 
 /** Public count of people who said "me too". Only the number is public, never who. */
@@ -19,5 +19,5 @@ export const sendReopen = (ref: string, reason: string) => api<unknown>(`/issues
 
 export const REPORT_REASONS = { Spam: "spam", Abuse: "abuse", Private: "personal_data", False: "false_information", Other: "other" } as const;
 export type ReportReason = keyof typeof REPORT_REASONS;
-export const reportContent = (type: "issue" | "idea" | "question" | "media", ref: string, reason: ReportReason, details?: string) =>
+export const reportContent = (type: "issue" | "idea" | "question" | "media" | "idea_argument" | "idea_comment", ref: string, reason: ReportReason, details?: string) =>
   api<unknown>("/reports", { body: { type, ref, reason: REPORT_REASONS[reason], ...(details?.trim() ? { details: details.trim() } : {}) } });

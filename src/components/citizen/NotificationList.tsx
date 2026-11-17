@@ -9,7 +9,7 @@ import EmptyState from "@/components/ui/EmptyState";
 import { useLang } from "@/components/ui/useLang";
 import { useT } from "@/components/ui/useT";
 import { fmtDate } from "@/lib/format";
-import { fetchNotices, KIND, markAllRead, markRead, noticeHref, noticeText } from "@/lib/notifications-api";
+import { fetchNotices, kindOf, markAllRead, markRead, noticeHref, noticeText } from "@/lib/notifications-api";
 
 export default function NotificationList() {
   return <QueryProvider><ListInner /></QueryProvider>;
@@ -51,7 +51,7 @@ function ListInner() {
             <li key={n.id}>
               <Card as="article" padded={false} tone={isNew ? "info" : "default"} className="space-y-2 p-3">
                 <div className="flex flex-wrap items-center gap-2">
-                  <Badge tone="neutral">{t[`ntKind_${KIND[n.type]}` as keyof typeof t] as string}</Badge>
+                  <Badge tone="neutral">{t[`ntKind_${kindOf(n.type)}` as keyof typeof t] as string}</Badge>
                   {isNew && <Badge tone="info" icon="●">{t.ntUnread}</Badge>}
                 </div>
                 <p className="font-medium">{text.title}</p>

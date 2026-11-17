@@ -1,8 +1,7 @@
-import PlannedPanel from "@/components/ui/PlannedPanel";
-import { dict, getLang } from "@/lib/i18n";
+import PollsOffice from "@/components/office/ws/PollsOffice";
+import { FLAGS } from "@/lib/flags-more";
 import { officePage } from "@/lib/office-page";
 
-export default async function Page() {
-  const t = dict[await getLang()];
-  return officePage("/office/polls", (x) => x.owPollsTitle, null, () => <PlannedPanel title={t.owPollsPlannedTitle} body={t.owPollsPlannedBody} />);
+export default function Page() {
+  return officePage("/office/polls", (x) => x.owPollsTitle, null, (c) => <PollsOffice constituency={c} surveys={FLAGS.surveys || FLAGS.officeRelease11} />);
 }

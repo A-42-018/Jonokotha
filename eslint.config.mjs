@@ -9,10 +9,12 @@ const eslintConfig = defineConfig([
   globalIgnores([
     // Default ignores of eslint-config-next:
     ".next/**",
+    ".next-*/**",   // a second build or server beside a dev server (NEXT_DIST_DIR)
     "out/**",
     "build/**",
     "next-env.d.ts",
     "public/vendor/**",
+    ".claude/**",   // Claude Code worktrees and settings are not project code
   ]),
 ]);
 

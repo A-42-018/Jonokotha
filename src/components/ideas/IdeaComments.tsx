@@ -69,7 +69,7 @@ function CommentsInner({ refId, signedIn }: { refId: string; signedIn: boolean }
       {q.hasNextPage && <Button variant="secondary" loading={q.isFetchingNextPage} onClick={() => void q.fetchNextPage()}>{t.cmMore}</Button>}
       {signedIn ? (
         <form className="space-y-2" noValidate onSubmit={(e) => { e.preventDefault(); if (!validComment(text)) { setErr(t.cmTooShort); return; } setErr(""); send.mutate(); }}>
-          <Textarea label={t.cmLabel} hint={t.cmHint} rows={3} maxLength={1000} value={text} error={err || undefined} onChange={(e) => { setText(e.target.value); setErr(""); }} />
+          <Textarea label={t.cmLabel} hint={t.cmHint} rows={3} maxLength={500} value={text} error={err || undefined} onChange={(e) => { setText(e.target.value); setErr(""); }} />
           <Button type="submit" loading={send.isPending}>{t.cmSend}</Button>
         </form>
       ) : (

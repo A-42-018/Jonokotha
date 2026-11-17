@@ -48,3 +48,6 @@ next-env.d.ts
 # consented real evaluation examples (never commit)
 /tests/ai/real/
 *.eval-real.json
+.next-r11/
+.next-off/
+.next-build/

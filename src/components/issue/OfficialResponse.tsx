@@ -1,4 +1,5 @@
 import Card from "@/components/ui/Card";
+import ReadAloud from "@/components/ui/ReadAloud";
 import { fillNum, fmtDate, type Dict, type Lang } from "@/lib/i18n";
 
 /** Public office reply. Placeholder until the API exposes one. */
@@ -14,6 +15,7 @@ export default function OfficialResponse({ t, lang, response }: { t: Dict; lang:
   return (
     <Card title={t.isResponseTitle} tone="info">
       <p className="whitespace-pre-wrap break-words">{response.text}</p>
+      <ReadAloud text={response.text} what={t.raWhatResponse} />
       <p className="mt-2 text-sm text-muted">{fillNum(t.isResponseFrom, { date: fmtDate(response.at, lang) }, lang)}</p>
     </Card>
   );
