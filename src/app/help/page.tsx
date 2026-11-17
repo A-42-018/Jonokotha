@@ -16,7 +16,10 @@ export default async function Help() {
       <Card title={t.hpSafetyTitle}>{list([t.hpSafety1, t.hpSafety2, t.hpSafety3])}</Card>
       <Card title={t.hpOfficialTitle}><p>{t.hpOfficialBody}</p></Card>
       <Card title={t.hpReportTitle}><p>{t.hpReportBody}</p></Card>
-      <Link href="/privacy" className="inline-flex min-h-11 items-center text-civic underline">{t.hpPrivacyLink}</Link>
+      <div className="flex flex-wrap gap-x-4">
+        <Link href="/help/contact" className="inline-flex min-h-11 items-center text-civic underline">{t.spHelpLink}</Link>
+        <Link href="/privacy" className="inline-flex min-h-11 items-center text-civic underline">{t.hpPrivacyLink}</Link>
+      </div>
     </div>
   );
 }

@@ -18,6 +18,7 @@ export default async function OfficeLayout({ children }: LayoutProps<"/office">)
     { href: "/office/staff", label: t.owNavStaff },
     { href: "/office/audit", label: t.owNavAudit },
     { href: "/office/settings", label: t.owNavSettings },
+    { href: "/office/help", label: t.otOpen },
   ];
   return (
     <div className="grid gap-4 lg:grid-cols-[13rem_1fr]">

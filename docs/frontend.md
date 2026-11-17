@@ -499,3 +499,15 @@ Docker was not available on the frontend machine, so these were never executed. 
 - **Gaps**: operator name, address and contact are not decided (M.9), so About and the statement show "not published yet"; terms and privacy texts need legal review; the statement's "automated check on the main pages" refers to the Playwright axe spec only.
 - **Checks**: axe (WCAG 2 A/AA, 2.1 A/AA) at 375 and 1280 px passes on `/about`, `/accessibility`, `/terms`, `/help`, `/`, `/login`, `/settings`, `/offline` (no real stack, dummy Supabase). `/about` added to the e2e page lists. Not done: screenshots, bn/en visual check by eye.
 - **Tests**: `tests/unit/about-footer.test.tsx` (footer in bn and en with links and 999, footer inside main, About in both languages, Terms note, accessibility statement); `tests/unit/home-nav.test.tsx` updated for the new More item. Language test, tsc and eslint pass.
+
+## Phase 6 progress (started 2026-11-17)
+
+| # | What | Status |
+|---|---|---|
+| F6.1 | Office onboarding: first-run tour (5 steps, `components/office/OfficeTour.tsx`) shown once per device after the staff guard passes, from `/office` and every `officePage` screen; `/office/help` with statuses in plain words, what never goes in public text, AI limits, the 999 note, the eight practice tasks (same as `docs/aibc/pilot/onboarding-training.md`), a replay button and a link to contact. "Office help" is last in the office side menu. | Built. "Tour done" is kept on this device only (`jonokotha:office-tour-done`); no endpoint stores it per staff member. |
+| F6.2 | Citizen help and contact: `/help/contact` (`components/SupportForm.tsx`) with three kinds (how do I, something does not work, pilot feedback); pilot feedback also asks how easy the page was to understand (1 to 5). Linked from `/help`. Warns when the text looks like a phone number, email or ID. | Built, **no endpoint**: the form prepares the message and hands it over by email (when `NEXT_PUBLIC_SUPPORT_EMAIL` is set) or by copy, like the content challenge. Support inbox and reference codes need a backend item. |
+| F6.3 | Field test protocol, screen list, log format and pass line: `docs/aibc/language/first-glance-test.md`. | **Not run.** Needs people from several districts. |
+| F6.4 | Native-speaker sign-off process and log: `docs/aibc/language/signoff.md`; review sheet regenerated (`strings-review.csv`, now includes everything from Phase 5 and 6). | **Open.** No row is marked reviewed. |
+| F6.5 | Real-device matrix, conditions, flows and volume checks: `docs/aibc/pilot/device-matrix.md`. | **Not run.** Needs the devices and a volume-seeded staging stack. |
+
+Strings: `src/lib/strings/pilot.ts` (`ot*`, `oh*`, `sp*`). Tests: `tests/unit/pilot.test.tsx` (validation, personal-data warning, mail link only with an address, five-step tour in bn and en, skip). `/help/contact` added to the axe page list and the release-gate page list. Not checked in a browser: the running dev server on port 3000 had stale strings, so the pages showed blank labels there; restart it. Not checked: axe on `/office/help` (needs a staff session), the tour on a phone.
