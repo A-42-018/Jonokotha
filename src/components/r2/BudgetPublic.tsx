@@ -27,15 +27,18 @@ function Inner({ constituency, project }: { constituency: string; project?: stri
   const [fy, setFy] = useState("");
   const [kind, setKind] = useState<EntryKind | "">("");
   const src = useQuery({ queryKey: ["budget-sources", constituency], queryFn: () => fetchBudgetSources(constituency), retry: false });
-  const ent = useQuery({ queryKey: ["budget-entries", constituency, fy, kind, project], queryFn: () => fetchBudgetEntries(constituency, { ...(fy ? { fiscal_year: fy } : {}), ...(kind ? { kind } : {}), ...(project ? { project } : {}) }), retry: false });
-  const years = src.data?.kind === "ok" ? [...new Set(src.data.data.map((s) => s.fiscal_year))].sort().reverse() : [];
+  // A project link shows that project's figures even when the visitor's chosen area is another one.
+  const area = project ? undefined : constituency;
+  const ent = useQuery({ queryKey: ["budget-entries", area, fy, kind, project], queryFn: () => fetchBudgetEntries(area, { ...(fy ? { fiscal_year: fy } : {}), ...(kind ? { kind } : {}), ...(project ? { project } : {}) }), retry: false });
+  const yearsFrom = project ? (ent.data?.kind === "ok" ? ent.data.data : []) : src.data?.kind === "ok" ? src.data.data : [];
+  const years = [...new Set(yearsFrom.map((s) => s.fiscal_year))].sort().reverse();
   return (
     <AsyncBlock pending={src.isPending || ent.isPending} error={src.error ?? ent.error} onRetry={() => { void src.refetch(); void ent.refetch(); }}>
       <Gate data={src.data}>
         {(sources) => (
           <div className="space-y-4">
             <p className="rounded-xl border border-civic/30 bg-civic/5 p-3 text-sm">{t.r2BgNote}</p>
-            {sources.length === 0 ? <EmptyState title={t.r2BgNoSources} body={t.r2BgNoSourcesBody} /> : (
+            {sources.length === 0 && !project ? <EmptyState title={t.r2BgNoSources} body={t.r2BgNoSourcesBody} /> : (
               <>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <Select label={t.r2Fy} value={fy} onChange={(e) => setFy(e.target.value)} options={[{ value: "", label: t.r2FyAll }, ...years.map((y) => ({ value: y, label: y }))]} />

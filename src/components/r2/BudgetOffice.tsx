@@ -13,7 +13,7 @@ import { useToast } from "@/components/ui/Toast";
 import { useLang } from "@/components/ui/useLang";
 import { useT } from "@/components/ui/useT";
 import { fillNum } from "@/lib/format";
-import { addEntry, ascii, num, createSource, DOC_KINDS, ENTRY_KINDS, entryProblem, fetchAdminSources, fetchOfficeSources, sourceProblem, verifySource, withdrawSource, type EntryKind, type OfficeSource } from "@/lib/r2-api";
+import { addEntry, ascii, noteTooShort, num, createSource, DOC_KINDS, ENTRY_KINDS, entryProblem, fetchAdminSources, fetchBudgetEntries, fetchOfficeSources, money, retractEntry, sourceProblem, verifySource, withdrawSource, type EntryKind, type OfficeSource } from "@/lib/r2-api";
 import { Ext, Gate, useR2Fail } from "./bits";
 import type { BudgetDocKind } from "@/lib/types";
 
@@ -81,6 +81,7 @@ function SourceRow({ s }: { s: OfficeSource }) {
   const qc = useQueryClient();
   const fail = useR2Fail();
   const [open, setOpen] = useState(false);
+  const [showEntries, setShowEntries] = useState(false);
   const [reason, setReason] = useState("");
   const w = useMutation({ mutationFn: () => withdrawSource(s.ref, reason.trim()), onSuccess: () => { toast("success", t.r2Done); void qc.invalidateQueries({ queryKey: ["office-budget-sources"] }); }, onError: fail });
   const live = s.status === "pending" || s.status === "verified";
@@ -97,12 +98,54 @@ function SourceRow({ s }: { s: OfficeSource }) {
         <>
           <Button variant="ghost" aria-expanded={open} onClick={() => setOpen((x) => !x)}>{t.r2BgAddEntry}</Button>
           {open && <NewEntry source={s.ref} />}
+          {s.status === "verified" && s.entries > 0 && (
+            <>
+              <Button variant="ghost" aria-expanded={showEntries} onClick={() => setShowEntries((x) => !x)}>{t.r2BgSeeEntries}</Button>
+              {showEntries && <PublishedEntries source={s} />}
+            </>
+          )}
           <div className="space-y-2">
             <Textarea label={t.r2Reason} rows={2} maxLength={500} value={reason} onChange={(e) => setReason(e.target.value)} />
             <ConfirmAction label={t.r2BgWithdraw} variant="danger" body={t.r2BgWithdrawBody} disabled={reason.trim().length < 5} loading={w.isPending} onConfirm={() => w.mutateAsync()} />
           </div>
         </>
       )}
+    </div>
+  );
+}
+
+/** The published figures of a verified document, each with a way to take a wrong one back (POST /office/budget/entries/{id}/retract). */
+function PublishedEntries({ source }: { source: OfficeSource }) {
+  const t = useT();
+  const lang = useLang();
+  const q = useQuery({ queryKey: ["office-budget-entries", source.ref], queryFn: () => fetchBudgetEntries(source.constituency, { source: source.ref }), retry: false });
+  return (
+    <Boundary q={q} isEmpty={(d) => d.kind === "ok" && d.data.length === 0} emptyTitle={t.r2BgNoEntries}>
+      {(d) => <Gate data={d}>{(rows) => (
+        <ul className="space-y-2">{rows.map((e) => (
+          <li key={e.id}><EntryRow id={e.id} label={`${t[`r2BgKind_${e.kind}`]} · ${e.label} · ${money(e.amount, e.currency, lang)}`} sourceRef={source.ref} /></li>
+        ))}</ul>
+      )}</Gate>}
+    </Boundary>
+  );
+}
+
+function EntryRow({ id, label, sourceRef }: { id: string; label: string; sourceRef: string }) {
+  const t = useT();
+  const toast = useToast();
+  const qc = useQueryClient();
+  const fail = useR2Fail();
+  const [reason, setReason] = useState("");
+  const r = useMutation({
+    mutationFn: () => retractEntry(id, reason.trim()),
+    onSuccess: () => { toast("success", t.r2Done); void qc.invalidateQueries({ queryKey: ["office-budget-entries", sourceRef] }); void qc.invalidateQueries({ queryKey: ["office-budget-sources"] }); },
+    onError: fail,
+  });
+  return (
+    <div className="space-y-2 rounded-lg border border-line p-2">
+      <p className="break-words text-sm">{label}</p>
+      <Textarea label={t.r2Reason} rows={2} maxLength={300} value={reason} onChange={(e) => setReason(e.target.value)} />
+      <ConfirmAction label={t.r2BgRetract} variant="danger" body={t.r2BgRetractBody} disabled={reason.trim().length < 5} loading={r.isPending} onConfirm={() => r.mutateAsync()} />
     </div>
   );
 }
@@ -167,9 +210,9 @@ function Review({ s }: { s: OfficeSource }) {
       <p className="break-words font-medium">{s.title}</p>
       <p className="text-sm text-muted">{s.publisher} · {t[`r2BgDoc_${s.doc_kind}`]} · {s.fiscal_year} · {s.constituency} · {fillNum(t.r2BgEntryCount, { n: s.entries }, lang)}</p>
       <p className="text-sm"><Ext href={s.source_url}>{t.r2OpenSource}</Ext></p>
-      <Textarea label={t.r2BgRejectNote} optional rows={2} maxLength={500} value={note} onChange={(e) => setNote(e.target.value)} />
+      <Textarea label={t.r2BgRejectNote} optional rows={2} maxLength={500} value={note} error={noteTooShort(note) ? t.r2NoteShort : undefined} onChange={(e) => setNote(e.target.value)} />
       <div className="flex flex-wrap gap-2">
-        <ConfirmAction label={t.r2BgVerify} body={t.r2BgVerifyBody} loading={m.isPending} onConfirm={() => m.mutateAsync("verify")} />
+        <ConfirmAction label={t.r2BgVerify} body={t.r2BgVerifyBody} disabled={noteTooShort(note)} loading={m.isPending} onConfirm={() => m.mutateAsync("verify")} />
         <Button variant="danger" disabled={note.trim().length < 5} loading={m.isPending} onClick={() => m.mutate("reject")}>{t.r2BgReject}</Button>
       </div>
     </div>

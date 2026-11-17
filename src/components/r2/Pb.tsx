@@ -18,7 +18,7 @@ import { useLang } from "@/components/ui/useLang";
 import { useT } from "@/components/ui/useT";
 import { ApiError } from "@/lib/api-client";
 import { fillNum, fmtDay } from "@/lib/format";
-import { createPb, num, fetchOfficePb, fetchOfficePbs, fetchPb, fetchPbList, money, pbAct, pbProblem, submitBallot, type OfficePb, type PbFull } from "@/lib/r2-api";
+import { createPb, noteTooShort, num, fetchOfficePb, fetchOfficePbs, fetchPb, fetchPbList, money, pbAct, pbProblem, submitBallot, type OfficePb, type PbFull } from "@/lib/r2-api";
 import { Gate, useR2Fail } from "./bits";
 
 /** Participatory budgeting (F8.6). Always labelled advisory until the office records that it will follow the result; the pledge is the office's own statement. */
@@ -73,8 +73,7 @@ function Detail({ refId, signedIn }: { refId: string; signedIn: boolean }) {
   });
   return (
     <AsyncBlock pending={q.isPending} error={q.error} onRetry={() => void q.refetch()}>
-      {q.data && (() => {
-        const c: PbFull = q.data;
+      <Gate data={q.data}>{(c: PbFull) => {
         const open = c.status === "open";
         const sel = picked ?? c.my_ballot?.option_ids ?? [];
         const toggle = (id: string) => { setProblem(null); setPicked(sel.includes(id) ? sel.filter((x) => x !== id) : [...sel, id]); };
@@ -127,7 +126,7 @@ function Detail({ refId, signedIn }: { refId: string; signedIn: boolean }) {
             <Link href="/budgeting" className="inline-flex min-h-11 items-center text-civic underline">{t.r2Back}</Link>
           </div>
         );
-      })()}
+      }}</Gate>
     </AsyncBlock>
   );
 }
@@ -239,18 +238,18 @@ function Manage({ refId }: { refId: string }) {
     onSuccess: () => { toast("success", t.r2Done); void qc.invalidateQueries({ queryKey: ["office-pb"] }); },
     onError: fail,
   });
-  if (!v.data) return <p role="status">{t.r1Loading}</p>;
-  const c = v.data;
   return (
+    <AsyncBlock pending={v.isPending} error={v.error} onRetry={() => void v.refetch()}>
+      <Gate data={v.data}>{(c) => (
     <div className="space-y-3">
       <p className="text-sm">{t.r2PbBudget}: {money(c.budget_amount, "BDT", lang)} · {fillNum(t.r2PbLive, { n: c.participants }, lang)}</p>
       <p className="break-words text-sm text-muted">{c.pledge}</p>
       {(c.status === "draft") && <ConfirmAction label={t.r2PbReqOpen} body={t.r2PbReqOpenBody} loading={act.isPending} onConfirm={() => act.mutateAsync({ action: "request-open" })} />}
       {c.status === "pending_approval" && (
         <div className="space-y-2">
-          <Textarea label={t.r2Reason} optional rows={2} maxLength={500} value={note} onChange={(e) => setNote(e.target.value)} />
+          <Textarea label={t.r2Reason} optional rows={2} maxLength={500} value={note} error={noteTooShort(note) ? t.r2NoteShort : undefined} onChange={(e) => setNote(e.target.value)} />
           <div className="flex flex-wrap gap-2">
-            <Button loading={act.isPending} onClick={() => act.mutate({ action: "decision", body: { decision: "approve", ...(note.trim() ? { note: note.trim() } : {}) } })}>{t.r2PbApprove}</Button>
+            <Button disabled={noteTooShort(note)} loading={act.isPending} onClick={() => act.mutate({ action: "decision", body: { decision: "approve", ...(note.trim() ? { note: note.trim() } : {}) } })}>{t.r2PbApprove}</Button>
             <Button variant="danger" disabled={note.trim().length < 5} loading={act.isPending} onClick={() => act.mutate({ action: "decision", body: { decision: "reject", note: note.trim() } })}>{t.r2PbRejectBtn}</Button>
           </div>
         </div>
@@ -272,5 +271,7 @@ function Manage({ refId }: { refId: string }) {
         </div>
       )}
     </div>
+      )}</Gate>
+    </AsyncBlock>
   );
 }

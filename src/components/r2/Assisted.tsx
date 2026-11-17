@@ -19,7 +19,7 @@ import { useT } from "@/components/ui/useT";
 import { CATEGORIES } from "@/lib/categories";
 import { fillNum, fmtDay } from "@/lib/format";
 import { dict } from "@/lib/i18n";
-import { applyVolunteer, assistedProblem, createKiosk, decideVolunteer, fetchKiosks, fetchMyAssisted, fetchMyVolunteer, fetchOfficeVolunteers, fetchVolunteerRules, retireKiosk, submitAssisted, withdrawVolunteer } from "@/lib/r2-api";
+import { applyVolunteer, assistedProblem, noteTooShort, createKiosk, decideVolunteer, fetchKiosks, fetchMyAssisted, fetchMyVolunteer, fetchOfficeVolunteers, fetchVolunteerRules, retireKiosk, submitAssisted, withdrawVolunteer } from "@/lib/r2-api";
 import type { AssistedReportResult, ConsentMethod } from "@/lib/types";
 import { Gate, useR2Fail } from "./bits";
 
@@ -213,11 +213,12 @@ function OfficeInner({ constituency }: { constituency: string }) {
         <div className="space-y-5">
           <section aria-labelledby="ov-v" className="space-y-3">
             <h2 id="ov-v" className="text-lg font-semibold">{t.r2AsVolunteers}</h2>
-            <Textarea label={t.r2AsDecisionNote} optional rows={2} maxLength={500} value={note} onChange={(e) => setNote(e.target.value)} />
+            <Textarea label={t.r2AsDecisionNote} optional rows={2} maxLength={500} value={note} error={noteTooShort(note) ? t.r2NoteShort : undefined} onChange={(e) => setNote(e.target.value)} />
             <Boundary q={q} isEmpty={() => d.volunteers.length === 0} emptyTitle={t.r2AsNoVolunteers}>
               {() => (
                 <ul className="space-y-2">{d.volunteers.map((v) => {
                   const needNote = note.trim().length < 5;
+                  const shortNote = noteTooShort(note);
                   return (
                     <li key={v.id} className="space-y-2 rounded-xl border border-line bg-white p-3">
                       <div className="flex flex-wrap items-center gap-2">
@@ -225,9 +226,9 @@ function OfficeInner({ constituency }: { constituency: string }) {
                         <span className="text-sm text-muted">{fmtDay(v.applied_at, lang)} · {fillNum(t.r2AsReports30, { n: v.reports_30d }, lang)}</span>
                       </div>
                       <div className="flex flex-wrap gap-2">
-                        {v.status === "pending" && <><ConfirmAction label={t.r2AsApprove} body={t.r2AsDecisionBody} loading={dec.isPending} onConfirm={() => dec.mutateAsync({ id: v.id, d: "approve" })} /><ConfirmAction label={t.r2AsReject} variant="danger" body={t.r2AsDecisionBody} disabled={needNote} loading={dec.isPending} onConfirm={() => dec.mutateAsync({ id: v.id, d: "reject" })} /></>}
+                        {v.status === "pending" && <><ConfirmAction label={t.r2AsApprove} body={t.r2AsDecisionBody} disabled={shortNote} loading={dec.isPending} onConfirm={() => dec.mutateAsync({ id: v.id, d: "approve" })} /><ConfirmAction label={t.r2AsReject} variant="danger" body={t.r2AsDecisionBody} disabled={needNote} loading={dec.isPending} onConfirm={() => dec.mutateAsync({ id: v.id, d: "reject" })} /></>}
                         {v.status === "active" && <ConfirmAction label={t.r2AsSuspend} variant="danger" body={t.r2AsDecisionBody} disabled={needNote} loading={dec.isPending} onConfirm={() => dec.mutateAsync({ id: v.id, d: "suspend" })} />}
-                        {v.status === "suspended" && <ConfirmAction label={t.r2AsReinstate} body={t.r2AsDecisionBody} loading={dec.isPending} onConfirm={() => dec.mutateAsync({ id: v.id, d: "reinstate" })} />}
+                        {v.status === "suspended" && <ConfirmAction label={t.r2AsReinstate} body={t.r2AsDecisionBody} disabled={shortNote} loading={dec.isPending} onConfirm={() => dec.mutateAsync({ id: v.id, d: "reinstate" })} />}
                       </div>
                     </li>
                   );

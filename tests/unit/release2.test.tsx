@@ -8,6 +8,7 @@ import BudgetPublic from "@/components/r2/BudgetPublic";
 import ReferralStatus from "@/components/issue/ReferralStatus";
 import Rti from "@/components/r2/Rti";
 import { VolunteerHub } from "@/components/r2/Assisted";
+import { RegionOverview } from "@/components/r2/Regional";
 import { assistedProblem, entryProblem, looksLikePublicKey, MP_KINDS, money, pbProblem, rtiProblem, sourceProblem } from "@/lib/r2-api";
 import { dict } from "@/lib/i18n";
 import { json, stub } from "./helpers-r11";
@@ -21,6 +22,7 @@ describe("Release 2 rules shown before sending (F8.*)", () => {
     expect(sourceProblem({ ...ok, source_url: "http://x" })).toBe("url");
     expect(sourceProblem({ ...ok, fiscal_year: "2026" })).toBe("year");
     expect(sourceProblem({ ...ok, doc_sha256: "abc" })).toBe("hash");
+    expect(sourceProblem({ ...ok, publisher: "EC" })).toBe("publisher");
     expect(entryProblem({ label: "রাস্তা", amount: "0", source_page: "4" })).toBeNull();
     expect(entryProblem({ label: "রাস্তা", amount: "-1", source_page: "4" })).toBe("amount");
     expect(entryProblem({ label: "রাস্তা", amount: "5", source_page: " " })).toBe("page");
@@ -30,11 +32,15 @@ describe("Release 2 rules shown before sending (F8.*)", () => {
     expect(money(1500000, "BDT", "bn")).toMatch(/[০-৯]/);
   });
   it("participatory budget: options must cost at least half the budget", () => {
-    const base = { title: "বাজেট চক্র", budget: 100, pledge: "আমরা ফল মানব, এটি আমাদের প্রকাশ্য প্রতিশ্রুতি।", maxChoices: 2, options: [{ title: "ক", cost: 30 }, { title: "খ", cost: 30 }] };
+    const base = { title: "বাজেট চক্র", budget: 100, pledge: "আমরা ফল মানব, এটি আমাদের প্রকাশ্য প্রতিশ্রুতি।", maxChoices: 2, options: [{ title: "রাস্তা", cost: 30 }, { title: "সেতু", cost: 30 }] };
     expect(pbProblem(base)).toBeNull();
-    expect(pbProblem({ ...base, options: [{ title: "ক", cost: 10 }, { title: "খ", cost: 10 }] })).toBe("cost");
-    expect(pbProblem({ ...base, options: [{ title: "ক", cost: 60 }] })).toBe("options");
+    expect(pbProblem({ ...base, options: [{ title: "রাস্তা", cost: 10 }, { title: "সেতু", cost: 10 }] })).toBe("cost");
+    expect(pbProblem({ ...base, options: [{ title: "রাস্তা", cost: 60 }] })).toBe("options");
     expect(pbProblem({ ...base, maxChoices: 3 })).toBe("choices");
+    // The server's own limits: option title at least 3 characters, cost above zero, a whole number of choices.
+    expect(pbProblem({ ...base, options: [{ title: "ক", cost: 30 }, { title: "সেতু", cost: 30 }] })).toBe("options");
+    expect(pbProblem({ ...base, options: [{ title: "রাস্তা", cost: 0 }, { title: "সেতু", cost: 60 }] })).toBe("options");
+    expect(pbProblem({ ...base, maxChoices: NaN })).toBe("choices");
   });
   it("assisted report needs all three agreements; RTI needs an agency and a real request; keys must be public", () => {
     const f = { title: "বাতি নেই", description: "রাস্তায় রাতে বাতি জ্বলে না, অনেকদিন ধরে।", category: "roads" };
@@ -69,6 +75,23 @@ describe("budget pages (F8.1)", () => {
     stub({});
     render(<BudgetPublic constituency="demo-1" />);
     expect(await screen.findByText("এই পাতা এখনো চালু হয়নি")).toBeInTheDocument();
+  });
+});
+
+describe("regional overview (F8.5)", () => {
+  const area = { constituency: "bd-017", name_en: "Dhaka-1", name_bn: "ঢাকা-১", is_sample: false, open_issues: 7, new_30d: 3, resolved_30d: 2, overdue_first_response: 1, active_staff: 4, has_mp: true };
+  it("reads the areas out of the server's { areas, definition } answer", async () => {
+    stub({ "GET /office/regions/mine": () => json(200, { data: [{ code: "D1", level: "district", name_en: "Dhaka", name_bn: "ঢাকা" }] }), "GET /office/regions/overview": () => json(200, { data: { areas: [area], definition: "Counts per area." } }) });
+    render(<RegionOverview />);
+    expect((await screen.findAllByText("ঢাকা-১")).length).toBeGreaterThan(0);
+  });
+  it("does not ask for counts when the account has no region", async () => {
+    const seen: string[] = [];
+    stub({ "GET /office/regions/mine": () => json(200, { data: [] }), "GET /office/regions/overview": () => { seen.push("overview"); return json(403, { error: { code: "forbidden" } }); } });
+    render(<RegionOverview />);
+    await waitFor(() => expect(screen.getAllByText(/./).length).toBeGreaterThan(0));
+    await new Promise((r) => setTimeout(r, 50));
+    expect(seen).toEqual([]);
   });
 });
 
