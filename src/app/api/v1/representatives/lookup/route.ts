@@ -18,12 +18,12 @@ export async function GET(req: Request) {
     const out = [];
     for (const a of areas) {
       const { data, error } = await c.sb.from("representatives")
-        .select("id,full_name,office_title,party_name,official_contact,source_url,verified_at,is_demo,representative_constituencies!inner(valid_from,valid_to,constituencies!inner(key))")
+        .select("id,full_name,full_name_bn,party_name_bn,photo_path,role_note,office_title,party_name,official_contact,source_url,verified_at,is_demo,representative_constituencies!inner(valid_from,valid_to,constituencies!inner(key))")
         .eq("representative_constituencies.constituencies.key", a.key).eq("verification_status", "verified");
       if (error) throw fromDbError(error);
       const today = new Date().toISOString().slice(0, 10);
       const reps = (data ?? []).filter((r) => (r.representative_constituencies as { valid_to: string | null }[]).some((m) => !m.valid_to || m.valid_to >= today))
-        .map((r) => ({ id: r.id, full_name: r.full_name, office_title: r.office_title, party_name: r.party_name, official_contact: r.official_contact, source_url: r.source_url, verified_at: r.verified_at, is_sample: r.is_demo }));
+        .map((r) => ({ id: r.id, full_name: r.full_name, full_name_bn: r.full_name_bn, party_name_bn: r.party_name_bn, photo_path: r.photo_path, role_note: r.role_note, office_title: r.office_title, party_name: r.party_name, official_contact: r.official_contact, source_url: r.source_url, verified_at: r.verified_at, is_sample: r.is_demo }));
       out.push({ constituency: a, representatives: reps });
     }
     return { data: { matches: out, needs_manual_choice: out.length === 0 } };

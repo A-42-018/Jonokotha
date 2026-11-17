@@ -1,6 +1,6 @@
 {
- "checked_at": "2026-11-16",
- "dry": true,
+ "checked_at": "2026-11-17",
+ "dry": false,
  "ok": [
   {
    "seat": 1,
@@ -1097,6 +1097,10 @@
    "name": "Jhalokati-2"
   },
   {
+   "seat": 164,
+   "name": "Kishoreganj-3"
+  },
+  {
    "seat": 215,
    "name": "Gopalganj-1"
   },
@@ -1528,13 +1532,6 @@
    "name": "Netrokona-5",
    "page_names": [
     "Masum Mustafa"
-   ]
-  },
-  {
-   "seat": 164,
-   "name": "Kishoreganj-3",
-   "page_names": [
-    "DR. MUHAMMAD OSMAN FARRUK"
    ]
   },
   {
