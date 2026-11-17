@@ -1,11 +1,24 @@
 @import "tailwindcss";
 
-:root { --background: #f4f8fc; --foreground: #14263b; }
+/* Brand (homepage redesign, docs/HOMEPAGE_REDESIGN_PLAN.md §3): Bangladesh flag green, warm cream page, ink text. */
+:root { --background: #fbf6ec; --foreground: #1b2a22; }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-civic: #1d5fa8;
+  --color-civic: #006a4e;
+  /* Header and footer band (white text 12.2:1, marigold text 5.9:1). */
+  --color-brand-deep: #0b3d2e;
+  /* Main report button on cream (white text 5.2:1; hover 7.3:1). Not on the deep band: there it is only 2.4:1. */
+  --color-brick: #c2410c;
+  --color-brick-dark: #9a3412;
+  /* Body copy (8.7:1 on cream) and ink that stays dark on pastel tiles in both themes. */
+  --color-ink-2: #3b4a41;
+  --color-ink: #1b2a22;
+  --color-cream: #fbf6ec;
+  /* Status accents for the home area cards (on white: 5.7:1 and 5.4:1); "reported" uses brick. */
+  --color-st-progress: #1f6f8b;
+  --color-st-done: #1f7a3f;
   --color-teal: #0f8b8d;
   --color-leaf: #3a9d5d;
   --color-amber: #f2a33a;
@@ -13,8 +26,8 @@
   --color-teal-strong: #0b6b6d;
   --color-leaf-strong: #25723f;
   --color-danger: #b42318;
-  /* Muted text (7.1 on background) and form-control borders (4.5 on white, above the 3:1 non-text minimum). */
-  --color-muted: #475569;
+  /* Muted text, meta lines only (5.9 on cream, 6.4 on white) and form-control borders (4.5 on white, above the 3:1 non-text minimum). */
+  --color-muted: #55625a;
   --color-line: #64748b;
   --font-sans: var(--font-body), system-ui, sans-serif;
   --font-heading: var(--font-head), var(--font-body), sans-serif;
@@ -22,6 +35,12 @@
 
 body { background: var(--background); color: var(--foreground); font-family: var(--font-sans); overflow-wrap: break-word; }
 h1, h2, h3 { font-family: var(--font-heading); }
+
+/* Readable Bangla body text (redesign §3.2): 17px with 1.7 line height; never below 15px for meta. */
+.jk-body { font-size: 1.0625rem; line-height: 1.7; }
+/* Soft card depth instead of grey borders (redesign §3.3). */
+.jk-card { background: #fff; border-radius: 1rem; box-shadow: 0 1px 2px rgb(27 42 34 / 0.06), 0 8px 24px rgb(27 42 34 / 0.08); }
+html[data-theme="dark"] .jk-card { background: var(--dk-surface); box-shadow: 0 0 0 1px var(--dk-s200); }
 
 /* Reduced motion (WCAG 2.3.3): no animation or smooth scrolling for people who ask the OS for less motion. */
 @media (prefers-reduced-motion: reduce) {
@@ -35,7 +54,7 @@ h1, h2, h3 { font-family: var(--font-heading); }
 
 /* Simple-language mode (F5.15): extra explanations are hidden, the task and its buttons stay; pictures get bigger. */
 html[data-simple="true"] .jk-more { display: none; }
-html[data-simple="true"] main img[src^="/illustrations/card-"] { width: 8rem; height: 8rem; }
+html[data-simple="true"] main img[src^="/illustrations/card-"], html[data-simple="true"] main img[src^="/illustrations/home/card-"] { width: 8rem; height: 8rem; }
 
 /*
  * Dark theme (F7.10). Switched on by data-theme="dark" on <html> (ThemeApplier, behind the darkMode flag).
@@ -44,7 +63,7 @@ html[data-simple="true"] main img[src^="/illustrations/card-"] { width: 8rem; he
  */
 :root {
   --dk-bg: #0e1621; --dk-fg: #e6edf5; --dk-surface: #17222f; --dk-s50: #131d29; --dk-s100: #1d2a39; --dk-s200: #2a3b4f; --dk-s300: #3a4f67;
-  --dk-muted: #b3c1d1; --dk-line: #8fa3b8; --dk-civic: #8ab8f0; --dk-teal: #6fd0d2; --dk-leaf: #86d9a2; --dk-danger: #ff9f94; --dk-amber-text: #f6c76b;
+  --dk-muted: #b3c1d1; --dk-line: #8fa3b8; --dk-civic: #7ed3b2; --dk-teal: #6fd0d2; --dk-leaf: #86d9a2; --dk-danger: #ff9f94; --dk-amber-text: #f6c76b; --dk-brick: #f6a06b; --dk-st-progress: #7cc4e0;
 }
 html[data-theme="dark"] { color-scheme: dark; --background: var(--dk-bg); --foreground: var(--dk-fg); --color-muted: var(--dk-muted); --color-line: var(--dk-line); }
 /* Tailwind inlines the theme colours (@theme inline), so changing the variables above would not reach these two utilities; they are set directly. */
@@ -66,7 +85,15 @@ html[data-theme="dark"] .text-leaf-strong { color: var(--dk-leaf); }
 html[data-theme="dark"] .text-danger { color: var(--dk-danger); }
 html[data-theme="dark"] .text-amber-900, html[data-theme="dark"] .text-amber-800 { color: var(--dk-amber-text); }
 /* Buttons and chips that sit on a light-blue (civic) tint keep readable text; filled civic buttons keep their white text. */
-html[data-theme="dark"] .bg-civic { background-color: #1d5fa8; }
+html[data-theme="dark"] .bg-civic { background-color: #006a4e; }
+/* Redesign surfaces: cream turns into the dark page, body ink into the dark muted text. Pastel tiles keep their tint and their fixed dark ink (text-ink). */
+html[data-theme="dark"] .bg-cream { background-color: var(--dk-bg); }
+html[data-theme="dark"] .text-ink-2 { color: var(--dk-muted); }
+/* The phone hero art has the light cream page colour baked in: in the dark theme it shows as a rounded light card instead of a hard box. */
+html[data-theme="dark"] .jk-hero-art { border-radius: 1.25rem; }
+html[data-theme="dark"] .text-brick { color: var(--dk-brick); }
+html[data-theme="dark"] .text-st-progress { color: var(--dk-st-progress); }
+html[data-theme="dark"] .text-st-done { color: var(--dk-leaf); }
 html[data-theme="dark"] button[aria-pressed="false"].bg-white, html[data-theme="dark"] .bg-white.text-civic { color: var(--dk-civic); }
 html[data-theme="dark"] dialog { background-color: var(--dk-surface); color: var(--dk-fg); }
 html[data-theme="dark"] dialog::backdrop { background-color: rgb(0 0 0 / 0.65); }

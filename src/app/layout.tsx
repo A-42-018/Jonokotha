@@ -18,10 +18,12 @@ import { getArea } from "@/lib/constituency-server";
 import { currentUser } from "@/lib/supabase/server";
 import { dict, getLang } from "@/lib/i18n";
 
-// preload: false keeps ~190 KB of font files from competing with the page on slow links; display: optional means a slow font never swaps in mid-read (no layout shift): the page keeps the system font for that visit and the brand font is used once cached.
-// Headings use one static weight: the variable Anek Bangla file (all weights and widths) is 156 KB, a single weight is far smaller.
-const head = Anek_Bangla({ variable: "--font-head", subsets: ["bengali", "latin"], weight: ["600"], preload: false, display: "optional" });
-const body = Hind_Siliguri({ variable: "--font-body", subsets: ["bengali", "latin"], weight: ["400", "500", "600"], preload: false, display: "optional" });
+// preload: false keeps ~190 KB of font files from competing with the page on slow links. display: swap (redesign §3.2) so the brand
+// Bangla font is used on the first visit too; with display: optional most first visits fell back to each device's own Bangla font,
+// which read thin and hazy. adjustFontFallback (on by default) sizes the fallback to limit the shift when the font arrives.
+// Headings use static weights: 600 for headings, 700 only for the home H1. The variable Anek Bangla file is 156 KB; single weights are far smaller.
+const head = Anek_Bangla({ variable: "--font-head", subsets: ["bengali", "latin"], weight: ["600", "700"], preload: false, display: "swap" });
+const body = Hind_Siliguri({ variable: "--font-body", subsets: ["bengali", "latin"], weight: ["400", "500", "600"], preload: false, display: "swap" });
 
 /** Title and description follow the page language (the Bangla default, or English when chosen). */
 export async function generateMetadata(): Promise<Metadata> {
@@ -29,7 +31,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: `${t.appName} — Jonokotha`, description: t.tagline };
 }
 export const viewport: Viewport = {
-  themeColor: "#1d5fa8",
+  themeColor: "#0b3d2e",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",

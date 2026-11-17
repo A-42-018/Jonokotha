@@ -41,9 +41,9 @@ export default function BottomTabBar() {
           <Link
             href="/report"
             aria-current={reportActive ? "page" : undefined}
-            className={cx("-mt-5 flex min-h-16 flex-col items-center justify-start gap-0.5 px-1 text-center text-xs font-semibold leading-tight text-civic", focusRing)}
+            className={cx("-mt-5 flex min-h-16 flex-col items-center justify-start gap-0.5 px-1 text-center text-xs font-semibold leading-tight text-brick", focusRing)}
           >
-            <span aria-hidden className="flex size-14 items-center justify-center rounded-full bg-civic text-white shadow-lg ring-4 ring-white">
+            <span aria-hidden className="flex size-14 items-center justify-center rounded-full bg-brick text-white shadow-lg ring-4 ring-white">
               <PlusIcon />
             </span>
             {t.navReportShort}
