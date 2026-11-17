@@ -5,7 +5,9 @@ import AccountMenu from "@/components/AccountMenu";
 import ConstituencyPicker from "@/components/ConstituencyPicker";
 import RegisterSW from "@/components/RegisterSW";
 import BottomTabBar from "@/components/ui/BottomTabBar";
+import SiteFooter from "@/components/SiteFooter";
 import I18nProvider from "@/components/ui/I18nProvider";
+import PersonalizationApplier from "@/components/ui/PersonalizationApplier";
 import QueueSync from "@/components/offline/QueueSync";
 import MainShell from "@/components/ui/MainShell";
 import OfflineBanner from "@/components/ui/OfflineBanner";
@@ -37,11 +39,13 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   const t = dict[lang];
   let email: string | null = null;
   let isStaff = false;
+  let userId: string | null = null;
   let role: "citizen" | "staff" | "admin" | null = null;
   try {
     const { user, isStaff: staff, role: r } = await currentUser();
     role = r;
     email = user?.email ?? null;
+    userId = user?.id ?? null;
     isStaff = staff;
   } catch { /* Supabase not configured: show signed-out header */ }
   return (
@@ -50,6 +54,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <I18nProvider lang={lang} dicts={{ [lang]: t }}>
         <TopNav
           isStaff={isStaff}
+          userId={userId}
           picker={
             <ConstituencyPicker
               selectedId={await getConstituencyId()}
@@ -66,11 +71,12 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             />
           }
         />
+          <PersonalizationApplier />
           <OfflineBanner />
           <RegisterSW />
           <ToastProvider>
             <QueueSync />
-            <MainShell>{children}</MainShell>
+            <MainShell footer={<SiteFooter t={t} />}>{children}</MainShell>
           </ToastProvider>
           <BottomTabBar />
         </I18nProvider>

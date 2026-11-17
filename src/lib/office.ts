@@ -1,4 +1,5 @@
 import type { CaseRecord, Category, Status } from "./types";
+import { matchesQuery } from "./translit";
 
 /** SAMPLE staff (নমুনা) for assignment until the staff directory API exists. */
 export const SAMPLE_STAFF = [
@@ -34,7 +35,7 @@ export function filterCases(cases: CaseRecord[], f: CaseFilter, assign: Record<s
     if (f.category !== "all" && c.category !== f.category) return false;
     if (f.assigned === "mine-none" && assign[c.ref]) return false;
     if (f.assigned !== "all" && f.assigned !== "mine-none" && assign[c.ref] !== f.assigned) return false;
-    return !q || `${c.ref} ${c.title} ${c.area}`.toLowerCase().includes(q);
+    return !q || matchesQuery(`${c.ref} ${c.title} ${c.area}`, q);
   });
 }
 

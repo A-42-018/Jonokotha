@@ -28,9 +28,9 @@ test.describe("offline and resilience", () => {
     expect(await page.evaluate(() => localStorage.getItem("jonokotha:report-draft:v2"))).toBeNull();
 
     let posted: { key: string | undefined; title: string } | undefined;
-    await page.route("**/api/cases", async (route) => {
+    await page.route("**/api/v1/issues", async (route) => {
       posted = { key: route.request().headers()["idempotency-key"], title: route.request().postDataJSON().title };
-      await route.fulfill({ status: 201, contentType: "application/json", body: JSON.stringify({ ref: "JK-TEST-1" }) });
+      await route.fulfill({ status: 201, contentType: "application/json", body: JSON.stringify({ data: { ref: "JK-TEST-1", status: "submitted" } }) });
     });
     await context.setOffline(false);
     await page.evaluate(() => window.dispatchEvent(new Event("online")));
@@ -40,7 +40,7 @@ test.describe("offline and resilience", () => {
   });
 
   test("a queued report can be discarded from My Reports after confirming", async ({ page }) => {
-    await page.route("**/api/cases", (route) => route.abort("internetdisconnected")); // still no signal: the report stays queued
+    await page.route("**/api/v1/issues", (route) => route.abort("internetdisconnected")); // still no signal: the report stays queued
     await page.goto("/me");
     await page.evaluate(() => localStorage.setItem("jonokotha:report-queue:v1", JSON.stringify([{ id: "q1", title: "ড্রেন বন্ধ", body: {}, queuedAt: "2026-12-14T06:00:00Z", state: "queued" }])));
     await page.reload();

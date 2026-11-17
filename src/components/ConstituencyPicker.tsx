@@ -1,8 +1,14 @@
 "use client";
-import { useEffect, useRef } from "react";
+import dynamic from "next/dynamic";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CONSTITUENCIES, findConstituency, saveConstituency } from "@/lib/constituency";
+import { useLocalValue } from "@/components/ui/useLocalValue";
+import { MY_AREA_KEY, type MyArea } from "@/lib/areas-api";
 import type { Lang } from "@/lib/i18n";
+import type { LookupMatch } from "@/lib/mp-api";
+
+const AreaChooser = dynamic(() => import("./AreaChooser"), { ssr: false });
 
 type Labels = { open: string; choose: string; title: string; hint: string; sample: string; close: string; none: string };
 
@@ -10,6 +16,8 @@ export default function ConstituencyPicker({ selectedId, signedIn, lang, labels 
   const router = useRouter();
   const dialog = useRef<HTMLDialogElement>(null);
   const autoOpened = useRef(false);
+  const [opened, setOpened] = useState(false);
+  const [, setMine] = useLocalValue<MyArea | null>(MY_AREA_KEY, null);
   const current = findConstituency(selectedId);
   const name = (c: { nameBn: string; nameEn: string }) => (lang === "bn" ? c.nameBn : c.nameEn);
 
@@ -18,6 +26,7 @@ export default function ConstituencyPicker({ selectedId, signedIn, lang, labels 
     if (signedIn && !current && !autoOpened.current) {
       autoOpened.current = true;
       dialog.current?.showModal();
+      setOpened(true);
     }
   }, [signedIn, current]);
 
@@ -31,7 +40,7 @@ export default function ConstituencyPicker({ selectedId, signedIn, lang, labels 
     <>
       <button
         type="button"
-        onClick={() => dialog.current?.showModal()}
+        onClick={() => { dialog.current?.showModal(); setOpened(true); }}
         aria-haspopup="dialog"
         aria-label={current ? `${labels.open}: ${name(current)}` : `${labels.choose}: ${labels.none}`}
         className="inline-flex min-h-11 max-w-full items-center gap-1 rounded-lg border border-slate-300 bg-white px-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-civic sm:max-w-64"
@@ -43,6 +52,7 @@ export default function ConstituencyPicker({ selectedId, signedIn, lang, labels 
       <dialog
         ref={dialog}
         aria-labelledby="cp-title"
+        onClose={() => setOpened(false)}
         onClick={(e) => { if (e.target === dialog.current) dialog.current?.close(); }}
         className="m-auto w-[calc(100%-2rem)] max-w-md rounded-2xl p-0 shadow-xl backdrop:bg-black/40"
       >
@@ -67,6 +77,12 @@ export default function ConstituencyPicker({ selectedId, signedIn, lang, labels 
               </li>
             ))}
           </ul>
+          {opened && (
+            <AreaChooser onConfirm={(m: LookupMatch) => {
+              setMine({ key: m.constituency.key, name_bn: m.constituency.name_bn, name_en: m.constituency.name_en, sample: m.constituency.is_demo });
+              dialog.current?.close();
+            }} />
+          )}
           <button type="button" onClick={() => dialog.current?.close()} className="min-h-11 w-full rounded-lg border border-slate-300 px-3 font-medium focus-visible:outline-2 focus-visible:outline-civic">
             {labels.close}
           </button>

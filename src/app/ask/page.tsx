@@ -1,6 +1,10 @@
 import Link from "next/link";
 import AskForm from "@/components/ask/AskForm";
+import PublicQuestions from "@/components/ask/PublicQuestions";
+import EmergencyNote from "@/components/EmergencyNote";
 import Card from "@/components/ui/Card";
+import { getConstituencyId } from "@/lib/constituency-server";
+import { DEMO_CONSTITUENCY } from "@/lib/demo-data";
 import { SAMPLE_FAQ } from "@/lib/ask";
 import { dict, getLang } from "@/lib/i18n";
 import { currentUser } from "@/lib/supabase/server";
@@ -12,6 +16,7 @@ export default async function Ask() {
   const t = dict[lang];
   let signedIn = false;
   try { signedIn = !!(await currentUser()).user; } catch { /* signed out */ }
+  const constituency = (await getConstituencyId()) ?? DEMO_CONSTITUENCY.id;
   return (
     <div className="space-y-5">
       <div className="flex items-start gap-4">
@@ -23,8 +28,9 @@ export default async function Ask() {
           <Link href="/ask/inbox" className="inline-flex min-h-11 items-center text-civic underline">{t.askInbox}</Link>
         </div>
       </div>
-      <p className="rounded-xl border border-amber/60 bg-amber/10 p-3 text-sm">{t.askSampleBanner}</p>
-      <AskForm signedIn={signedIn} />
+      <EmergencyNote t={t} />
+      <AskForm signedIn={signedIn} constituency={constituency} />
+      <PublicQuestions constituency={constituency} signedIn={signedIn} />
       <section aria-labelledby="faq" className="space-y-2">
         <h2 id="faq" className="text-xl font-semibold text-foreground">{t.askFaqTitle}</h2>
         <p className="text-sm text-muted">{t.askFaqNote}</p>

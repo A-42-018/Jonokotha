@@ -1,7 +1,7 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeAll, describe, expect, it } from "vitest";
-import CaseTable, { ASSIGN_KEY } from "@/components/office/CaseTable";
+import { beforeAll, describe, expect, it, vi } from "vitest";
+import CaseTable from "@/components/office/CaseTable";
 import { ToastProvider } from "@/components/ui/Toast";
 import { dict } from "@/lib/i18n";
 import type { CaseRecord } from "@/lib/types";
@@ -14,20 +14,26 @@ beforeAll(() => {
   HTMLDialogElement.prototype.close = function () { this.removeAttribute("open"); };
 });
 
+vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
+
 describe("CaseTable", () => {
-  it("search narrows rows; bulk assign needs a pick and a confirmation", async () => {
+  it("search narrows rows; bulk assign asks for confirmation, then assigns each selected case to me through the API", async () => {
     const user = userEvent.setup();
+    const f = vi.fn(async (url: string) => new Response(JSON.stringify({ data: url.endsWith("/me/profile") ? { id: "me-1" } : {} }), { status: 200 }));
+    vi.stubGlobal("fetch", f);
     render(<ToastProvider><CaseTable cases={[mk("JK-1", "গর্ত"), mk("JK-2", "ড্রেন")]} /></ToastProvider>);
     await user.type(screen.getByLabelText(t.odSearch), "ড্রেন");
     expect(screen.queryByText("গর্ত")).toBeNull();
     await user.clear(screen.getByLabelText(t.odSearch));
     await user.click(screen.getByLabelText(t.odSelectAll));
     await user.click(screen.getByRole("button", { name: t.odBulkAssign }));
+    expect(f).not.toHaveBeenCalled();
     const dialog = screen.getByRole("dialog", { hidden: true });
-    expect(within(dialog).getByRole("button", { name: t.odBulkConfirm, hidden: true })).toBeDisabled();
-    expect(localStorage.getItem(ASSIGN_KEY)).toBeNull();
-    await user.selectOptions(within(dialog).getByRole("combobox", { hidden: true }), "st-2");
     await user.click(within(dialog).getByRole("button", { name: t.odBulkConfirm, hidden: true }));
-    expect(JSON.parse(localStorage.getItem(ASSIGN_KEY)!)).toEqual({ "JK-1": "st-2", "JK-2": "st-2" });
+    await vi.waitFor(() => expect(f.mock.calls.filter((c) => String((c as unknown as [string])[0]).endsWith("/assign")).length).toBe(2));
+    const calls = f.mock.calls as unknown as [string, RequestInit][];
+    const assign = calls.find((c) => c[0] === "/api/v1/office/issues/JK-1/assign")!;
+    expect(JSON.parse(assign[1].body as string)).toEqual({ assignee: "me-1" });
+    vi.unstubAllGlobals();
   });
 });

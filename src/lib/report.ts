@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { CATEGORIES } from "@/lib/categories";
 import type { Dict } from "@/lib/i18n";
+import { REPORT_DESC_MAX } from "@/lib/report-extras";
 
 export const DRAFT_KEY = "jonokotha:report-draft:v2";
 export const LEGACY_DRAFT_KEY = "jonokotha:report-draft:v1";
@@ -22,7 +23,7 @@ export function reportSchema(t: Dict) {
   return z.object({
     category: z.enum(CATEGORIES, { error: t.errCategory }),
     title: z.string().trim().min(3, t.errTitleMin).max(120, t.errTitleMax),
-    description: z.string().trim().min(10, t.errDescMin).max(2000, t.errDescMax),
+    description: z.string().trim().min(10, t.errDescMin).max(REPORT_DESC_MAX, t.errDescMax),
     area: z.string().trim().min(2, t.errAreaMin).max(120, t.errAreaMax),
   });
 }

@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
@@ -12,13 +13,14 @@ import { useLang } from "@/components/ui/useLang";
 import { useLocalValue } from "@/components/ui/useLocalValue";
 import { useT } from "@/components/ui/useT";
 import { fillNum, fmtDate } from "@/lib/format";
-import { casesToCsv, filterCases, NO_CASE_FILTER, SAMPLE_STAFF, type CaseFilter } from "@/lib/office";
+import { ApiError } from "@/lib/api-client";
+import { assignTo, fetchMyId } from "@/lib/office-api";
+import { casesToCsv, filterCases, NO_CASE_FILTER, type CaseFilter } from "@/lib/office";
 import { CATEGORIES } from "@/lib/categories";
 import { type CaseRecord, type Status } from "@/lib/types";
 
 const STATUSES: Status[] = ["received", "acknowledged", "referred", "resolved"];
 const FILTERS_KEY = "jonokotha:office-filters:v1";
-export const ASSIGN_KEY = "jonokotha:office-assign:v1";
 type Saved = { name: string; f: CaseFilter };
 const NO_SAVED: Saved[] = [];
 const NO_ASSIGN: Record<string, string> = {};
@@ -31,40 +33,46 @@ export default function CaseTable({ cases }: { cases: CaseRecord[] }) {
   const toast = useToast();
   const [f, setF] = useState<CaseFilter>(NO_CASE_FILTER);
   const [saved, setSaved] = useLocalValue(FILTERS_KEY, NO_SAVED);
-  const [assign, setAssign] = useLocalValue(ASSIGN_KEY, NO_ASSIGN);
+  const router = useRouter();
+  const [busy, setBusy] = useState(false);
   const [name, setName] = useState("");
   const [sel, setSel] = useState<string[]>([]);
   const [dlg, setDlg] = useState(false);
-  const [who, setWho] = useState("");
-  const rows = useMemo(() => filterCases(cases, f, assign), [cases, f, assign]);
-  const staff = (id?: string) => SAMPLE_STAFF.find((s) => s.id === id)?.name ?? t.odUnassignedLabel;
+  const rows = useMemo(() => filterCases(cases, f, NO_ASSIGN), [cases, f]);
   const allOn = rows.length > 0 && rows.every((r) => sel.includes(r.ref));
   const toggle = (ref: string) => setSel((s) => (s.includes(ref) ? s.filter((x) => x !== ref) : [...s, ref]));
 
   function exportCsv() {
-    const csv = casesToCsv(rows, Object.fromEntries(rows.map((r) => [r.ref, assign[r.ref] ? staff(assign[r.ref]) : ""])), t.odCsvHeader.split(","));
+    const csv = casesToCsv(rows, {}, t.odCsvHeader.split(","));
     const url = URL.createObjectURL(new Blob(["﻿", csv], { type: "text/csv;charset=utf-8" }));
     const a = document.createElement("a");
     a.href = url; a.download = "jonokotha-cases.csv"; a.click();
     URL.revokeObjectURL(url);
   }
 
-  function confirmAssign() {
-    if (!who) return;
-    setAssign({ ...assign, ...Object.fromEntries(sel.map((r) => [r, who])) });
-    toast("success", fillNum(t.odBulkDone, { n: sel.length }, lang));
-    setSel([]); setWho(""); setDlg(false);
+  // Bulk assign goes to yourself, one request per case (each is checked and audited by the server). A colleague needs a staff directory the API does not have yet.
+  async function confirmAssign() {
+    setBusy(true);
+    try {
+      const me = await fetchMyId();
+      const results = await Promise.allSettled(sel.map((r) => assignTo(r, me)));
+      const ok = results.filter((r) => r.status === "fulfilled").length;
+      const denied = results.some((r) => r.status === "rejected" && r.reason instanceof ApiError && r.reason.status === 403);
+      toast(ok === sel.length ? "success" : "error", ok === sel.length ? fillNum(t.odBulkDone, { n: ok }, lang) : denied ? t.ofToastForbidden : fillNum(t.odBulkPartial, { n: ok, total: sel.length }, lang));
+      router.refresh();
+    } catch {
+      toast("error", t.ofToastFail);
+    }
+    setBusy(false); setSel([]); setDlg(false);
   }
 
-  const assignedOpts = [{ value: "all", label: t.odAll }, { value: "mine-none", label: t.odUnassignedLabel }, ...SAMPLE_STAFF.map((s) => ({ value: s.id, label: s.name }))];
   return (
     <section aria-labelledby="cases-h" className="space-y-3">
       <h2 id="cases-h" className="text-xl font-semibold">{t.queue}</h2>
-      <form role="search" onSubmit={(e) => e.preventDefault()} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <Input label={t.odSearch} type="search" value={f.q} onChange={(e) => setF({ ...f, q: e.target.value })} />
+      <form role="search" onSubmit={(e) => e.preventDefault()} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <Input label={t.odSearch} type="search" hint={t.srBanglish} value={f.q} onChange={(e) => setF({ ...f, q: e.target.value })} />
         <Select label={t.odStatus} value={f.status} onChange={(e) => setF({ ...f, status: e.target.value as CaseFilter["status"] })} options={[{ value: "all", label: t.odAll }, ...STATUSES.map((s) => ({ value: s, label: t.statuses[s] }))]} />
         <Select label={t.odCategory} value={f.category} onChange={(e) => setF({ ...f, category: e.target.value as CaseFilter["category"] })} options={[{ value: "all", label: t.odAll }, ...CATEGORIES.map((c) => ({ value: c, label: t.cats[c] }))]} />
-        <Select label={t.odAssigned} value={f.assigned} onChange={(e) => setF({ ...f, assigned: e.target.value })} options={assignedOpts} />
       </form>
 
       <div className="flex flex-wrap items-end gap-3">
@@ -92,7 +100,7 @@ export default function CaseTable({ cases }: { cases: CaseRecord[] }) {
         <Button variant="secondary" disabled={sel.length === 0} onClick={() => setDlg(true)}>{t.odBulkAssign}</Button>
         <Button variant="secondary" disabled={rows.length === 0} onClick={exportCsv}>{t.odExport}</Button>
       </div>
-      <p className="text-xs text-muted">{t.odExportNote} {t.odAssignLocal}</p>
+      <p className="text-xs text-muted">{t.odExportNote}</p>
 
       {rows.length === 0 ? <p className="rounded-xl border border-line/40 bg-white p-4">{t.odNoRows}</p> : (
         <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
@@ -101,7 +109,7 @@ export default function CaseTable({ cases }: { cases: CaseRecord[] }) {
             <thead className="bg-slate-50 text-slate-600">
               <tr>
                 <th scope="col" className="px-3 py-2"><label className="flex min-h-11 items-center gap-2"><input type="checkbox" className="size-5 accent-civic" checked={allOn} onChange={() => setSel(allOn ? [] : rows.map((r) => r.ref))} /><span className="sr-only">{t.odSelectAll}</span></label></th>
-                {[t.ofColRef, t.ofColTitle, t.ofColCat, t.ofColArea, t.ofColStatus, t.odColAssigned, t.ofColDate].map((h) => <th key={h} scope="col" className="px-3 py-3 font-medium">{h}</th>)}
+                {[t.ofColRef, t.ofColTitle, t.ofColCat, t.ofColArea, t.ofColStatus, t.ofColDate].map((h) => <th key={h} scope="col" className="px-3 py-3 font-medium">{h}</th>)}
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -113,7 +121,6 @@ export default function CaseTable({ cases }: { cases: CaseRecord[] }) {
                   <td className="whitespace-nowrap px-3 py-1 text-teal-strong">{t.cats[c.category]}</td>
                   <td className="px-3 py-1">{c.area || t.ofNoArea}</td>
                   <td className="px-3 py-1"><StatusChip status={c.status} label={t.statuses[c.status]} /></td>
-                  <td className="whitespace-nowrap px-3 py-1">{staff(assign[c.ref])}</td>
                   <td className="whitespace-nowrap px-3 py-1 text-slate-600">{fmtDate(c.createdAt, lang)}</td>
                 </tr>
               ))}
@@ -122,10 +129,8 @@ export default function CaseTable({ cases }: { cases: CaseRecord[] }) {
         </div>
       )}
 
-      <Dialog open={dlg} onClose={() => setDlg(false)} title={fillNum(t.odBulkTitle, { n: sel.length }, lang)} description={t.odBulkBody}
-        actions={<><Button variant="ghost" onClick={() => setDlg(false)}>{t.cpCancel}</Button><Button disabled={!who} onClick={confirmAssign}>{t.odBulkConfirm}</Button></>}>
-        <Select label={t.odBulkPick} placeholder={t.odBulkPick} value={who} onChange={(e) => setWho(e.target.value)} options={SAMPLE_STAFF.map((s) => ({ value: s.id, label: s.name }))} />
-      </Dialog>
+      <Dialog open={dlg} onClose={() => !busy && setDlg(false)} busy={busy} title={fillNum(t.odBulkTitle, { n: sel.length }, lang)} description={t.odBulkBody}
+        actions={<><Button variant="ghost" disabled={busy} onClick={() => setDlg(false)}>{t.cpCancel}</Button><Button loading={busy} onClick={() => void confirmAssign()}>{t.odBulkConfirm}</Button></>} />
     </section>
   );
 }

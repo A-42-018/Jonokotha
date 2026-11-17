@@ -32,3 +32,7 @@ h1, h2, h3 { font-family: var(--font-heading); }
     scroll-behavior: auto !important;
   }
 }
+
+/* Simple-language mode (F5.15): extra explanations are hidden, the task and its buttons stay; pictures get bigger. */
+html[data-simple="true"] .jk-more { display: none; }
+html[data-simple="true"] main img[src^="/illustrations/card-"] { width: 8rem; height: 8rem; }

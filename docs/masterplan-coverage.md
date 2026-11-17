@@ -26,7 +26,7 @@ Status: **Done**, **Partial**, **Open**, as of 2026-11-16.
 | 2.4 | Submission package docs | M.1–M.5 | F.12 | Open |
 | 2.5–2.6 | Video, Congress demo, Q&A | Phase 4 | F.9, F.12 | Partial |
 | 2.8.3 | Business model, pilot, cost per constituency | M.5, B6.1 | — | Open |
-| 2.8.4 | Country adapters, configurable hierarchy, locale, currency, categories, channels | B5.12 | F5.12 | Open |
+| 2.8.4 | Country adapters, configurable hierarchy, locale, currency, categories, channels | B5.12 | F5.12 | Partial |
 | 2.8.5 | Responsible AI rules | existing, M.3, M.8 | F.5 | Partial |
 | 2.9 | Evidence: implemented vs prototype vs planned labels | B5.13 | F5.13 | Partial |
 | 2.10 | Benchmark features | covered by §7 rows | | |
@@ -77,7 +77,7 @@ Status: **Done**, **Partial**, **Open**, as of 2026-11-16.
 | 15 | Notifications incl. email, SMS, poll reminders, unsubscribe | existing, B5.9, B7.4 | F.10, F5.11 | Partial |
 | 16 | Maps and location privacy incl. spoof review | existing, B5.7 | existing | Partial |
 | 17.1–17.3 | Agents incl. Translation, Insight, Idea Assistant; RAG; graph | existing, B5.10 | F5.14 | Partial |
-| 17.4 | Personalization incl. simple-language and voice-first modes, view/reset | B5.11 | F5.15 | Open |
+| 17.4 | Personalization incl. simple-language and voice-first modes, view/reset | B5.11 | F5.15 | Partial |
 | 17.5 | Model selection, prompt caching, glossary in every prompt | B5.10 | — | Partial |
 | 17.6 | Real data sources (EC, Parliament, HDX, OSM, National Portal, GRS, 999/333) with lineage | B6.2 | — | Open |
 | 17.7 | AI evaluation incl. real consented examples, dialect STT | M.10, B6.5 | — | Partial |

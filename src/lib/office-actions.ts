@@ -61,3 +61,22 @@ export const submitToApproveRoute = (cref: string): SubmitAction => async (actio
   } catch { /* fall through */ }
   return "fail";
 };
+
+/**
+ * Submitter on /api/v1: acknowledge (the note is kept as an internal note), request more information (the note is the message the citizen sees)
+ * and resolve (the note is the resolution note). Forwarding to the suggested agency still uses the approve route, which picks the agency server-side.
+ */
+export const submitToApi = (cref: string): SubmitAction => async (action, note) => {
+  if (action === "refer") return submitToApproveRoute(cref)(action, note);
+  const [path, body] = {
+    acknowledge: ["acknowledge", { internal_note: note.trim() }],
+    request_info: ["request-information", { message: note.trim() }],
+    resolve: ["resolve", { resolution_note: note.trim() }],
+  }[action] as [string, Record<string, string>];
+  try {
+    const r = await fetch(`/api/v1/office/issues/${encodeURIComponent(cref)}/${path}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body), signal: AbortSignal.timeout(15000) });
+    if (r.ok) return "ok";
+    if (r.status === 401 || r.status === 403) return "forbidden";
+  } catch { /* fall through */ }
+  return "fail";
+};

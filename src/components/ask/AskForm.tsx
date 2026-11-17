@@ -1,32 +1,66 @@
 "use client";
+import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import EmergencyGuidance from "@/components/EmergencyGuidance";
+import QueryProvider from "@/components/QueryProvider";
+import { ApiError } from "@/lib/api-client";
+import { askBody, askQuestion, type Asked } from "@/lib/ask-api";
+import { newId } from "@/lib/offline-queue";
+import PublicNotice from "@/components/PublicNotice";
 import Button, { buttonClass } from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import { RadioGroup } from "@/components/ui/Choice";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
+import { usePersonalModes } from "@/components/ui/usePersonalization";
+import SpeakBar from "@/components/ui/SpeakBar";
 import Textarea from "@/components/ui/Textarea";
 import { useToast } from "@/components/ui/Toast";
 import { useLang } from "@/components/ui/useLang";
-import { useLocalValue } from "@/components/ui/useLocalValue";
 import { useT } from "@/components/ui/useT";
-import { ASK_KEY, NO_ASKS, remainingToday, TOPICS, validateAsk, type AskKind } from "@/lib/ask";
-import { fillNum } from "@/lib/format";
+import { TOPICS, validateAsk, type AskKind } from "@/lib/ask";
 
-/** Ask Your MP form. Sign-in required. No messages API yet: stored on this device (see askSampleBanner). */
-export default function AskForm({ signedIn }: { signedIn: boolean }) {
+export default function AskForm(props: { signedIn: boolean; constituency: string }) {
+  return <QueryProvider><AskInner {...props} /></QueryProvider>;
+}
+
+/** Ask Your MP form. Sign-in required. Posts to /api/v1/questions; a public question waits for moderation. */
+function AskInner({ signedIn, constituency }: { signedIn: boolean; constituency: string }) {
   const t = useT();
   const lang = useLang();
   const toast = useToast();
-  const [list, setList] = useLocalValue(ASK_KEY, NO_ASKS);
+  const [modes] = usePersonalModes();
+  const voiceFirst = modes.voiceFirst;
+  const [sent, setSent] = useState<Asked & { kind: AskKind }>();
+  const key = useRef(newId()); // one Idempotency-Key per question: a double tap does not send twice
   const [kind, setKind] = useState<AskKind | "">("");
   const [topic, setTopic] = useState("");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [errs, setErrs] = useState<ReturnType<typeof validateAsk>>({});
-  const [now] = useState(() => Date.now());
-  const left = remainingToday(list, now);
+
+  const topicLabel = (k: (typeof TOPICS)[number]) => t[`askTopic_${k}` as keyof typeof t] as string;
+  const send = useMutation({
+    mutationFn: () => askQuestion(constituency, kind as AskKind, subject, askBody(topicLabel(topic as (typeof TOPICS)[number]), message), key.current),
+    onSuccess: (r) => {
+      toast("success", kind === "public" ? t.askSentPublic : t.askSent);
+      setSent({ ...r, kind: kind as AskKind });
+      setKind(""); setTopic(""); setSubject(""); setMessage("");
+      key.current = newId();
+    },
+    onError: (e) => toast("error", e instanceof ApiError && e.status === 429 ? t.askLimit : e instanceof ApiError && e.status === 401 ? t.askNeedsSignIn : t.askSendFail),
+  });
+
+  // Imminent harm flagged by the server: the guidance replaces the form (the question itself is already saved).
+  if (sent?.emergency) {
+    return (
+      <EmergencyGuidance emergency={sent.emergency} lang={lang}>
+        <Link href="/ask/inbox" className={buttonClass({ full: true })}>{t.emContinueAsk}</Link>
+        <Button full variant="ghost" onClick={() => setSent(undefined)}>{t.emAskAnother}</Button>
+      </EmergencyGuidance>
+    );
+  }
 
   if (!signedIn) {
     return (
@@ -42,22 +76,35 @@ export default function AskForm({ signedIn }: { signedIn: boolean }) {
     const v = validateAsk({ kind, topic, subject, message });
     setErrs(v);
     if (Object.keys(v).length) return;
-    setList([...list, { id: `m-${Date.now()}`, kind: kind as AskKind, topic, subject: subject.trim(), message: message.trim(), at: new Date().toISOString() }]);
-    toast("success", t.askSent);
-    setKind(""); setTopic(""); setSubject(""); setMessage("");
+    send.mutate();
   }
 
-  const topicLabel = (k: (typeof TOPICS)[number]) => t[`askTopic_${k}` as keyof typeof t] as string;
   return (
     <form onSubmit={submit} noValidate className="space-y-4">
       <RadioGroup legend={t.askKind} name="ask-kind" value={kind} onChange={(v) => setKind(v as AskKind)} error={errs.kind ? t.askErrKind : undefined}
         options={[{ value: "private", label: t.askKindPrivate, hint: t.askPrivateNote }, { value: "public", label: t.askKindPublic, hint: t.askPublicWarn }]} />
       <Select label={t.askTopic} placeholder={t.askChoose} value={topic} error={errs.topic ? t.askErrTopic : undefined} onChange={(e) => setTopic(e.target.value)} options={TOPICS.map((k) => ({ value: k, label: topicLabel(k) }))} />
       <Input label={t.askSubject} maxLength={120} value={subject} error={errs.subject ? t.askErrSubject : undefined} onChange={(e) => setSubject(e.target.value)} />
+      {voiceFirst && <SpeakBar onText={(add) => setMessage((m) => add(m).slice(0, 2000))} />}
       <Textarea label={t.askMessage} rows={6} maxLength={2000} value={message} error={errs.message ? t.askErrMessage : undefined} onChange={(e) => setMessage(e.target.value)} />
+      {!voiceFirst && <SpeakBar onText={(add) => setMessage((m) => add(m).slice(0, 2000))} />}
       <p className="text-sm text-muted">{t.askGuidance}</p>
-      <p className="text-sm" aria-live="polite">{left > 0 ? fillNum(t.askRemaining, { n: left }, lang) : t.askLimit}</p>
-      <Button type="submit" size="lg" full disabled={left === 0}>{t.askSend}</Button>
+      <p className="text-sm text-muted">{t.askRateNote}</p>
+      {kind === "public" && <PublicNotice kind="question" />}
+      <Button type="submit" size="lg" full loading={send.isPending}>{t.askSend}</Button>
+      {sent && (
+        <div aria-live="polite" className="space-y-2">
+          {sent.emergency && (
+            // Fixed guidance from the server, shown as given (never replaced by model text).
+            <div role="alert" className="rounded-xl border-2 border-danger bg-white p-4">
+              <p className="font-semibold text-danger">{sent.emergency.guidance[lang]}</p>
+              <p className="mt-1 text-lg font-semibold">{sent.emergency.numbers.join(" · ")}</p>
+            </div>
+          )}
+          {sent.pii_removed.length > 0 && <p role="status" className="text-sm text-muted">{t.idPiiRemoved}</p>}
+          <Link href="/ask/inbox" className="inline-flex min-h-11 items-center text-civic underline">{t.askInbox}</Link>
+        </div>
+      )}
     </form>
   );
 }

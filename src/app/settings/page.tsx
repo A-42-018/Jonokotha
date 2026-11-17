@@ -1,5 +1,6 @@
 import SettingsPanel from "@/components/me/SettingsPanel";
 import { dict, getLang } from "@/lib/i18n";
+import { safeStatusUrl } from "@/lib/notifications-api";
 import { currentUser } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -12,7 +13,7 @@ export default async function Settings() {
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-semibold text-civic">{t.stTitle}</h1>
-      <SettingsPanel email={email} role={role} />
+      <SettingsPanel email={email} role={role} statusUrl={safeStatusUrl(process.env.NEXT_PUBLIC_STATUS_URL)} />
     </div>
   );
 }

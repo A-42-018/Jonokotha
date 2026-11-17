@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { ApiError, fromDbError, parse, rpc, type Ctx, type Result } from "./api";
+import { country } from "./country";
 import { vapidConfigured } from "./notify/deliver";
 import { PageQuery } from "./pagination";
 import { decodeFeedCursor, encodeFeedCursor } from "./feed-cursor";
@@ -50,7 +51,7 @@ const Prefs = z.strictObject({
 });
 const prefOut = (r: Record<string, unknown> | null) => ({
   channels: r?.channels ?? { in_app: true, push: false, email: false, sms: false, whatsapp: false }, muted_types: r?.muted_types ?? [], quiet_hours: r?.quiet_hours ?? null,
-  timezone: r?.timezone ?? "Asia/Dhaka", personalization_enabled: r?.personalization_enabled ?? true,
+  timezone: r?.timezone ?? country().timezone, personalization_enabled: r?.personalization_enabled ?? true,
 });
 
 export async function getPreferences(c: Ctx): Promise<Result> {

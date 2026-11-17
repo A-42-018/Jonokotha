@@ -2,6 +2,7 @@
 import { useSyncExternalStore } from "react";
 import type { Lang } from "@/lib/i18n";
 import { usePageLang } from "./I18nProvider";
+import { useNumerals } from "./usePersonalization";
 
 const subscribe = () => () => {};
 
@@ -11,6 +12,7 @@ const subscribe = () => () => {};
  */
 export function useLang(override?: Lang): Lang {
   const server = usePageLang();
+  useNumerals();
   const page = useSyncExternalStore(subscribe, () => (document.documentElement.lang === "en" ? "en" : "bn"), () => server);
   return override ?? page;
 }

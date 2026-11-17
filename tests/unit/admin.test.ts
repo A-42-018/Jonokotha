@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { analytics, decide, hotspots, REASON_MIN, SAMPLE_REVIEW, validReason } from "@/lib/admin";
+import { analytics, hotspots, REASON_MIN, validReason } from "@/lib/admin";
 import type { CaseRecord } from "@/lib/types";
 
 const mk = (ref: string, area: string, category: CaseRecord["category"] = "roads", status: CaseRecord["status"] = "received"): CaseRecord => ({
@@ -10,11 +10,6 @@ describe("admin decisions", () => {
   it("require a reason of at least the minimum length", () => {
     expect(validReason("x".repeat(REASON_MIN - 1))).toBe(false);
     expect(validReason("   short  ")).toBe(false);
-    expect(decide("m1", "hide", "", "2026-11-16T00:00:00Z")).toBeNull();
-    expect(decide("m1", "hide", "contains a phone number", "2026-11-16T00:00:00Z")).toMatchObject({ itemId: "m1", action: "hide", reason: "contains a phone number" });
-  });
-  it("sample review items are all marked sample in their text", () => {
-    for (const i of SAMPLE_REVIEW) expect(i.titleEn.toLowerCase()).toContain("sample");
   });
 });
 

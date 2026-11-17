@@ -1,11 +1,15 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { ApiError, fromDbError } from "./api";
+import { country, inCountryBox } from "./country";
 
-/** Bangladesh bounding box: rejects swapped, zero or foreign coordinates before they reach the database. */
-export const inBangladesh = (lat: number, lng: number) => lat >= 20.5 && lat <= 26.8 && lng >= 88.0 && lng <= 92.8;
-export const Lat = z.number().finite().min(20.5, "outside Bangladesh").max(26.8, "outside Bangladesh");
-export const Lng = z.number().finite().min(88.0, "outside Bangladesh").max(92.8, "outside Bangladesh");
+/** Active country's bounding box (src/lib/country.ts): rejects swapped, zero or foreign coordinates before they reach the database. */
+export const inCountry = inCountryBox;
+/** @deprecated kept for older imports; same as `inCountry`. */
+export const inBangladesh = inCountryBox;
+const { bbox: BB } = country();
+export const Lat = z.number().finite().min(BB.minLat, "outside the country").max(BB.maxLat, "outside the country");
+export const Lng = z.number().finite().min(BB.minLng, "outside the country").max(BB.maxLng, "outside the country");
 
 export const LocationInput = z.object({
   lat: Lat.optional(), lng: Lng.optional(),
@@ -31,11 +35,11 @@ export async function searchAreas(sb: SupabaseClient, q: string): Promise<AreaMa
 export function parsePoint(s: string, field = "near"): { lat: number; lng: number } {
   const m = /^(-?\d{1,3}(?:\.\d{1,8})?),(-?\d{1,3}(?:\.\d{1,8})?)$/.exec(s);
   const lat = m ? Number(m[1]) : NaN, lng = m ? Number(m[2]) : NaN;
-  if (!m || !inBangladesh(lat, lng)) throw new ApiError("validation_failed", "Use lat,lng inside Bangladesh.", { [field]: "invalid" });
+  if (!m || !inCountry(lat, lng)) throw new ApiError("validation_failed", `Use lat,lng inside ${country().name.en}.`, { [field]: "invalid" });
   return { lat, lng };
 }
 
-/** Validates a GeoJSON Polygon/MultiPolygon (closed rings, positions inside Bangladesh) and returns its bounding box. */
+/** Validates a GeoJSON Polygon/MultiPolygon (closed rings, positions inside the active country) and returns its bounding box. */
 export function boundaryBBox(g: unknown): { min_lat: number; max_lat: number; min_lng: number; max_lng: number } {
   const bad = (m: string) => new ApiError("validation_failed", m, { boundary: "invalid" });
   const geo = g as { type?: string; coordinates?: unknown };
@@ -49,7 +53,7 @@ export function boundaryBBox(g: unknown): { min_lat: number; max_lat: number; mi
       const first = ring[0] as number[], last = ring[ring.length - 1] as number[];
       if (first[0] !== last[0] || first[1] !== last[1]) throw bad("rings must be closed");
       for (const p of ring as number[][]) {
-        if (!Array.isArray(p) || typeof p[0] !== "number" || typeof p[1] !== "number" || !inBangladesh(p[1], p[0])) throw bad("a position is outside Bangladesh or malformed (use [lng, lat])");
+        if (!Array.isArray(p) || typeof p[0] !== "number" || typeof p[1] !== "number" || !inCountry(p[1], p[0])) throw bad(`a position is outside ${country().name.en} or malformed (use [lng, lat])`);
         minLat = Math.min(minLat, p[1]); maxLat = Math.max(maxLat, p[1]); minLng = Math.min(minLng, p[0]); maxLng = Math.max(maxLng, p[0]); points++;
       }
     }

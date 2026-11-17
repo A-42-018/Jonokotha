@@ -9,6 +9,8 @@ import NoAccess from "@/components/ui/NoAccess";
 import { AGENCIES } from "@/lib/demo-data";
 import { dict, fmtDate, getLang } from "@/lib/i18n";
 import { auditFromTimeline } from "@/lib/office-actions";
+import ReferralStatus from "@/components/issue/ReferralStatus";
+import { readReferral } from "@/lib/referral";
 import { getCase } from "@/lib/store";
 import { guardStaff } from "@/lib/guard";
 
@@ -20,6 +22,7 @@ export default async function Case({ params }: PageProps<"/office/[ref]">) {
   if (denied) return <NoAccess t={t} email={denied.email} role={denied.role} next={`/office/${ref}`} />;
   const c = await getCase(sb, ref);
   if (!c) notFound();
+  const referral = await readReferral(sb, ref);
   const agency = AGENCIES.find((a) => a.id === c.ai.agencyId);
   return (
     <div className="space-y-4">
@@ -40,6 +43,7 @@ export default async function Case({ params }: PageProps<"/office/[ref]">) {
         <h2 id="rep-title" className="font-semibold text-slate-700">{t.ofReport}</h2>
         <p className="whitespace-pre-wrap break-words">{c.description}</p>
       </section>
+      <ReferralStatus timeline={c.timeline} referral={referral} t={t} lang={lang} staff />
       <AuditList entries={auditFromTimeline(c.timeline)} t={t} lang={lang} />
       <NotesAndAssign cref={c.ref} />
       </div>
@@ -49,8 +53,7 @@ export default async function Case({ params }: PageProps<"/office/[ref]">) {
         <section aria-labelledby="act-h" className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
           <h2 id="act-h" className="font-medium">{t.ofActions}</h2>
           <p className="text-xs text-amber-800">{t.humanOnly}</p>
-          {/* Only acknowledge and refer exist in the backend today; request_info and resolve need it (see task notes). */}
-          <OfficeActions cref={c.ref} status={c.status} enabled={["acknowledge", "refer"]} />
+          <OfficeActions cref={c.ref} status={c.status} />
         </section>
       </div>
       </div>

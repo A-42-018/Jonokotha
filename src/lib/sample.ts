@@ -44,12 +44,3 @@ export const SAMPLE_IDEAS: Idea[] = [
   I(7, "ময়লা আলাদা করার ডাস্টবিন", "পাড়ায় তিন রঙের ডাস্টবিন রেখে ময়লা আলাদা করা শুরু হোক।", "waste", "ওয়ার্ড ৩ (নমুনা)", 27, "in_progress", 30),
   I(8, "মাঠে কমিউনিটি বইয়ের তাক", "খেলার মাঠের এক কোণে ছোট খোলা লাইব্রেরি।", "education", "ওয়ার্ড ১ (নমুনা)", 19, "implemented", 70),
 ];
-
-/** SAMPLE in-app notifications (নমুনা). Real ones need the notifications API (not built). */
-export interface Notice { id: string; kind: "status" | "reply" | "area" | "idea"; bn: string; en: string; at: string; href: string }
-export const SAMPLE_NOTICES: Notice[] = [
-  { id: "n1", kind: "status", bn: "আপনি যে সমস্যার খবর রাখছেন, তার অবস্থা বদলেছে: “এমপির অফিস পেয়েছে”।", en: "A report you follow changed status: “Seen by office”.", at: T(0), href: "/area" },
-  { id: "n2", kind: "reply", bn: "এমপি অফিস আপনার প্রশ্নের উত্তর দিয়েছে।", en: "The MP office replied to your question.", at: T(1), href: "/ask/inbox" },
-  { id: "n3", kind: "area", bn: "আপনি যে এলাকার খবর রাখছেন, সেখানে নতুন একটি সমস্যা জানানো হয়েছে।", en: "A new problem was reported in an area you follow.", at: T(2), href: "/area" },
-  { id: "n4", kind: "idea", bn: "আপনার সমর্থন করা আইডিয়া “বিবেচনায়” গেছে।", en: "An idea you supported is now “under consideration”.", at: T(5), href: "/ideas" },
-];
