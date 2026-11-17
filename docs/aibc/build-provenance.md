@@ -19,6 +19,7 @@ Live app: https://jonokotha.vercel.app/ (checked 2026-11-16: the Bangla home pag
 | CI/CD | GitHub Actions (lint, typecheck, unit, build, bundle secret scan, e2e, database suite); schedules for uptime, jobs and backup are defined but paused in favour of free alternatives | `.github/workflows/`, commit `2474128` |
 | Design | Design tokens and primitives in code. **No Figma file** was used. | `docs/design-system.md`, `src/components/ui` |
 | Illustration art | Recraft (Basic plan): Recraft V4.1 Vector for the homepage scenes, cards and category tiles; Nano Banana 2.1 (Google, run inside Recraft) only for the two layout mockup images. Prompts are in the plan; the scenes are checked against a Bangladesh-accuracy list (dress, rickshaw, flag, Jatiya Sangsad) before use. Final art ships as AVIF/WebP because the traced SVGs were 100 KB to 1.6 MB each. | `docs/HOMEPAGE_REDESIGN_PLAN.md` §6, `docs/mockups/`, `public/illustrations/home/` |
+| Navbar logo art | Recraft V4.1 Vector, one prompt (street scene drawn for the deep green header, no text); the জনকথা wordmark is live text in the site heading font. Background rect removed and viewBox cropped by hand. | `public/brand/jonokotha-scene.svg`, `src/components/ui/TopNav.tsx` |
 
 Two environments built the product in parallel, one on the `frontend` branch and one on `backend`, each limited to its own folders and joined by a written API contract (`docs/WORK_SPLIT.md`, `docs/api-v1.md`, merged by pull requests #1 to #3).
 

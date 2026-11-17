@@ -25,10 +25,12 @@ export default function TopNav({ isStaff, userId = null, picker, account }: { is
   return (
     <header className="bg-brand-deep text-white">
       <div className="mx-auto flex w-full max-w-[120rem] flex-wrap items-center gap-x-2 gap-y-1 px-4 py-2 sm:px-6 lg:px-8 lg:flex-nowrap lg:gap-x-3">
-        <Link href="/" className={cx("-ms-1 flex min-h-11 shrink-0 items-center gap-2 rounded-lg px-1 font-heading text-2xl font-semibold text-amber", ringOnDark)}>
+        <Link href="/" className={cx("-ms-1 flex min-h-11 shrink-0 items-center gap-1.5 rounded-lg px-0.5 font-heading font-bold text-amber sm:gap-2.5 sm:px-1", ringOnDark)}>
+          {/* Logo lockup: street scene art (drawn for the deep green band, no plate) and the Bangla wordmark in every language. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/illustrations/logo-mark.svg" alt="" className="size-8 rounded-full bg-white p-0.5" />
-          {t.appName}
+          <img src="/brand/jonokotha-scene.svg" alt="" width={980} height={430} className="h-7 w-auto sm:h-11 lg:h-9 2xl:h-11" />
+          <span aria-hidden="true" lang="bn" className="text-xl leading-none sm:text-3xl lg:text-2xl 2xl:text-3xl">জনকথা</span>
+          <span className="sr-only">{t.appName}</span>
         </Link>
         <nav aria-label={t.navAria} className="hidden lg:block">
           <ul className="flex items-center gap-0.5">
