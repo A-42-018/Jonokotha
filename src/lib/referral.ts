@@ -17,7 +17,7 @@ export interface ReferralInfo {
   office_reference: string | null;
   forwarded_at: string | null;
   /** Set only when the server has an integration or proof record (B5.4 `officially_registered`). Absent today. */
-  registered?: { at: string | null; proof_url: string | null } | null;
+  registered?: { at: string | null; proof_url: string | null; proof_text?: string | null; agency_reference?: string | null } | null;
 }
 
 export interface ReferralStages { received: StageState; forwarded: StageState; registered: StageState }
@@ -44,11 +44,15 @@ export async function readReferral(sb: SupabaseClient, ref: string): Promise<Ref
   try {
     const { data: issue } = await sb.from("issues").select("id").eq("ref", ref).maybeSingle();
     if (!issue) return null;
-    const { data } = await sb.from("issue_agency_referrals").select("agency_name,external_reference,forwarded_at")
+    const { data } = await sb.from("issue_agency_referrals").select("agency_name,external_reference,forwarded_at,registration_status,registration_reference,registration_proof,registered_at")
       .eq("issue_id", (issue as { id: string }).id).order("forwarded_at", { ascending: false }).limit(1).maybeSingle();
     if (!data) return null;
-    const r = data as { agency_name: string | null; external_reference: string | null; forwarded_at: string | null };
-    return { agency_name: r.agency_name, office_reference: r.external_reference, forwarded_at: r.forwarded_at };
+    const r = data as { agency_name: string | null; external_reference: string | null; forwarded_at: string | null; registration_status?: string | null; registration_reference?: string | null; registration_proof?: string | null; registered_at?: string | null };
+    // "Registered" only when the database holds the proof (the signed receipt text or a typed proof) next to the status (B8.2 / 0030, 0083).
+    const registered = r.registration_status === "officially_registered" && r.registration_proof
+      ? { at: r.registered_at ?? null, proof_url: /^https?:\/\//.test(r.registration_proof) ? r.registration_proof : null, proof_text: r.registration_proof, agency_reference: r.registration_reference ?? null }
+      : null;
+    return { agency_name: r.agency_name, office_reference: r.external_reference, forwarded_at: r.forwarded_at, registered };
   } catch {
     return null;
   }

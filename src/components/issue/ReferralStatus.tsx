@@ -55,6 +55,13 @@ export default function ReferralStatus({ timeline, referral, t, lang, staff = fa
         {s.registered === "done" ? t.rfRegisteredProof : staff ? t.rfStaffNote : t.rfRegisteredNone}
         {s.registered === "done" && proof && <> <a href={proof} rel="noopener noreferrer" target="_blank" className="text-civic underline">{t.rfProofLink}</a></>}
       </p>
+      {s.registered === "done" && (
+        <dl className="mt-2 space-y-1 text-sm">
+          {referral?.registered?.agency_reference && <div><dt className="inline text-muted">{t.r2RfAgencyRef} </dt><dd className="inline break-all font-medium">{referral.registered.agency_reference}</dd></div>}
+          {referral?.registered?.proof_text && !proof && <p className="text-muted">{t.r2RfSigned}</p>}
+          {!proof && <p className="text-muted">{t.r2RfNoLink}</p>}
+        </dl>
+      )}
     </Card>
   );
 }
