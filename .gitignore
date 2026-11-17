@@ -39,3 +39,15 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# tests
+/test-results/
+/playwright-report/
+/tests/ai/out/
+
+# consented real evaluation examples (never commit)
+/tests/ai/real/
+*.eval-real.json
+.next-r11/
+.next-off/
+.next-build/

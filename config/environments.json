@@ -1,0 +1,28 @@
+{
+  "_comment": "Three separate environments (masterplan §26, backend plan B6.4). Each has its own Supabase project and Vercel project; nothing is shared except code. Checked by scripts/check-environment.mjs and tests/unit/environments.test.ts.",
+  "development": {
+    "supabase": "local (supabase start) or a personal dev project",
+    "vercel": "none (next dev)",
+    "required": ["NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_ANON_KEY"],
+    "forbidden_values": {},
+    "allow_demo_login": true,
+    "real_user_data": false
+  },
+  "staging": {
+    "supabase": "separate hosted project, no real citizen data",
+    "vercel": "separate project, preview and staging domain",
+    "required": ["NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_ANON_KEY", "SUPABASE_SERVICE_ROLE_KEY", "NEXT_PUBLIC_APP_URL", "CRON_SECRET"],
+    "forbidden_values": {},
+    "allow_demo_login": true,
+    "real_user_data": false
+  },
+  "production": {
+    "supabase": "separate hosted project, region documented in docs/aibc/data-sovereignty.md",
+    "vercel": "separate project, production domain",
+    "required": ["NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_ANON_KEY", "SUPABASE_SERVICE_ROLE_KEY", "NEXT_PUBLIC_APP_URL", "CRON_SECRET", "ALERT_WEBHOOK_URL", "SENTRY_DSN", "EMAIL_API_KEY", "EMAIL_FROM"],
+    "forbidden_values": { "DEMO_LOGIN": ["true"], "CSP_MODE": ["report-only", ""] },
+    "required_values": { "CSP_MODE": ["enforce"] },
+    "allow_demo_login": false,
+    "real_user_data": true
+  }
+}

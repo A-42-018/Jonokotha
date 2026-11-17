@@ -14,7 +14,7 @@ Two long-lived branches off `main`: **`frontend`** and **`backend`**. Merge both
 | Data and logic | — | `src/lib/store.ts`, `intake.ts`, `types.ts`, `demo-data.ts`, `src/lib/supabase/**`, `src/proxy.ts` |
 | Database | — | `supabase/migrations/**`, RLS, seeds |
 | AI | prompts' UI (draft form, AI panel) | agents, prompts, embeddings, eval set |
-| Docs | `docs/aibc/video-script.md` | `docs/aibc/ai-architecture.md`, `data-sovereignty.md`, `problem.md` |
+| Docs | `docs/aibc/video-script.md`, `device-matrix.md`, `phase3-audit.md` | `docs/aibc/ai-architecture.md`, `data-sovereignty.md`, `problem.md`, `scalability.md`, `ethics.md`, `business.md`, `pia.md`, `security-review.md`, `qa.md` (team lead owns `team.md`, `collaborators.md`, `ai-usage.md`) |
 
 Shared files (`package.json`, `next.config.ts`): small, separate commits; tell the other person.
 
@@ -33,6 +33,8 @@ When the backend adds a field, it updates `types.ts` first and tells the fronten
 
 ## Task list from the masterplan
 
+The sprint lists below are the summary. The full requirement-by-requirement map, with status and owners, is `docs/masterplan-coverage.md`; detailed tasks are in `docs/frontend.md` and `docs/backend.md` under "Masterplan alignment". The highest-priority joint item is frontend task F.1 (replace device-local stubs with the real `/api/v1` endpoints), which needs backend task M.14 (live migrations) first.
+
 ### Frontend
 - Sprint 0: finish bn/en polish, desktop layout, constituency picker UI, sign-out and account menu, loading and error states (use `state-*.svg`), onboarding screens (`onboard-*.svg`), empty states.
 - Sprint 1: status timeline design, request-info flow UI, office actions UI, accessibility pass.
@@ -46,6 +48,12 @@ When the backend adds a field, it updates `types.ts` first and tells the fronten
 - Sprint 2: Bangla speech-to-text and translation, full copilot panel, ideas and similar-idea search, personalised feed, MP profile counts, AI run log, hotspot and analytics queries.
 - Sprint 3: security and RLS review, backup and restore drill, monitoring, published AI evaluation results.
 - Sprint 4: demo seed and reset script, freeze fixes.
+
+### Beyond the sprints (both sides, full masterplan)
+- Phase 5, MVP completion: every §31 required citizen, office and admin feature (MP approvals, agency liaison, full office and admin consoles, polls, idea comments, projects, admin hierarchy picker, country adapters, personalization modes, Banglish search, translation, Insight and Idea agents).
+- Phase 6, pilot: one verified office, real data ingestion with lineage, legal and governance review, separate environments, field testing with citizens, pen test.
+- Phase 7, Release 1.1: consultations, WhatsApp/SMS, check-ins, for/against points, support thresholds, polls for citizens, commitment tracker, priority ranking, insight briefs, exports, heatmaps, read-aloud, dark mode.
+- Phase 8, Release 2: budgets, agency integrations, assisted reporting, open data, regional admin, participatory budgeting, RTI helper, MP activity, Open311, second country.
 
 ## Working rules
 - Never commit `.env.local` or any key. Each person uses their own keys.

@@ -1,0 +1,65 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Status } from "./types";
+
+/**
+ * Referral language (masterplan 1, 28; F5.6). Three different things, never merged:
+ * - received: the MP's office has the report
+ * - forwarded: the office told the responsible authority
+ * - registered: the authority put it in its own records. Only with proof from an integration record (B5.4).
+ * "Registered" is never worked out from a status or from a reference number somebody typed.
+ */
+export type ReferralStage = "received" | "forwarded" | "registered";
+export type StageState = "done" | "not_yet" | "unconfirmed";
+
+export interface ReferralInfo {
+  agency_name: string | null;
+  /** A reference the office typed when forwarding. It is the office's note, not the authority's confirmation. */
+  office_reference: string | null;
+  forwarded_at: string | null;
+  /** Set only when the server has an integration or proof record (B5.4 `officially_registered`). Absent today. */
+  registered?: { at: string | null; proof_url: string | null; proof_text?: string | null; agency_reference?: string | null } | null;
+}
+
+export interface ReferralStages { received: StageState; forwarded: StageState; registered: StageState }
+
+/** What has happened, from the timeline statuses (legacy four-label set) and the optional referral record. */
+export function referralStages(timeline: readonly { status: Status }[], referral?: ReferralInfo | null): ReferralStages {
+  const seen = new Set(timeline.map((s) => s.status));
+  const forwarded = seen.has("referred") || !!referral;
+  const received = forwarded || seen.has("acknowledged") || seen.has("resolved");
+  const registered: StageState = referral?.registered ? "done" : forwarded ? "unconfirmed" : "not_yet";
+  return { received: received ? "done" : "not_yet", forwarded: forwarded ? "done" : "not_yet", registered };
+}
+
+/** Nothing to say before the office has received the report. */
+export function hasReferralStory(s: ReferralStages): boolean {
+  return s.received === "done" || s.forwarded === "done";
+}
+
+/**
+ * Referral row the signed-in session may read: RLS gives the reporter their own `public` rows and staff every row
+ * of their office. Anyone else gets null, which the page shows as "not published", not as "no referral".
+ */
+const BASE_COLS = "agency_name,external_reference,forwarded_at";
+const PROOF_COLS = "registration_status,registration_reference,registration_proof,registered_at";
+
+export async function readReferral(sb: SupabaseClient, ref: string): Promise<ReferralInfo | null> {
+  try {
+    const { data: issue } = await sb.from("issues").select("id").eq("ref", ref).maybeSingle();
+    if (!issue) return null;
+    const issueId = (issue as { id: string }).id;
+    const read = (cols: string) => sb.from("issue_agency_referrals").select(cols).eq("issue_id", issueId).order("forwarded_at", { ascending: false }).limit(1).maybeSingle();
+    let { data, error } = await read(`${BASE_COLS},${PROOF_COLS}`);
+    // A database without migration 0030 has no registration columns: keep showing the forwarded stage instead of hiding the referral.
+    if (error) ({ data, error } = await read(BASE_COLS));
+    if (error || !data) return null;
+    const r = data as unknown as { agency_name: string | null; external_reference: string | null; forwarded_at: string | null; registration_status?: string | null; registration_reference?: string | null; registration_proof?: string | null; registered_at?: string | null };
+    // "Registered" only when the database holds the proof (the signed receipt text or a typed proof) next to the status (B8.2 / 0030, 0083).
+    const registered = r.registration_status === "officially_registered" && r.registration_proof
+      ? { at: r.registered_at ?? null, proof_url: /^https?:\/\//.test(r.registration_proof) ? r.registration_proof : null, proof_text: r.registration_proof, agency_reference: r.registration_reference ?? null }
+      : null;
+    return { agency_name: r.agency_name, office_reference: r.external_reference, forwarded_at: r.forwarded_at, registered };
+  } catch {
+    return null;
+  }
+}

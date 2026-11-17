@@ -1,0 +1,117 @@
+{
+  "date": "2026-11-16T05:38:02.662Z",
+  "axe": "@axe-core/playwright, tags wcag2a wcag2aa wcag21a wcag21aa wcag22aa",
+  "lang": "bn",
+  "viewport": "375",
+  "results": [
+    {
+      "screen": "home",
+      "url": "/",
+      "passes": 25,
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "screen": "explore",
+      "url": "/area",
+      "passes": 30,
+      "violations": [],
+      "incomplete": [
+        "color-contrast"
+      ]
+    },
+    {
+      "screen": "ideas",
+      "url": "/ideas",
+      "passes": 30,
+      "violations": [],
+      "incomplete": [
+        "color-contrast"
+      ]
+    },
+    {
+      "screen": "find-mp",
+      "url": "/mp",
+      "passes": 27,
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "screen": "help",
+      "url": "/help",
+      "passes": 25,
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "screen": "sign-in",
+      "url": "/login",
+      "passes": 26,
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "screen": "offline",
+      "url": "/offline",
+      "passes": 25,
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "screen": "report-wizard",
+      "url": "/dev/screens/report",
+      "passes": 28,
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "screen": "issue-detail",
+      "url": "/dev/screens/issue",
+      "passes": 25,
+      "violations": [],
+      "incomplete": [
+        "color-contrast"
+      ]
+    },
+    {
+      "screen": "office-overview",
+      "url": "/dev/screens/office",
+      "passes": 33,
+      "violations": [],
+      "incomplete": [
+        "aria-prohibited-attr",
+        "color-contrast"
+      ]
+    },
+    {
+      "screen": "office-case",
+      "url": "/dev/screens/case",
+      "passes": 29,
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "screen": "announcements",
+      "url": "/dev/screens/announcements",
+      "passes": 27,
+      "violations": [],
+      "incomplete": []
+    },
+    {
+      "screen": "admin-verification",
+      "url": "/dev/screens/admin-verification",
+      "passes": 25,
+      "violations": [],
+      "incomplete": [
+        "color-contrast"
+      ]
+    },
+    {
+      "screen": "admin-moderation",
+      "url": "/dev/screens/admin-moderation",
+      "passes": 25,
+      "violations": [],
+      "incomplete": []
+    }
+  ]
+}

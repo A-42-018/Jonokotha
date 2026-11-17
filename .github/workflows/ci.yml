@@ -1,0 +1,78 @@
+name: CI
+on:
+  push:
+    branches: [main, frontend, backend]
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    env:
+      # Placeholders so the app builds; real keys are never needed for these checks.
+      NEXT_PUBLIC_SUPABASE_URL: http://localhost:54321
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run lint:migrations
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - run: npm run check:bundle
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+        env:
+          PW_CHANNEL: ""
+
+  database:
+    # Phase 1 task 11: RLS, state machine, audit, SLA and API tests against a LOCAL Supabase started from the migrations.
+    # Any failing permission test fails the build.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - uses: supabase/setup-cli@v1
+        with: { version: latest }
+      - name: Start local Supabase (applies every migration and the seed)
+        run: supabase start -x studio,imgproxy,edge-runtime,logflare,vector,supavisor,mailpit
+      - name: Export local connection details
+        run: |
+          supabase status -o env > /tmp/sb.env
+          get() { grep "^$1=" /tmp/sb.env | cut -d= -f2- | tr -d '"'; }
+          echo "SUPABASE_API_URL=$(get API_URL)" >> "$GITHUB_ENV"
+          echo "SUPABASE_ANON_KEY=$(get ANON_KEY)" >> "$GITHUB_ENV"
+          echo "SUPABASE_SERVICE_ROLE_KEY_LOCAL=$(get SERVICE_ROLE_KEY)" >> "$GITHUB_ENV"
+          echo "::add-mask::$(get ANON_KEY)"
+          echo "::add-mask::$(get SERVICE_ROLE_KEY)"
+      - run: npm run test:db
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: Secret scan (history)
+        uses: gitleaks/gitleaks-action@v2
+        env: { GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}" }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - name: Dependency audit (production dependencies, high and above)
+        run: npm audit --omit=dev --audit-level=high
+
+  eval-gate:
+    # Offline evaluation (keyword fallback, PII redaction, lexical duplicates) must not fall below the stated floors
+    # (scripts/eval-gate.mjs). Sends nothing to any provider; the live-model run is manual (docs/aibc/eval-results.md).
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npm run eval
+      - run: npm run eval:gate
