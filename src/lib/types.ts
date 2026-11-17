@@ -100,3 +100,52 @@ export interface Release11Kpis { constituency: string | null; period_days: numbe
 
 /** Notification types added in Release 1.1 (B7.13). */
 export const RELEASE_1_1_NOTIFICATION_TYPES = ["consultation_opened", "consultation_report", "idea_update", "idea_threshold", "idea_response_due", "area_alert", "checkin_response", "channel_reply", "brief_ready", "channel_cost_alert"] as const;
+
+// ---------------------------------------------------------------------------------------------------------------------------------------------
+// Phase 8 (Release 2) contract. Shapes returned by the /api/v1 routes in docs/api-v1.md "Phase 8". Additive: nothing above changes.
+// Rules that hold for every shape below: money is only ever quoted from a verified source document; nothing is labelled "officially registered" or
+// "binding" without the record that proves it; MP records carry no count, rank or score; small groups (under 5) are hidden.
+// ---------------------------------------------------------------------------------------------------------------------------------------------
+
+/** B8.1 budget entries: amounts as stated in a source document checked by a second person. The platform never sums, estimates or compares them. */
+export type BudgetDocKind = "annual_budget" | "adp" | "tender_notice" | "work_order" | "expenditure_report" | "audit_report" | "other";
+export interface BudgetSource { ref: string; constituency_key: string; title: string; publisher: string; doc_kind: BudgetDocKind; source_url: string; published_on: string | null; fiscal_year: string; doc_sha256: string | null; verified_at: string; is_sample: boolean }
+export interface BudgetEntry { id: string; source_ref: string; constituency_key: string; project_ref: string | null; fiscal_year: string; kind: "allocated" | "released" | "spent"; label: string; amount: number; currency: string; source_page: string; source_title: string; source_publisher: string; source_url: string; verified_at: string; is_sample: boolean }
+
+/** B8.2 a signed receipt from an agency system. Every failure is a plain 403. */
+export interface AgencyReceiptRequest { integration_id: string; referral_id: string; agency_reference: string; issued_at: string; signature: string }
+export interface AgencyIntegrationRow { id: string; agency_id: string; agency: string; kind: "api" | "email_gateway" | "portal"; status: "planned" | "confirmed" | "retired"; has_key: boolean; key_fingerprint: string | null; confirmed_at: string | null; receipts: number }
+
+/** B8.3 assisted reporting. `consent` is stored with the case in the same transaction; the person's identity is not stored. */
+export type ConsentMethod = "read_aloud_agreed" | "signed_paper" | "kiosk_screen";
+export interface AssistedConsent { method: ConsentMethod; version: string; agreed_to_file: true; agreed_to_publish: true; understands_no_account: true; language: "bn" | "en" }
+export interface VolunteerRecord { id: string; status: "pending" | "active" | "rejected" | "suspended" | "withdrawn"; conduct_version: string; created_at: string; decided_at: string | null; constituency: string }
+export interface Kiosk { id: string; constituency_key: string; label: string; place_text: string | null }
+export interface AssistedReportResult { ref: string; status: string; label: "assisted"; note: string; emergency?: Emergency }
+
+/** B8.4 open data. `hidden_cells` counts the aggregate cells left out because they described fewer than 5 reports. */
+export interface OpenDataset { slug: string; title_en: string; title_bn: string; description_en: string; columns: { name: string; type: string }[]; update_frequency: "live" | "daily" | "monthly"; privacy_note: string }
+export interface OpenDataLicence { code: string; name: string; url: string; reviewed: boolean }
+
+/** B8.5 regional overview: counts per area inside the caller's scope, no case rows. */
+export interface RegionalArea { constituency: string; name_en: string; name_bn: string; is_sample: boolean; open_issues: number; new_30d: number; resolved_30d: number; overdue_first_response: number; active_staff: number; has_mp: boolean }
+
+/** B8.6 participatory budgeting. `pledge` is the office's own public statement; the platform does not verify that an office controls the money. */
+export interface PbCycle { ref: string; constituency_key: string; title: string; description: string | null; fiscal_year: string; budget_amount: number; currency: string; pledge: string; max_choices: number; status: "open" | "closed"; closes_at: string; participants: number | null; result_valid: boolean | null; followed_result: boolean | null; deviation_reason: string | null; budget_source_ref: string | null; is_sample: boolean }
+export interface PbOption { id: string; position: number; title: string; description: string | null; cost: number; approvals: number | null; funded: boolean | null }
+
+/** B8.7 RTI helper. Self-reported dates; deadlines are an estimate from configuration that counsel has not confirmed unless `reviewed`. */
+export type RtiStatus = "draft" | "filed_by_me" | "answered" | "appealed" | "closed";
+export interface RtiTimeline { state: "not_filed" | "awaiting_answer" | "due_soon" | "past_earliest_deadline" | "answered" | "appealed" | "closed"; earliest_due_on: string | null; appeal_window_days: number; self_reported: true }
+export interface RtiDraft { id: string; agency_id: string | null; agency_name: string; subject: string; info_requested: string; period_text: string | null; preferred_format: "electronic" | "paper_copy" | "inspection"; draft_text: string; status: RtiStatus; filed_on: string | null; filed_channel: "in_person" | "post" | "email" | "official_portal" | null; agency_reference: string | null; answered_on: string | null; created_at: string; timeline: RtiTimeline }
+
+/** B8.8 one sourced record about an MP. There is deliberately no count, rank, rating or score field. */
+export type MpRecordKind = "question_asked" | "bill_introduced" | "committee_membership" | "debate_contribution" | "other";
+export interface MpRecord { ref: string; representative_id: string; representative_name: string; kind: MpRecordKind; title: string; occurred_on: string; session_label: string | null; source_name: string; source_url: string; source_checked_at: string; summary_bn: string | null; published_at: string; is_sample: boolean }
+
+/** B8.9 Open311 GeoReport v2 request, in the standard's field names. */
+export interface Open311Request { service_request_id: string; status: "open" | "closed"; status_notes: null; service_name: string; service_code: string; description: string; agency_responsible: null; service_notice: null; requested_datetime: string; updated_datetime: string; expected_datetime: null; address: null; address_id: null; zipcode: null; lat: number | null; long: number | null; media_url: null }
+
+/** B8.10 second-country readiness: five reviews, each with a document reference and the named reviewer. */
+export const COUNTRY_GATES = ["legal_review", "electoral_review", "data_protection_review", "language_review", "hosting_residency"] as const;
+export interface CountryReadiness { country: string; home_country: boolean; adapter_configured: boolean; ready: boolean; gates: { gate: (typeof COUNTRY_GATES)[number]; status: "open" | "cleared"; evidence_ref: string | null; reviewer: string | null; cleared_at: string | null }[] }

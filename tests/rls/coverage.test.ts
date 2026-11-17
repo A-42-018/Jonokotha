@@ -21,6 +21,9 @@ const PHASE7_TABLES = ["consultations", "consultation_statements", "statement_vo
   "channel_links", "channel_conversations", "channel_messages", "channel_budgets", "area_alerts", "insight_briefs", "pending_file_deletions"];
 const PHASE7_VIEWS = ["public_consultations", "public_consultation_statements", "public_consultation_reports", "public_idea_arguments", "public_project_checkins", "public_surveys", "public_survey_questions",
   "public_commitments", "public_commitment_events", "public_priority_rounds", "public_priority_items", "public_area_alerts"];
+// Phase 8 (migrations 0080-0083); own lines so merges with other phases stay trivial.
+const PHASE8_TABLES = ["budget_sources", "budget_entries", "open_datasets", "volunteers", "kiosks", "assisted_reports", "regional_admins", "pb_cycles", "pb_options", "pb_ballots", "rti_drafts", "mp_records", "agency_receipts", "country_gates"];
+const PHASE8_VIEWS = ["public_budget_sources", "public_budget_entries", "public_open_datasets", "public_kiosks", "public_pb_cycles", "public_pb_options", "public_mp_records"];
 const PUBLIC_VIEWS = ["public_analytics_reports", "public_announcements", "public_case_events", "public_cases", "public_ideas", "public_project_milestones", "public_projects", "public_question_messages", "public_questions"];
 const ANON_READABLE = ["agencies", "constituencies", "issue_categories", "issue_transitions", "knowledge_sources", "office_permissions", "representative_constituencies", "representative_fields", "representatives"];
 
@@ -33,14 +36,14 @@ ANON_READABLE.push("admin_units", "constituency_units", "country_adapters");
 describe("RLS coverage guard", () => {
   it("every public table has RLS enabled and RLS tests", () => withClient(async (c) => {
     const { rows } = await c.query("select c.relname, c.relrowsecurity from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='public' and c.relkind='r'");
-    expect(rows.map((r) => r.relname).sort()).toEqual([...COVERED, ...PHASE6_TABLES, ...PHASE7_TABLES].sort());
+    expect(rows.map((r) => r.relname).sort()).toEqual([...COVERED, ...PHASE6_TABLES, ...PHASE7_TABLES, ...PHASE8_TABLES].sort());
     expect(rows.filter((r) => !r.relrowsecurity).map((r) => r.relname)).toEqual([]);
   }));
 
   it("anonymous visitors hold no privileges except on reference tables and the two public views", () => withClient(async (c) => {
     const { rows } = await c.query(
       `select table_name from information_schema.role_table_grants where grantee='anon' and table_schema='public' group by table_name order by 1`);
-    expect(rows.map((r) => r.table_name)).toEqual([...ANON_READABLE, ...PUBLIC_VIEWS, ...PHASE6_VIEWS, ...PHASE7_VIEWS].sort());
+    expect(rows.map((r) => r.table_name)).toEqual([...ANON_READABLE, ...PUBLIC_VIEWS, ...PHASE6_VIEWS, ...PHASE7_VIEWS, ...PHASE8_VIEWS].sort());
     const { rows: w } = await c.query("select 1 from information_schema.role_table_grants where grantee='anon' and table_schema='public' and privilege_type <> 'SELECT'");
     expect(w).toEqual([]);
   }));
