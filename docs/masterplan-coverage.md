@@ -58,12 +58,12 @@ Status: **Done**, **Partial**, **Open**, as of 2026-11-16.
 | 7.11 | Moderation actions incl. request edit, appeal path | existing | F.1 | Partial |
 | 7.12 | 12 states on every screen | — | existing | Done |
 | 7.13 | Find your MP: district → upazila/city → ward/union picker, boundary uncertainty | B5.7 | F5.9 | Partial |
-| 7.14 | Consultations with consensus mapping | B7.1 | F7.1 | Open |
-| 7.15 | WhatsApp/SMS intake, area alerts | B7.2 | F7.2 | Open |
-| 7.16 | Project check-ins | B7.3 | F7.3 | Open |
+| 7.14 | Consultations with consensus mapping | B7.1 | F7.1 | Backend done (B7.1, 2026-11-17); frontend open |
+| 7.15 | WhatsApp/SMS intake, area alerts | B7.2 | F7.2 | Backend done except live providers (B7.2, B7.4); frontend open |
+| 7.16 | Project check-ins | B7.3 | F7.3 | Backend done (B7.3); frontend open |
 | 8.1–8.9 | MVP workflows end to end | existing | F.1, F.2 | Partial |
 | 8.5 | Public project lifecycle incl. budget source, procurement, delay explanation, post-completion feedback | B5.5 | F5.10 | Partial |
-| 8.10–8.12 | Release 1.1 workflows | B7 | F7 | Open |
+| 8.10–8.12 | Release 1.1 workflows | B7 | F7 | Backend done except live providers; frontend open |
 | 9 | State machine, SLA config | existing | existing | Done |
 | 10.1 | Realtime for status and inbox only, background jobs, privacy-conscious analytics, Sentry | B5.8 | F5.11 | Partial |
 | 10.2 | Monorepo layout | B5.14 (decision record) | — | Open |
@@ -89,7 +89,7 @@ Status: **Done**, **Partial**, **Open**, as of 2026-11-16.
 | 19.1 | Bangla-first incl. Bangla/Latin numeral setting, ৳ lakh/crore, Banglish search, digit-agnostic phone/OTP | B5.11 | F5.16 | Partial |
 | 19.2–19.5 | Style, glossary, status, category labels | existing | existing | Done (native review open) |
 | 19.6 | Bangla AI and voice; read-aloud (R1.1) | existing | F7.9 | Partial |
-| 19.7 | Fonts, conjunct rendering in PDFs and exports, SMS length | B7.4 | F5.16 | Open |
+| 19.7 | Fonts, conjunct rendering in PDFs and exports, SMS length | B7.4 | F5.16 | Backend: SMS length and CSV done; PDF open (font and renderer) |
 | 19.8 | WCAG 2.2 AA | — | Phase 3 | Partial |
 | 19.9 | First-glance tests with citizens of different districts and ages | — | F6.3 | Open |
 | 20 | Performance and reliability incl. status page, RPO/RTO | Phase 3 | Phase 3, F5.11 | Partial |
@@ -109,3 +109,6 @@ Status: **Done**, **Partial**, **Open**, as of 2026-11-16.
 ## Phase 5 update (2026-11-17)
 
 Backend items B5.1-B5.15 are built on the Phase 5 branch (migrations 0030-0036); see the status block in `docs/backend.md` for what is built, tested, not measured and blocked. Sections this moves from planned to built on the backend side: §5.2 (MP approval, delegation), §5.5 (agency liaison), §5.6 and §6.4 (admin configuration), §1 and §28 (received / forwarded / officially registered), §4.2, §7.3, §8.5, §12 (comments, polls, snapshot, project transparency), §7.4 (report fields, video), §7.13 and §16 (administrative hierarchy, uncertain boundary), §10.1 and §20 (jobs, Realtime, Sentry, privacy-conscious analytics), §15 (notification events, opt-in, unsubscribe), §17.2 and §17.5 (idea assistant, translation label, caching, glossary), §17.4 and §19.1 (personalization, Banglish search), §2.8.4 (country adapters), §2.9 (capability labels), §13.10 (Open311-ready ids). Frontend rows are unchanged.
+
+
+Backend items B7.1-B7.14 are built on the Phase 7 branch (migrations 0070-0074); see the Phase 7 status block in `docs/backend.md` and `docs/aibc/release11/open-items.md` for what is built, tested, not measured and blocked (live WhatsApp/SMS/TTS accounts, PDF font and renderer, real consultations and KPIs). Sections this moves on the backend side: §4.3, §7.14, §7.15, §7.16, §7.7 (for/against points and support threshold), §8.10, §8.11, §8.12, §12 (Release 1.1 tables), §15 (Release 1.1 events), §3.3 (Release 1.1 KPIs), §19.6 (read-aloud, provider needed), §19.7 (SMS length, CSV), §11 (graph evaluation), §21.3 scenarios 16 and 17. Frontend rows are unchanged.

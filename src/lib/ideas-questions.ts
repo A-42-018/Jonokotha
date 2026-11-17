@@ -12,7 +12,7 @@ export const checkRef = (r: string) => { if (!REF.test(r)) throw new ApiError("n
 const clean = (s: string) => redactPii(s);
 
 // Ideas ---------------------------------------------------------------------------------------------------------------
-const IDEA_COLS = "ref,constituency_key,category,title,body,status,decision_note,decided_at,created_at,is_demo,support_count";
+const IDEA_COLS = "ref,constituency_key,category,title,body,status,decision_note,decided_at,created_at,is_demo,support_count,support_threshold,threshold_reached_at,response_due_at,responded_at,response_state";
 const toIdea = (r: Record<string, unknown>) => { const { is_demo, ...rest } = r; return { ...rest, is_sample: is_demo }; };
 const IdeaFilters = z.object({ constituency: KEY.optional(), category: z.string().regex(/^[a-z_]{2,40}$/).optional(), status: z.enum(["published", "under_consideration", "planned", "declined"]).optional(),
   sort: z.enum(["new", "supported"]).default("new") });
