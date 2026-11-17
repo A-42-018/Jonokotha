@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Card from "@/components/ui/Card";
 import { dict, getLang } from "@/lib/i18n";
+import { R2 } from "@/lib/flags-r2";
 import { SUPPORT_EMAIL } from "@/lib/legal";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -24,6 +25,7 @@ export default async function About() {
       <Card title={t.abContactTitle}>
         <p>{SUPPORT_EMAIL ? <>{t.abContactMail} <a className="text-civic underline" href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a></> : t.abContactNone}</p>
         <Link href="/help" className={link}>{t.a11yHelp}</Link>
+        {Object.values(R2).some(Boolean) && <Link href="/transparency" className={link}>{t.r2Hub}</Link>}
       </Card>
       <nav aria-label={t.abLinks} className="flex flex-wrap gap-x-4">
         <Link href="/terms" className={link}>{t.navTerms}</Link>

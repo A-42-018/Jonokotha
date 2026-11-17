@@ -68,3 +68,20 @@ test("Release 1.1 pages are not in production navigation and show the not-found 
   const settings = await (await page.request.get("/settings")).text();
   expect(settings.includes("/help/channels")).toBe(false);
 });
+
+// Release 2 pages (Phase 8) exist only with their flags (PW_RELEASE2=1 starts the server with them on).
+const R2 = process.env.PW_RELEASE2 === "1";
+test("Release 2 pages are not found and not linked while their flags are off", async ({ page }) => {
+  test.skip(R2, "this run has the Release 2 flags on");
+  test.setTimeout(240_000);
+  for (const path of ["/transparency", "/budget", "/budgeting", "/budgeting/PB-DEMO", "/open-data", "/open-data/issues-monthly", "/rti", "/mp-records", "/volunteer", "/volunteer/consent"]) {
+    await page.goto(path);
+    await expect(page.getByRole("heading", { level: 1 }), path).toHaveText("পাতাটি পাওয়া যায়নি");
+  }
+  for (const path of ["/office/budget", "/office/budgeting", "/office/volunteers", "/office/region", "/admin/budget", "/admin/mp-records", "/admin/regional-admins", "/admin/countries"]) {
+    await page.goto(path);
+    if (!/\/login/.test(page.url())) await expect(page.getByRole("heading", { level: 1 }), path).toHaveText("পাতাটি পাওয়া যায়নি");
+  }
+  const about = await (await page.request.get("/about")).text();
+  expect(about.includes('href="/transparency"')).toBe(false);
+});

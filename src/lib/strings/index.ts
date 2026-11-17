@@ -17,6 +17,8 @@ import { checkins } from "./checkins";
 import { consult } from "./consult";
 import { ideas11 } from "./ideas11";
 import { release11 } from "./release11";
+import { release2a } from "./release2a";
+import { release2b } from "./release2b";
 import { engage } from "./engage";
 import { feed } from "./feed";
 import { heatmap } from "./heatmap";
@@ -48,7 +50,7 @@ import { theme } from "./theme";
 import { tracker } from "./tracker";
 import { voice } from "./voice";
 
-const parts = [explore, location, voice, ideas, mp, engage, ask, feed, share, pages, office, officeWs, liaison, live, admin, adminConsole, offline, security, mfa, emergency, legal, metrics, push, community, capability, referral, reportExtras, refresh, nav, home, projects, areas, aiHelpers, personalize, about, seats, pilot, release11, consult, ideas11, checkins, channels, surveys, tracker, priorities, office11, readaloud, heatmap, theme];
+const parts = [explore, location, voice, ideas, mp, engage, ask, feed, share, pages, office, officeWs, liaison, live, admin, adminConsole, offline, security, mfa, emergency, legal, metrics, push, community, capability, referral, reportExtras, refresh, nav, home, projects, areas, aiHelpers, personalize, about, seats, pilot, release11, consult, ideas11, checkins, channels, surveys, tracker, priorities, office11, readaloud, heatmap, theme, release2a, release2b];
 
 type UnionToIntersection<U> = (U extends unknown ? (x: U) => void : never) extends (x: infer I) => void ? I : never;
 type Bn = UnionToIntersection<(typeof parts)[number]["bn"]>;
