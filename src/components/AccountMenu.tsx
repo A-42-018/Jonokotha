@@ -22,7 +22,7 @@ export default function AccountMenu({ email, role, labels }: { email: string | n
 
   if (!email) {
     return (
-      <Link href="/login" className="inline-flex min-h-11 items-center rounded-lg border-2 border-white bg-white px-3 font-medium text-civic hover:bg-white/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
+      <Link href="/login" className="inline-flex min-h-11 items-center rounded-lg border-2 border-white bg-white px-2.5 font-medium text-civic min-[360px]:px-3 hover:bg-white/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
         {labels.signIn}
       </Link>
     );
@@ -49,7 +49,8 @@ export default function AccountMenu({ email, role, labels }: { email: string | n
         onClick={() => setOpen((v) => !v)}
         className="inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-full border border-white/50 bg-white/10 px-2 text-white hover:bg-white/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white lg:pe-3"
       >
-        <span aria-hidden className="flex h-7 w-7 items-center justify-center rounded-full bg-amber text-sm font-semibold uppercase text-ink">{email[0]}</span>
+        {/* The initial is drawn by CSS (data-letter), so it is not part of the button text: WCAG 2.5.3 compares the visible text (the email) with the accessible name. */}
+        <span aria-hidden data-letter={email[0]} className="flex h-7 w-7 items-center justify-center rounded-full bg-amber text-sm font-semibold uppercase text-ink before:content-[attr(data-letter)]" />
         <span className="hidden max-w-40 truncate lg:inline">{email}</span>
       </button>
       {open && (

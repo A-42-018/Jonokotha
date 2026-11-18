@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { saveConstituency, type Area } from "@/lib/constituency";
 import { api } from "@/lib/api-client";
 import type { AreaMatch } from "@/lib/geo";
@@ -12,6 +12,7 @@ type Labels = { open: string; choose: string; title: string; hint: string; sampl
 
 export default function ConstituencyPicker({ selected, signedIn, lang, labels }: { selected: Area; signedIn: boolean; lang: Lang; labels: Labels }) {
   const router = useRouter();
+  const path = usePathname();
   const dialog = useRef<HTMLDialogElement>(null);
   const autoOpened = useRef(false);
   const current = selected;
@@ -39,13 +40,15 @@ export default function ConstituencyPicker({ selected, signedIn, lang, labels }:
     );
   }
 
-  // First sign-in: ask once if nothing has been chosen yet.
+  // First sign-in: ask once if nothing has been chosen yet. Not inside the office and admin workspaces: staff work there first, and the office tour
+  // opens its own dialog on the same visit (two stacked modals hid the page behind them).
+  const workspace = path === "/office" || path.startsWith("/office/") || path === "/admin" || path.startsWith("/admin/");
   useEffect(() => {
-    if (signedIn && current.sample && !autoOpened.current) {
+    if (signedIn && current.sample && !workspace && !autoOpened.current) {
       autoOpened.current = true;
       dialog.current?.showModal();
     }
-  }, [signedIn, current]);
+  }, [signedIn, current, workspace]);
 
   const searchable = q.trim().length >= 2 || /^[0-9০-৯]$/.test(q.trim());
   const shown = searchable ? results : null;
@@ -99,11 +102,11 @@ export default function ConstituencyPicker({ selected, signedIn, lang, labels }:
         aria-haspopup="dialog"
         // WCAG 2.5.3: the visible words (the area name, then the sample badge, with a space between them) are all inside the name.
         aria-label={`${labels.open}: ${name(current)}${current.sample ? ` ${labels.sample}` : ""}`}
-        className="inline-flex min-h-11 min-w-0 max-w-full items-center gap-1.5 rounded-full border border-white/50 bg-white/10 px-3 text-[0.9375rem] font-medium text-white hover:bg-white/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:max-w-72"
+        className="inline-flex min-h-11 min-w-0 max-w-full items-center gap-1.5 rounded-full border border-white/50 bg-white/10 px-3 text-[0.9375rem] font-medium text-white hover:bg-white/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white max-sm:w-11 max-sm:justify-center max-sm:px-0 sm:max-w-72"
       >
         <span aria-hidden>📍</span>
-        <span className="truncate">{name(current)}</span>
-        {current.sample && <>{" "}<span className="shrink-0 rounded-full bg-amber px-2 text-[0.8125rem] font-semibold text-ink">{labels.sample}</span></>}
+        <span className="truncate max-sm:hidden">{name(current)}</span>
+        {current.sample && <>{" "}<span className="shrink-0 rounded-full max-sm:hidden bg-amber px-2 text-[0.8125rem] font-semibold text-ink">{labels.sample}</span></>}
       </button>
       <dialog
         ref={dialog}

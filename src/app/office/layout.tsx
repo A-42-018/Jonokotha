@@ -30,7 +30,7 @@ export default async function OfficeLayout({ children }: LayoutProps<"/office">)
     { href: "/office/help", label: t.otOpen },
   ];
   return (
-    <div className="grid gap-4 lg:grid-cols-[13rem_1fr]">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-[13rem_minmax(0,1fr)]">
       <PanelSidebar aria={t.rfOfficeNav} title={t.appName} links={links} />
       <div className="min-w-0">{children}</div>
     </div>

@@ -21,7 +21,7 @@ function Inner({ refId, signedIn }: { refId: string; signedIn: boolean }) {
   const back = <Link href="/ideas" className="inline-flex min-h-11 items-center text-civic underline">← {t.idBack}</Link>;
   if (q.isPending) return <div role="status" aria-label={t.idDetailLoading} className="space-y-3">{back}<Skeleton className="h-40 w-full" /></div>;
   if (q.isError) {
-    if (q.error instanceof ApiError && q.error.status === 404) return <div className="space-y-3">{back}<EmptyState variant="empty" title={t.idNotFoundTitle} body={t.idNotFoundBody} /></div>;
+    if (q.error instanceof ApiError && q.error.status === 404) return <div className="space-y-3">{back}<EmptyState variant="empty" as="h1" title={t.idNotFoundTitle} body={t.idNotFoundBody} /></div>;
     return <div role="alert" className="space-y-3">{back}<p>{t.idDetailError}</p><Button variant="secondary" onClick={() => void q.refetch()}>{t.exRetry}</Button></div>;
   }
   return <div className="space-y-3">{back}<h1 className="sr-only">{q.data.title}</h1><IdeaCard idea={q.data} signedIn={signedIn} heading="h2" /></div>;

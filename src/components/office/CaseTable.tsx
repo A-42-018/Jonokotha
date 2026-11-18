@@ -108,14 +108,14 @@ export default function CaseTable({ cases }: { cases: CaseRecord[] }) {
             <caption className="sr-only">{t.ofQueueAria}</caption>
             <thead className="bg-slate-50 text-slate-600">
               <tr>
-                <th scope="col" className="px-3 py-2"><label className="flex min-h-11 items-center gap-2"><input type="checkbox" className="size-5 accent-civic" checked={allOn} onChange={() => setSel(allOn ? [] : rows.map((r) => r.ref))} /><span className="sr-only">{t.odSelectAll}</span></label></th>
+                <th scope="col" className="px-3 py-2"><label className="flex min-h-11 min-w-11 items-center justify-center gap-2"><input type="checkbox" className="size-5 accent-civic" checked={allOn} onChange={() => setSel(allOn ? [] : rows.map((r) => r.ref))} /><span className="sr-only">{t.odSelectAll}</span></label></th>
                 {[t.ofColRef, t.ofColTitle, t.ofColCat, t.ofColArea, t.ofColStatus, t.ofColDate].map((h) => <th key={h} scope="col" className="px-3 py-3 font-medium">{h}</th>)}
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {rows.map((c) => (
                 <tr key={c.ref} className="hover:bg-slate-50">
-                  <td className="px-3 py-1"><label className="flex min-h-11 items-center"><input type="checkbox" className="size-5 accent-civic" checked={sel.includes(c.ref)} onChange={() => toggle(c.ref)} /><span className="sr-only">{fillNum(t.odSelectRow, { ref: c.ref }, lang)}</span></label></td>
+                  <td className="px-3 py-1"><label className="flex min-h-11 min-w-11 items-center justify-center"><input type="checkbox" className="size-5 accent-civic" checked={sel.includes(c.ref)} onChange={() => toggle(c.ref)} /><span className="sr-only">{fillNum(t.odSelectRow, { ref: c.ref }, lang)}</span></label></td>
                   <td className="whitespace-nowrap px-3 py-1 text-slate-600">{c.ref}</td>
                   <td className="min-w-56 px-3 py-1 font-medium"><Link href={`/office/${c.ref}`} className={`inline-flex min-h-11 items-center text-civic underline ${focus}`}>{c.title}</Link></td>
                   <td className="whitespace-nowrap px-3 py-1 text-teal-strong">{t.cats[c.category]}</td>

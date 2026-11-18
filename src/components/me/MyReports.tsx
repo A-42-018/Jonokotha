@@ -55,7 +55,7 @@ export default function MyReports({ reports, filter, page, base, extra, t, lang 
                     focusRing,
                   )}
                 >
-                  <span>{label(f)}</span>
+                  <span>{label(f)}</span>{" "}
                   <span aria-hidden className={cx("rounded-full px-2 text-xs", active ? "bg-white/20" : "bg-slate-100 text-muted")}>{fmtNum(counts[f], lang)}</span>
                 </Link>
               </li>

@@ -4,7 +4,7 @@ import { dict, getLang } from "@/lib/i18n";
 export default async function Loading() {
   const t = dict[await getLang()];
   return (
-    <div role="status" aria-busy="true" className="space-y-4">
+    <div role="status" aria-busy="true" className="min-h-[100svh] space-y-4">
       <span className="sr-only">{t.stLoading}</span>
       <Skeleton className="h-8 w-24" />
       <Skeleton className="h-32 w-full" />

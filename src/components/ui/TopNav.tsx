@@ -7,6 +7,7 @@ import { cx, ringOnDark } from "./cx";
 import { isActivePath } from "./nav";
 import MoreMenu from "./MoreMenu";
 import NotificationBell from "./NotificationBell";
+import { useLang } from "./useLang";
 import { useT } from "./useT";
 import { primaryNav } from "@/lib/nav-items";
 
@@ -17,6 +18,7 @@ import { primaryNav } from "@/lib/nav-items";
  */
 export default function TopNav({ isStaff, userId = null, picker, account }: { isStaff: boolean; userId?: string | null; picker: ReactNode; account: ReactNode }) {
   const t = useT();
+  const short = useLang() === "bn" ? "EN" : "বাং";
   const path = usePathname();
   const items = [
     ...primaryNav().map((i) => ({ href: i.href, label: t[i.key] })),
@@ -24,7 +26,7 @@ export default function TopNav({ isStaff, userId = null, picker, account }: { is
   ];
   return (
     <header className="bg-brand-deep text-white shadow-[0_4px_14px_rgb(11_61_46/0.22)] xl:sticky xl:top-0 xl:z-40">
-      <div className="mx-auto flex w-full max-w-[90rem] flex-nowrap items-center gap-x-2 px-4 py-2 sm:px-6 lg:px-8 2xl:gap-x-3">
+      <div className="mx-auto flex w-full max-w-[90rem] flex-nowrap items-center gap-x-1 px-3 py-2 min-[360px]:gap-x-2 min-[360px]:px-4 sm:px-6 lg:px-8 2xl:gap-x-3">
         <Link href="/" className={cx("-ms-1 flex min-h-11 shrink-0 items-center gap-1.5 rounded-lg px-0.5 font-heading font-bold text-amber sm:gap-2.5 sm:px-1", ringOnDark)}>
           {/* Logo lockup: street scene art (drawn for the deep green band, no plate) and the Bangla wordmark in every language. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -60,7 +62,9 @@ export default function TopNav({ isStaff, userId = null, picker, account }: { is
           <div className="hidden shrink-0 xl:block"><Link href="/report" className={cx("inline-flex min-h-11 items-center whitespace-nowrap rounded-full border-2 border-amber px-3.5 font-semibold 2xl:px-5 text-amber hover:bg-amber hover:text-ink", ringOnDark)}>{t.reportCta}</Link></div>
           {/* Route handler (sets the cookie, redirects back), so a plain anchor is intended. */}
           <a href="/lang" aria-label={t.navLangSwitch} className={cx("inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-white/50 px-2.5 text-sm font-medium text-white 2xl:px-3 hover:bg-white/10", ringOnDark)}>
-            {t.switchLang}
+            {/* Under 360px the row has no room for the full name: a short code (the accessible name already carries the full language). */}
+            <span className="min-[360px]:hidden" aria-hidden="true">{short}</span>
+            <span className="max-[359px]:hidden">{t.switchLang}</span>
           </a>
           {account}
         </div>

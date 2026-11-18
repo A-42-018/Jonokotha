@@ -38,7 +38,7 @@ function Inner({ refId, signedIn = false, loginHref = "/login" }: { refId: strin
 
   if (q.isPending) return <div role="status" aria-label={t.pdLoading} className="space-y-3">{back}<Skeleton className="h-10 w-2/3" /><Skeleton className="h-32 w-full" /></div>;
   if (q.isError) {
-    if (q.error instanceof ApiError && q.error.status === 404) return <div className="space-y-3">{back}<EmptyState variant="empty" title={t.pdNotFoundTitle} body={t.pdNotFoundBody} /></div>;
+    if (q.error instanceof ApiError && q.error.status === 404) return <div className="space-y-3">{back}<EmptyState variant="empty" as="h1" title={t.pdNotFoundTitle} body={t.pdNotFoundBody} /></div>;
     return (
       <div role="alert" className="space-y-3">{back}
         <p>{q.error instanceof ApiError && q.error.isNetwork ? t.pdOffline : t.pdError}</p>

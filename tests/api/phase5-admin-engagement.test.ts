@@ -59,9 +59,9 @@ afterAll(async () => {
   await admin.from("ideas").delete().in("constituency_id", [A.id, B.id]); await admin.from("polls").delete().in("constituency_id", [A.id, B.id]);
   await admin.from("announcements").delete().in("constituency_id", [A.id, B.id]); await admin.from("projects").delete().in("constituency_id", [A.id, B.id]);
   await admin.from("sla_policies").delete().in("constituency_id", [A.id, B.id]);
-  await admin.from("issue_categories").delete().in("slug", slugs); await admin.from("agencies").delete().in("key", agencyKeys);
+  await admin.from("issue_categories").delete().in("slug", slugs);
   await admin.from("knowledge_sources").delete().like("name", "p5-%"); await admin.from("platform_invitations").delete().like("email", "%p5inv%");
-  await cleanup([A.id, B.id]);
+  await cleanup([A.id, B.id]); await admin.from("agencies").delete().in("key", agencyKeys);   // after cleanup: rows that reference the agency go first, or the delete is refused and the key leaks into the next run
 });
 
 describe("feature flags and capability labels (B5.3, B5.13)", () => {

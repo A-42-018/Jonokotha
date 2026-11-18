@@ -5,7 +5,7 @@ import type { Dict } from "@/lib/i18n";
 export default function EmergencyNote({ t, withLink = true }: { t: Dict; withLink?: boolean }) {
   return (
     <p className="text-sm text-muted" data-testid="emergency-note">
-      <a href="tel:999" className="font-medium text-danger underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-civic">{t.emNote}</a>
+      <a href="tel:999" className="inline-flex min-h-11 items-center font-medium text-danger underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-civic">{t.emNote}</a>
       {withLink && <> <Link href="/help#emergency" className="inline-flex min-h-11 items-center underline underline-offset-2">{t.emNoteMore}</Link></>}
     </p>
   );

@@ -72,7 +72,7 @@ function NewIdeaInner({ constituency, signedIn }: { constituency: string; signed
   });
 
   if (!signedIn) {
-    return <Card tone="info"><p className="mb-3">{t.idSupportNeedsSignIn}</p><Link href={`/login?need=1&next=${encodeURIComponent("/ideas/new")}`} className={buttonClass()}>{t.signIn}</Link></Card>;
+    return <><h1 className="jk-h1 mb-3">{t.idNewTitle}</h1><Card tone="info"><p className="mb-3">{t.idSupportNeedsSignIn}</p><Link href={`/login?need=1&next=${encodeURIComponent("/ideas/new")}`} className={buttonClass()}>{t.signIn}</Link></Card></>;
   }
 
   if (done) {

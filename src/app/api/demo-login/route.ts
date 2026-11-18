@@ -3,7 +3,7 @@ import { DEMO_EMAILS, demoEnabled, demoLanding, parseDemoRole } from "@/lib/demo
 import { limited } from "@/lib/http";
 import { supabaseServer } from "@/lib/supabase/server";
 
-// One-click demo sign-in (dev period). POST form field `role` = citizen | staff.
+// One-click demo sign-in (dev period). POST form field `role` = one of DEMO_ROLES (never admin).
 export async function POST(req: Request) {
   if (!demoEnabled()) return NextResponse.json({ error: "not_found" }, { status: 404 });
   const tooMany = limited(req, "demo-login", null, 20);

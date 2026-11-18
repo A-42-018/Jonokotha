@@ -40,6 +40,7 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const lang = await getLang();
   const t = dict[lang];
+  const areaPromise = getArea();   // started now so it runs while the user lookup waits on the database
   let email: string | null = null;
   let isStaff = false;
   let userId: string | null = null;
@@ -53,14 +54,14 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   } catch { /* Supabase not configured: show signed-out header */ }
   return (
     <html lang={lang} className={`${head.variable} ${body.variable}`}>
-      <body className="min-h-screen">
+      <body className="flex min-h-screen flex-col">
         <I18nProvider lang={lang} dicts={{ [lang]: t }}>
         <TopNav
           isStaff={isStaff}
           userId={userId}
           picker={
             <ConstituencyPicker
-              selected={await getArea()}
+              selected={await areaPromise}
               signedIn={!!email}
               lang={lang}
               labels={{ open: t.cpOpen, choose: t.cpChoose, none: t.cpNone, title: t.cpTitle, hint: t.cpHint, sample: t.cpSample, close: t.cpClose, searchLabel: t.seSearchLabel, searchHint: t.seSearchHint, noResults: t.seNoResults, error: t.seSearchError, searching: t.seSearching, seat: t.seSeatNo, vacant: t.seVacant, ls: { btn: t.lsBtn, busy: t.lsBusy, privacy: t.lsPrivacy, denied: t.lsDenied, unsupported: t.lsUnsupported, failed: t.lsFailed, outside: t.lsOutside, foundSeat: t.lsFoundSeat, foundDistrict: t.lsFoundDistrict, or: t.lsOr } }}
