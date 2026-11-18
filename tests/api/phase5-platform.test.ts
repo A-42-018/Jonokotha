@@ -132,7 +132,7 @@ describe("background jobs, events (B5.8)", () => {
       expect(mine?.attempts, `claim ${i}`).toBe(i);
       const { data: st } = await admin.rpc("finish_job", { p_id: id, p_ok: false, p_error: "provider down" }); runs.push(0);
       expect(st).toBe(i < 5 ? "failed" : "dead");
-      if (i < 5) { const { data: j } = await admin.from("background_jobs").select("run_at").eq("id", id).single(); expect(new Date(j!.run_at).getTime()).toBeGreaterThan(Date.now() + 20_000 * 2 ** (i - 1)); await admin.from("background_jobs").update({ run_at: new Date().toISOString() }).eq("id", id); }
+      if (i < 5) { const { data: j } = await admin.from("background_jobs").select("run_at").eq("id", id).single(); expect(new Date(j!.run_at).getTime()).toBeGreaterThan(Date.now() + 20_000 * 2 ** (i - 1)); await admin.from("background_jobs").update({ run_at: new Date(Date.now() - 60_000).toISOString() }).eq("id", id); }
     }
     expect((await admin.from("background_jobs").select("status,last_error,finished_at").eq("id", id).single()).data).toMatchObject({ status: "dead", last_error: "provider down" });
     expect((await admin.rpc("claim_jobs", { p_limit: 50, p_worker: "test" })).data.some((j: { id: string }) => j.id === id)).toBe(false);   // dead jobs are not retried

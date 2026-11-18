@@ -118,7 +118,7 @@ describe("staff and cases", () => {
     const inv = { id: "i1", email: "a@b.com", office_role: "case_officer", status: "pending", expires_at: "2026-11-30T00:00:00Z", created_at: "2026-11-01T00:00:00Z", accepted_at: null };
     const calls = stub({ "GET /office/invitations": () => json(200, { data: [inv] }), "POST /office/invitations": () => json(201, { data: {} }), "POST /office/invitations/i1/revoke": () => json(200, { data: {} }) });
     const u = userEvent.setup();
-    render(<StaffPanel constituency="c" />);
+    render(<StaffPanel constituency="c" canInvite />);
     expect(await screen.findByText("a@b.com")).toBeInTheDocument();
     expect(within(screen.getByLabelText(t.owStaffRole)).getAllByRole("option")).toHaveLength(2);
     await u.type(screen.getByLabelText(t.owStaffEmail), "bad");
@@ -127,6 +127,15 @@ describe("staff and cases", () => {
     await u.click(screen.getByRole("button", { name: new RegExp(t.owStaffRevoke) }));
     await waitFor(() => expect(calls.some((c) => c.key === "POST /office/invitations/i1/revoke")).toBe(true));
     expect(screen.getByText(t.owStaffRolesTitle)).toBeInTheDocument();
+  });
+  it("without the assign permission the invite form and revoke buttons are not shown, but the list is", async () => {
+    const inv = { id: "i1", email: "a@b.com", office_role: "case_officer", status: "pending", expires_at: "2026-11-30T00:00:00Z", created_at: "2026-11-01T00:00:00Z", accepted_at: null };
+    stub({ "GET /office/invitations": () => json(200, { data: [inv] }) });
+    render(<StaffPanel constituency="c" canInvite={false} />);
+    expect(await screen.findByText("a@b.com")).toBeInTheDocument();
+    expect(screen.queryByLabelText(t.owStaffEmail)).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: t.owStaffSend })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: new RegExp(t.owStaffRevoke) })).not.toBeInTheDocument();
   });
   it("my cases: empty state, offline state with retry, and the three planned gaps", async () => {
     stub({ "GET /office/issues": () => json(200, { data: [] }) });

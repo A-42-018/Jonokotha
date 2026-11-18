@@ -14,13 +14,13 @@ import { fmtDate } from "@/lib/format";
 import { fetchInvitations, invite, MANAGER_INVITE_ROLES, revokeInvitation, type InviteRole } from "@/lib/office-workspace-api";
 import Boundary, { label, saveError } from "./Boundary";
 
-export default function StaffPanel({ constituency }: { constituency: string }) {
-  return <QueryProvider><Inner constituency={constituency} /></QueryProvider>;
+export default function StaffPanel({ constituency, canInvite }: { constituency: string; canInvite: boolean }) {
+  return <QueryProvider><Inner constituency={constituency} canInvite={canInvite} /></QueryProvider>;
 }
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-function Inner({ constituency }: { constituency: string }) {
+function Inner({ constituency, canInvite }: { constituency: string; canInvite: boolean }) {
   const t = useT();
   const lang = useLang();
   const toast = useToast();
@@ -43,11 +43,11 @@ function Inner({ constituency }: { constituency: string }) {
   });
   return (
     <div className="space-y-4">
-      <form noValidate className="grid gap-3 rounded-2xl border border-line bg-white p-4 sm:grid-cols-[1fr_14rem_auto] sm:items-end" onSubmit={(e) => { e.preventDefault(); if (!EMAIL.test(email.trim())) { setErr(t.owStaffEmailBad); return; } setErr(""); send.mutate(); }}>
+      {canInvite && <form noValidate className="grid gap-3 rounded-2xl border border-line bg-white p-4 sm:grid-cols-[1fr_14rem_auto] sm:items-end" onSubmit={(e) => { e.preventDefault(); if (!EMAIL.test(email.trim())) { setErr(t.owStaffEmailBad); return; } setErr(""); send.mutate(); }}>
         <Input label={t.owStaffEmail} type="email" dir="ltr" value={email} onChange={(e) => setEmail(e.target.value)} error={err || undefined} />
         <Select label={t.owStaffRole} value={role} onChange={(e) => setRole(e.target.value as InviteRole)} options={MANAGER_INVITE_ROLES.map((r) => ({ value: r, label: label(t, "owRole_", r) }))} />
         <Button type="submit" disabled={send.isPending}>{t.owStaffSend}</Button>
-      </form>
+      </form>}
       <Boundary q={q} isEmpty={(d) => d.length === 0} emptyTitle={t.owStaffEmpty}>
         {(rows) => (
           <ul className="space-y-2">{rows.map((r) => (
@@ -56,7 +56,7 @@ function Inner({ constituency }: { constituency: string }) {
               <Badge>{label(t, "owRole_", r.office_role)}</Badge>
               <Badge tone="info">{label(t, "owInv_", r.status)}</Badge>
               <span className="text-sm text-muted">{t.owStaffExpires}: {fmtDate(r.expires_at, lang)}</span>
-              {r.status === "pending" && <Button variant="secondary" disabled={revoke.isPending} onClick={() => revoke.mutate(r.id)}>{t.owStaffRevoke}<span className="sr-only">: {r.email}</span></Button>}
+              {canInvite && r.status === "pending" && <Button variant="secondary" disabled={revoke.isPending} onClick={() => revoke.mutate(r.id)}>{t.owStaffRevoke}<span className="sr-only">: {r.email}</span></Button>}
             </li>
           ))}</ul>
         )}
