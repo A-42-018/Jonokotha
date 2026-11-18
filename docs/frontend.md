@@ -583,3 +583,15 @@ Strings: `src/lib/strings/pilot.ts` (`ot*`, `oh*`, `sp*`). Tests: `tests/unit/pi
 - An external tracking link per referral (field, or an agency link on the integration), if an agency ever offers one.
 - Counsel review: open-data licence, volunteer conduct and consent texts, the participatory-budget pledge, RTI deadlines and channels. Native review of every Phase 8 Bangla string (drafts).
 - A lookup for representative ids, account ids, unit codes and budget source refs so the admin and office forms need no pasted ids.
+
+## Dadu (জমির দাদু), the helper character
+
+Status: built, behind `NEXT_PUBLIC_FLAG_DADU` (all off by default; `..._DADU_VOICE` adds the microphone, `..._DADU_AI` is reserved for the model layer's UI). Idea and persona from LandShield BD's helper (its `feat/dadu-helper` and `feat/voice-nav` branches); the land tools of LandShield are deliberately not part of this.
+
+- **What he does:** answers how-to questions about jonokotha in Bangla, English or Banglish from the site's own text; explains the page the person is on ("এই পাতাটি কীভাবে ব্যবহার করব?"); takes people to a page when they say so by voice; reads answers aloud in a male Bangla voice; gives a pointer (land office, report a problem) for land questions. He cannot look up anyone's land record, and gives no legal advice.
+- **Where:** a round launcher after `BottomTabBar` in `src/app/layout.tsx`, drawn by the server only when the flag is on (zero bytes when off). It is hidden on `/report`, `/login`, `/mfa` and the staff and developer areas. The panel (`src/components/dadu/DaduPanel.tsx`) and the flat SVG character (`DaduAvatar.tsx`, five poses, still under reduced motion) load on the first click through `next/dynamic`. A card on About and Help links to him (not from the menus: the home page first-load budget is spent).
+- **Voice navigation:** `src/lib/helper/navigate.ts` holds the whitelist of pages. A spoken request (a go-cue or a wish, with a page name, and no question word) returns a `navigate` block; the panel shows "যাচ্ছি: …" for **two seconds** with "বাতিল" and "এখনই যান", and only then opens the page. Typed chat never navigates. Pages behind a flag are offered only when their flag is on; sign-in pages send a signed-out person to `/login?next=…`; staff, admin and developer pages are not in the table.
+- **Read-aloud:** `DaduSpeak.tsx` uses the server voice when `GET /api/v1/helper/speech` says it is available, else the browser voice but, for Bangla, only a real `bn-BD` voice; with neither, no button. After a spoken question the answer is read out once.
+- **Strings:** the panel chrome is in `src/lib/strings/helper.ts` (`dd` keys). Dadu's own lines (answers, page guides, page names) are in `src/lib/helper/*.ts`, and `tests/unit/helper-content.test.ts` applies the dictionary's Bangla rules to them and checks that every public page has a guide.
+- **Budget:** measure `/` first-load JS with the flag on (`PW_DADU=1`) before switching it on in production; see the status block below for the number.
+- **Run the e2e:** `npm run test:e2e:dadu` (own server on port 3300, API mocked in the browser).

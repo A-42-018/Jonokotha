@@ -14,7 +14,9 @@ import MainShell from "@/components/ui/MainShell";
 import OfflineBanner from "@/components/ui/OfflineBanner";
 import TopNav from "@/components/ui/TopNav";
 import { ToastProvider } from "@/components/ui/Toast";
+import DaduLauncher from "@/components/dadu/DaduLauncher";
 import { getArea } from "@/lib/constituency-server";
+import { DADU } from "@/lib/flags-dadu";
 import { currentUser } from "@/lib/supabase/server";
 import { dict, getLang } from "@/lib/i18n";
 
@@ -84,6 +86,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             <MainShell footer={<SiteFooter t={t} />}>{children}</MainShell>
           </ToastProvider>
           <BottomTabBar />
+          {DADU.on && <DaduLauncher label={t.ddLaunch} short={t.ddLaunchShort} />}
         </I18nProvider>
       </body>
     </html>

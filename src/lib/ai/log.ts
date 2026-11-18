@@ -1,6 +1,6 @@
 import { serviceClient } from "../supabase/service";
 
-export type AiAgent = "intake" | "duplicate" | "routing" | "copilot" | "translation" | "insight" | "idea" | "transcription";
+export type AiAgent = "intake" | "duplicate" | "routing" | "copilot" | "translation" | "insight" | "idea" | "transcription" | "helper";
 export type AiStatus = "ok" | "timeout" | "refused" | "invalid_output" | "error" | "fallback";
 
 export interface AiRunRecord {
