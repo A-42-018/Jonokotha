@@ -47,15 +47,30 @@ export function can(a: Actor | null, action: OfficeAction, issue: { constituency
   });
 }
 
-/** Loads the actor from the session user (identity never comes from the request body). */
-export async function loadActor(sb: SupabaseClient, userId: string, aal: Actor["aal"] = "aal1"): Promise<Actor | null> {
-  const { data: p } = await sb.from("profiles").select("role,account_status").eq("id", userId).maybeSingle();
+type ProfileRow = { role: string; account_status: string } | null;
+type MemberRow = { constituency_id: string; office_role: string; constituencies: unknown };
+
+/** The profile and the active office memberships of a user, fetched side by side (one round trip of waiting instead of two). */
+export async function fetchActorRows(sb: SupabaseClient, userId: string): Promise<{ profile: ProfileRow; members: MemberRow[] }> {
+  const [{ data: p }, { data: m }] = await Promise.all([
+    sb.from("profiles").select("role,account_status").eq("id", userId).maybeSingle(),
+    sb.from("office_members").select("constituency_id,office_role,status,constituencies(key)").eq("user_id", userId).eq("status", "active"),
+  ]);
+  return { profile: p as ProfileRow, members: (m ?? []) as MemberRow[] };
+}
+
+/** Builds the actor from rows read by `fetchActorRows`; null for a missing or inactive account. */
+export function actorFromRows(userId: string, aal: Actor["aal"], { profile: p, members }: { profile: ProfileRow; members: MemberRow[] }): Actor | null {
   if (!p || p.account_status !== "active") return null;
-  const { data: m } = await sb.from("office_members").select("constituency_id,office_role,status,constituencies(key)").eq("user_id", userId).eq("status", "active");
-  const offices = (m ?? []).map((r) => ({
-    constituencyId: r.constituency_id as string,
-    constituencyKey: ((r.constituencies as unknown as { key: string } | null)?.key) ?? "",
+  const offices = members.map((r) => ({
+    constituencyId: r.constituency_id,
+    constituencyKey: ((r.constituencies as { key: string } | null)?.key) ?? "",
     officeRole: r.office_role as OfficeRole,
   }));
   return { id: userId, role: p.role as PlatformRole, offices, aal };
+}
+
+/** Loads the actor from the session user (identity never comes from the request body). */
+export async function loadActor(sb: SupabaseClient, userId: string, aal: Actor["aal"] = "aal1"): Promise<Actor | null> {
+  return actorFromRows(userId, aal, await fetchActorRows(sb, userId));
 }
