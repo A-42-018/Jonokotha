@@ -74,6 +74,10 @@ main { font-size: 1.0625rem; line-height: 1.65; }
 .jk-card { background: #fff; border-radius: 1rem; box-shadow: 0 1px 2px rgb(27 42 34 / 0.06), 0 8px 24px rgb(27 42 34 / 0.08); }
 html[data-theme="dark"] .jk-card { background: var(--dk-surface); box-shadow: 0 0 0 1px var(--dk-s200); }
 
+/* Footer skyline: the footer green on the cream page; lifted in the dark theme so it shows against the dark page. */
+.jk-skyline { color: #0b3d2e; }
+html[data-theme="dark"] .jk-skyline { color: #1a6a50; }
+
 /* Reduced motion (WCAG 2.3.3): no animation or smooth scrolling for people who ask the OS for less motion. */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

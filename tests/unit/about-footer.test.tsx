@@ -22,12 +22,13 @@ describe("footer on every page", () => {
     expect(foot.textContent).toContain("999".replace(/9/g, l === "bn" ? "৯" : "9"));
     expect(within(foot).getByText(t.footOfficialHead)).toBeInTheDocument();
     const hrefs = within(screen.getByRole("navigation", { name: t.footNav })).getAllByRole("link").map((a) => a.getAttribute("href"));
-    expect(hrefs).toEqual(["/about", "/help", "/privacy", "/terms", "/accessibility", "/help#emergency", "/settings"]);
+    expect(hrefs).toEqual(["/area", "/projects", "/ideas", "/polls", "/report", "/ask", "/mp", "/about", "/help", "/privacy", "/terms", "/accessibility", "/help#emergency", "/settings"]);
   });
-  it("the page shell puts the footer inside the main area, after the content", () => {
+  it("the page shell puts the full-width footer right after the main area", () => {
     render(<MainShell footer={<SiteFooter t={dict.bn} />}><p>body</p></MainShell>);
     const main = screen.getByRole("main");
-    expect(main.lastElementChild?.tagName).toBe("FOOTER");
+    expect(within(main).queryByRole("contentinfo")).toBeNull();
+    expect(main.nextElementSibling?.querySelector("footer")).not.toBeNull();
   });
 });
 

@@ -53,7 +53,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   } catch { /* Supabase not configured: show signed-out header */ }
   return (
     <html lang={lang} className={`${head.variable} ${body.variable}`}>
-      <body className="min-h-screen">
+      <body className="flex min-h-screen flex-col">
         <I18nProvider lang={lang} dicts={{ [lang]: t }}>
         <TopNav
           isStaff={isStaff}
