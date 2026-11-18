@@ -39,7 +39,7 @@ Case officers recommend forwarding or resolution; the office manager performs it
 ## MFA plan (§14: MP, moderator and admin)
 
 - Enforcement is built: `mfa_required()` is true for moderators, admins and anyone with an active `mp` membership; `mfa_ok()` requires a Supabase TOTP session (`aal2` in the JWT) when `app_settings.enforce_mfa` is `true`. `office_can`, `office_scope`, `is_admin` and `is_moderator` all call it, so with the flag on an `aal1` session loses every elevated permission.
-- The flag is `false` for now because the sign-in UI cannot yet enrol or challenge TOTP (frontend work: `supabase.auth.mfa.enroll/challenge/verify`). Dev sign-in uses demo accounts, which are not MP, moderator or admin.
+- The flag is `false` for now because the sign-in UI cannot yet enrol or challenge TOTP (frontend work: `supabase.auth.mfa.enroll/challenge/verify`). Dev sign-in has demo MP and moderator accounts (never admin); once the flag is on they lose their elevated permissions until they enrol TOTP, so turn off `DEMO_LOGIN` first.
 - Before real MP, moderator or admin accounts exist: enable TOTP in Supabase Auth settings, ship the enrol/challenge screens, create the accounts, then set the flag with `update app_settings set value = 'true' where key = 'enforce_mfa';`. This is a Phase 3 security-review gate at the latest.
 - Hosted Supabase may require the Pro plan for some MFA settings; confirm before relying on it.
 

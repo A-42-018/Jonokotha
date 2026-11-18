@@ -1,12 +1,22 @@
--- Demo accounts for the dev-period one-click login (src/lib/demo.ts). Run in the Supabase SQL editor.
--- Replace __DEMO_PASSWORD__ with the value of DEMO_PASSWORD from .env.local. Never commit the real value.
+-- Demo accounts for the dev-period one-click login (src/lib/demo.ts). Run in the Supabase SQL editor. Safe to run twice.
+-- One account per role except admin (never created here). Replace __DEMO_PASSWORD__ with the value of DEMO_PASSWORD from .env.local.
+-- Never commit the real value. Requires migrations 0006 (roles) and 0030 (office_members.agency_id).
 -- Remove these users and unset DEMO_LOGIN before real use:
---   delete from auth.users where email in ('demo-citizen@jonokotha.test','demo-staff@jonokotha.test');
+--   delete from auth.users where email in ('demo-citizen@jonokotha.test','demo-staff@jonokotha.test','demo-officer@jonokotha.test',
+--     'demo-mp@jonokotha.test','demo-liaison@jonokotha.test','demo-moderator@jonokotha.test');
+-- MFA: the MP and moderator accounts need TOTP once app_settings.enforce_mfa is true; until then they sign in with the password alone.
 create extension if not exists pgcrypto;
 do $$
 declare r record; uid uuid;
 begin
-  for r in select * from (values ('demo-citizen@jonokotha.test', 'citizen'), ('demo-staff@jonokotha.test', 'staff')) as t(email, role) loop
+  for r in select * from (values
+      ('demo-citizen@jonokotha.test', 'citizen'),
+      ('demo-staff@jonokotha.test', 'staff'),
+      ('demo-officer@jonokotha.test', 'staff'),
+      ('demo-mp@jonokotha.test', 'staff'),
+      ('demo-liaison@jonokotha.test', 'staff'),
+      ('demo-moderator@jonokotha.test', 'moderator')
+    ) as t(email, role) loop
     select id into uid from auth.users where email = r.email;
     if uid is null then
       uid := gen_random_uuid();
@@ -23,11 +33,22 @@ begin
     update profiles set role = r.role where id = uid;
   end loop;
 end $$;
--- Demo staff is an office manager of the sample constituency only (scoped; no access elsewhere). Requires migration 0006.
-insert into office_members (user_id, constituency_id, office_role)
-select u.id, c.id, 'office_manager' from auth.users u, constituencies c
-where u.email = 'demo-staff@jonokotha.test' and c.key = 'demo-1'
-on conflict (user_id, constituency_id) do update set office_role = 'office_manager', status = 'active';
-select u.email, p.role, m.office_role from profiles p join auth.users u on u.id = p.id
+-- Office roles, all in the sample constituency only (scoped; no access elsewhere). The liaison belongs to LGED, so it sees only cases
+-- an office forwards to LGED; the case officer sees only cases assigned to it. Adding the MP makes demo-1 an area with an active MP,
+-- so if its office turns on "MP approval required", announcements and public replies wait for demo-mp.
+insert into office_members (user_id, constituency_id, office_role, agency_id)
+select u.id, c.id, m.office_role, (select id from agencies where key = m.agency_key)
+from (values
+    ('demo-staff@jonokotha.test', 'office_manager', null),
+    ('demo-officer@jonokotha.test', 'case_officer', null),
+    ('demo-mp@jonokotha.test', 'mp', null),
+    ('demo-liaison@jonokotha.test', 'agency_liaison', 'ag-lged')
+  ) as m(email, office_role, agency_key)
+join auth.users u on u.email = m.email
+cross join constituencies c
+where c.key = 'demo-1'
+on conflict (user_id, constituency_id) do update set office_role = excluded.office_role, agency_id = excluded.agency_id, status = 'active';
+select u.email, p.role, m.office_role, a.key as agency from profiles p join auth.users u on u.id = p.id
 left join office_members m on m.user_id = p.id and m.status = 'active'
-where u.email like 'demo-%@jonokotha.test';
+left join agencies a on a.id = m.agency_id
+where u.email like 'demo-%@jonokotha.test' order by u.email;

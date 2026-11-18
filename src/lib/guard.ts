@@ -34,6 +34,23 @@ export async function guardStaff(path: string) {
   return { ...cu, user: cu.user, denied };
 }
 
+/**
+ * Route guard for the moderation queue: moderators and admins (the queue API already serves both; the database limits moderators to it).
+ * `currentUser` folds moderators into "citizen", so the platform role is read here. Moderators need MFA like admins once it is enforced.
+ */
+export async function guardModeration(path: string) {
+  const cu = await currentUser();
+  if (!cu.user) redirect(loginUrl(path));
+  const { data: p } = await cu.sb.from("profiles").select("role").eq("id", cu.user.id).maybeSingle();
+  const allowed = p?.role === "admin" || p?.role === "moderator";
+  if (allowed) {
+    const { data } = await cu.sb.rpc("mfa_ok");
+    if (data === false) redirect(mfaUrl(path));
+  }
+  const denied = allowed ? null : { email: cu.user.email ?? "", role: cu.role as Role };
+  return { ...cu, user: cu.user, denied };
+}
+
 /** Route guard for admin pages: signed out goes to sign-in; staff or citizens get `denied` (render NoAccess). */
 export async function guardAdmin(path: string) {
   const cu = await currentUser();

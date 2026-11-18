@@ -13,10 +13,10 @@
 Vercel project `jonokotha` (team devalif), production branch `backend`: https://jonokotha.vercel.app. Supabase redirect URLs include its `/auth/callback`. Env vars set in Vercel: Supabase URL and anon key, Anthropic key and model. While the Anthropic key is invalid, `/api/intake` returns `source: "fallback"`.
 
 ## Dev-period demo login (temporary)
-Email delivery is limited (see step 2), so `/login` has one-click **Citizen** and **Office staff** buttons. They sign in to two real accounts (`demo-citizen@` and `demo-staff@jonokotha.test`), so RLS and the staff gate still apply; admin is not available.
+Email delivery is limited (see step 2), so `/login` has one-click buttons for every role except admin: **Citizen**, **Office manager**, **Case officer**, **MP**, **Agency liaison** (LGED) and **Moderator**. They sign in to real accounts (`demo-citizen@`, `demo-staff@`, `demo-officer@`, `demo-mp@`, `demo-liaison@`, `demo-moderator@jonokotha.test`; office roles are scoped to the sample constituency `demo-1`), so RLS, office scopes and the staff gate still apply. Admin is never offered. A button whose account does not exist yet returns to `/login` with "demo login failed".
 - Enabled only when the server env vars `DEMO_LOGIN=true` and `DEMO_PASSWORD` are both set (`.env.local`, Vercel env). Unset `DEMO_LOGIN` to turn it off; no deploy needed beyond a redeploy.
 - Create the accounts with `supabase/seed/demo_users.sql` (replace `__DEMO_PASSWORD__`; never commit the real value).
-- **Before real users or judging:** unset `DEMO_LOGIN`, and delete the two demo users (SQL in the seed file header). Anyone who can reach the site while it is on can become demo staff. Revisit in the Phase 3 security review.
+- **Before real users or judging:** unset `DEMO_LOGIN`, and delete the demo users (SQL in the seed file header). Anyone who can reach the site while it is on can become demo office manager, MP or moderator (moderators can hide public content). Revisit in the Phase 3 security review.
 
 ## Local Supabase for database tests (Phase 1)
 Docker must be running. `npx supabase start` (first run pulls images), `npx supabase db reset` applies every migration and `supabase/seed/seed.sql` to a clean local database, `npm run test:db` runs the database tests against it (they refuse any non-local URL). The local stack never touches the live project.
