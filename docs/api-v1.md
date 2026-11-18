@@ -565,3 +565,11 @@ Base `/api/v1/open311/v2/`, `.json` or `.xml` on every path: `discovery`, `servi
 
 ### Frontend handoff for Phase 8 (backend cannot do these)
 Screens for each section; the labels "assisted report", "verified source", "advisory until the office's pledge is recorded", "self-reported date"; the volunteer conduct and consent screens and the printed consent sheet (texts are drafts); the open-data page with licence and attribution; the MP-record cards (no numbers, no sorting by performance); a kiosk mode (large text, auto-clear after a report) if kiosks are used.
+
+## Dadu (জমির দাদু)
+
+| Route | Auth | Limit | Flag | Notes |
+|---|---|---|---|---|
+| `POST /helper/chat` | optional | 20/min per IP, 30/min per user | `helper` | body `{messages[1..10] {role: user\|bot, text ≤500}, lang: bn\|en, page: path, voice: boolean}`; answer `{blocks[], intent, confidence, source: rules\|kb\|emergency\|ai, lang, mood}`. Blocks: `text`, `chips`, `link`, `navigate` (only when `voice` is true), `handoff`, `emergency`. Every `href` comes from a fixed table. |
+| `GET /helper/speech` | optional | 120/min per IP | `helper_speech` | `{available, max_chars, voices}`; `available` is false without Azure keys |
+| `POST /helper/speech` | optional | 30/min | `helper_speech` | `{text ≤600, lang}` → `audio/mpeg`; 503 `unavailable` (`_: not_configured\|provider_error\|timeout`) or 429 `rate_limited` (`daily_cap`) |

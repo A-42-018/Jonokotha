@@ -12,6 +12,7 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:r11": "PW_RELEASE11=1 PW_REUSE_SERVER=0 PW_PORT=3100 playwright test tests/e2e/release11.spec.ts tests/e2e/release-gates.spec.ts",
+    "test:e2e:dadu": "PW_DADU=1 PW_REUSE_SERVER=0 PW_PORT=3300 playwright test tests/e2e/dadu.spec.ts",
     "test:e2e:r2": "PW_RELEASE2=1 PW_REUSE_SERVER=0 PW_PORT=3200 playwright test tests/e2e/release2.spec.ts",
     "test:e2e:real": "node scripts/e2e-real.mjs",
     "audit:ui": "node scripts/ui-audit.mjs",

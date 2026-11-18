@@ -27,7 +27,7 @@ export function buildCsp({ supabaseUrl, nonce }: CspOptions = {}): string {
     // MapLibre runs its tile worker from /vendor (same origin) and may use a blob worker.
     "worker-src": ["'self'", "blob:"],
     "manifest-src": ["'self'"],
-    "media-src": ["'self'"],
+    "media-src": ["'self'", "blob:"],   // blob: for read-aloud clips (Dadu's server voice plays them from object URLs)
     "object-src": ["'none'"],
     "base-uri": ["'self'"],
     "form-action": ["'self'"],

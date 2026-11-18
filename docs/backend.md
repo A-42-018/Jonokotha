@@ -348,3 +348,12 @@ Full requirement map: `docs/masterplan-coverage.md`. Items below were in the mas
 ### Definition of done additions
 
 Every endpoint also states: public or private, audit event, rate limit, and the §22 definition string if it returns a public metric. Every new AI feature adds eval cases in Bangla and English and a manual fallback test.
+
+## Dadu (জমির দাদু), the helper character
+
+Migration `0090_helper_agent.sql`: adds `'helper'` to `ai_runs_agent_check` (last redefined in 0015) and seeds three flags, all off: `helper` (the chat route), `helper_ai` (the model layer), `helper_speech` (the server voice).
+
+- **Chat (`POST /api/v1/helper/chat`)**: public, per-IP limit 20/min (30/min per signed-in user), no model for anonymous people. Order of the scripted brain in `src/lib/helper/chat.ts`: emergency words (`detectEmergency`, fixed guidance only) → page help → spoken navigation → keyword intents → BM25 over the site's own text → "not sure" with a way to a person.
+- **Model layer** (`src/lib/ai/helper.ts`, prompt `HELPER_V1`): only for a signed-in person, only with `helper_ai` explicitly on (a missing row means OFF here, unlike other routes), only with `ANTHROPIC_API_KEY`, and only for what the scripted brain answered weakly. One forced tool call, grounded in the page guide and the top site entries; a phone number, email or web address in the answer discards it; pages outside the whitelist are dropped; any failure keeps the scripted answer. Labelled "এআইয়ের লেখা" in the panel.
+- **Server voice** (`POST /api/v1/helper/speech`, `src/lib/helper/azure-speech.ts`): Azure Speech REST, `bn-BD-PradeepNeural` / `en-IN-PrabhatNeural`; env `AZURE_SPEECH_KEY`, `AZURE_SPEECH_REGION`, optional `AZURE_SPEECH_DAILY_CHARS` (default 15000). Text is redacted of personal data, numbers are written out in Bangla words (`speech-text.ts`), the text is never logged, clips are cached in memory (200), 600 characters at most.
+- **Not applied to the live project.** Apply 0090 and switch the flags on one by one after the checks in docs/api-v1.md.

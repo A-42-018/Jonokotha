@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Card from "@/components/ui/Card";
+import { DADU } from "@/lib/flags-dadu";
 import { dict, getLang } from "@/lib/i18n";
 import { R2 } from "@/lib/flags-r2";
 import { SUPPORT_EMAIL } from "@/lib/legal";
@@ -18,6 +19,14 @@ export default async function About() {
     <div className="space-y-4">
       <h1 className="jk-h1">{t.abTitle}</h1>
       <p className="text-muted">{t.abLead}</p>
+      {DADU.on && (
+        <Card tone="info">
+          <div className="flex items-center gap-4">
+            <img src="/illustrations/dadu.svg" alt="" width={72} height={90} loading="lazy" decoding="async" className="h-[90px] w-[72px] shrink-0" />
+            <div><h2 className="text-lg font-semibold text-civic">{t.ddHeroTitle}</h2><p className="text-muted">{t.ddHeroBody}</p></div>
+          </div>
+        </Card>
+      )}
       <Card title={t.abDoTitle}>{list([t.abDo1, t.abDo2, t.abDo3, t.abDo4])}</Card>
       <Card tone="danger" title={t.abNotTitle}>{list([t.abNot1, t.abNot2, t.abNot3])}</Card>
       <Card title={t.abAiTitle}>{list([t.abAi1, t.abAi2, t.abAi3])}</Card>

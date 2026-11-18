@@ -85,3 +85,11 @@ test("Release 2 pages are not found and not linked while their flags are off", a
   const about = await (await page.request.get("/about")).text();
   expect(about.includes('href="/transparency"')).toBe(false);
 });
+
+// Dadu exists only with NEXT_PUBLIC_FLAG_DADU=1 (PW_DADU=1 starts the server with it on; tests/e2e/dadu.spec.ts covers it). Without it no launcher is in the HTML (its strings are in the dictionary, so the test looks for the button itself).
+test("no Dadu launcher in the page while the flag is off", async ({ page }) => {
+  test.skip(process.env.PW_DADU === "1", "the Dadu flag is on in this run");
+  test.setTimeout(120_000);
+  const html = await (await page.request.get("/")).text();
+  expect(html).not.toContain("data-dadu-launcher");
+});
