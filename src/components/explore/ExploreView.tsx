@@ -31,11 +31,11 @@ const ExploreMap = dynamic(() => import("./ExploreMap"), { ssr: false });
 const STATUSES: Status[] = ["received", "acknowledged", "referred", "resolved"];
 
 /** Explore issues (§7.6): list/map toggle, search, filters, sort, "data last updated". Client-side over a public list. */
-export default function ExploreView({ constituency = "demo-1" }: { constituency?: string }) {
-  return <QueryProvider><ExploreInner constituency={constituency} /></QueryProvider>;
+export default function ExploreView({ constituency = "demo-1", signedIn = true }: { constituency?: string; signedIn?: boolean }) {
+  return <QueryProvider><ExploreInner constituency={constituency} signedIn={signedIn} /></QueryProvider>;
 }
 
-function ExploreInner({ constituency }: { constituency: string }) {
+function ExploreInner({ constituency, signedIn }: { constituency: string; signedIn: boolean }) {
   const t = useT();
   const lang = useLang();
   const [filters, setFilters] = useState<Filters>(NO_FILTERS);
@@ -44,7 +44,7 @@ function ExploreInner({ constituency }: { constituency: string }) {
   const [geo, setGeo] = useState<"idle" | "busy" | "denied">("idle");
   const [selected, setSelected] = useState<string>();
   const toast = useToast();
-  const { isFollowing, toggle: toggleFollow, follows } = useFollows(true);
+  const { isFollowing, toggle: toggleFollow, follows } = useFollows(signedIn);
   const [now] = useState(() => Date.now());
   const AREA = constituency;
   const [heatOn, setHeatOn] = useState(false);
@@ -134,12 +134,17 @@ function ExploreInner({ constituency }: { constituency: string }) {
       <h1 className="jk-h1">{t.exTitle}</h1>
       {hasSample && <p className="rounded-xl border border-amber/60 bg-amber/10 p-3 text-sm">{t.exSampleBanner}</p>}
       <div className="flex flex-wrap items-center gap-3">
-        <Button variant={followingArea ? "success" : "secondary"} aria-pressed={followingArea} loading={toggleFollow.isPending || follows === undefined}
-          onClick={() => toggleFollow.mutate({ type: "area", target: AREA }, {
-            onError: (e) => toast("error", e instanceof ApiError && e.status === 401 ? t.enSignIn : t.enActionFail),
-          })}>
-          {followingArea ? t.enFollowingArea : t.enFollowArea}
-        </Button>
+        {signedIn ? (
+          <Button variant={followingArea ? "success" : "secondary"} aria-pressed={followingArea} loading={toggleFollow.isPending || follows === undefined}
+            onClick={() => toggleFollow.mutate({ type: "area", target: AREA }, {
+              onError: (e) => toast("error", e instanceof ApiError && e.status === 401 ? t.enSignIn : t.enActionFail),
+            })}>
+            {followingArea ? t.enFollowingArea : t.enFollowArea}
+          </Button>
+        ) : (
+          // Signed out: there is nothing to load or toggle, so the button is a sign-in link (it used to spin forever after a 401).
+          <Link href="/login?need=1&next=%2Farea" className={buttonClass({ variant: "secondary" })}>{t.enFollowArea}</Link>
+        )}
         <span className="text-sm text-muted">{followingArea ? t.enFollowAreaOn : t.enFollowLocal}</span>
       </div>
       {loadFailed && (

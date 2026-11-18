@@ -27,9 +27,10 @@ export default function State({ kind, title, body, children, compact = false, li
 }) {
   return (
     <section role={live === "assertive" ? "alert" : live ? "status" : undefined} className={`mx-auto flex max-w-md flex-col items-center text-center ${compact ? "gap-2 py-4" : "gap-3 py-8"}`}>
+      {/* width/height reserve the square box (no layout shift); lazy stops React from emitting an unused preload hint for the not-found art on every page. */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={`/illustrations/${ART[kind]}.svg`} alt="" className={compact ? "w-32" : "w-48 sm:w-56"} />
-      <Heading className="jk-h1">{title}</Heading>
+      <img src={`/illustrations/${ART[kind]}.svg`} alt="" width={1024} height={1024} loading="lazy" className={compact ? "w-32" : "w-48 sm:w-56"} />
+      <Heading className={Heading === "h1" ? "jk-h1" : "jk-h2"}>{title}</Heading>
       {body && <p className="text-muted">{body}</p>}
       {children && <div className="mt-2 flex w-full flex-col items-stretch justify-center gap-2 sm:w-auto sm:flex-row">{children}</div>}
     </section>

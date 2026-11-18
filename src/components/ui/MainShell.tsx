@@ -18,7 +18,8 @@ export default function MainShell({ children, footer }: { children: ReactNode; f
       <main
         id="main"
         className={cx(
-          "mx-auto w-full px-4 pt-6 sm:px-6",
+          // min-h: the footer starts below the first screen, so lists that load after hydration do not push it (layout shift) while it is in view.
+          "mx-auto min-h-[calc(100svh-4rem)] w-full px-4 pt-6 sm:px-6",
           wide ? "max-w-[90rem] lg:px-8" : "max-w-3xl",
           footer || !bar ? "pb-6" : "pb-[calc(6rem+env(safe-area-inset-bottom))] xl:pb-6",
         )}

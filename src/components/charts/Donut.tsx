@@ -22,7 +22,7 @@ export default function Donut({ slices, lang, totalLabel, summary }: { slices: S
           return <circle key={s.key} cx="70" cy="70" r={R} fill="none" stroke={CHART_COLORS[i % CHART_COLORS.length]} strokeWidth="18" strokeDasharray={`${len} ${C - len}`} strokeDashoffset={-offsets[i]} transform="rotate(-90 70 70)" />;
         })}
         <text x="70" y="70" textAnchor="middle" className="fill-foreground text-[22px] font-semibold">{fmtNum(total, lang)}</text>
-        <text x="70" y="90" textAnchor="middle" className="fill-muted text-[11px]">{totalLabel}</text>
+        <text x="70" y="90" textAnchor="middle" className="fill-muted text-[13px]">{totalLabel}</text>
       </svg>
       <ul className="min-w-40 flex-1 space-y-1.5 text-sm">
         {slices.map((s, i) => (

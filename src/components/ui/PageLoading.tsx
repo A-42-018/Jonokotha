@@ -5,7 +5,7 @@ import { Skeleton } from "./Skeleton";
 export default async function PageLoading({ shape }: { shape: "list" | "detail" }) {
   const t = dict[await getLang()];
   return (
-    <div role="status" aria-busy="true" className="space-y-4">
+    <div role="status" aria-busy="true" className="min-h-[100svh] space-y-4">
       <span className="sr-only">{t.stLoading}</span>
       <Skeleton className="h-8 w-48" />
       {shape === "list" ? (

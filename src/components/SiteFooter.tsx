@@ -3,7 +3,7 @@ import type { Dict } from "@/lib/i18n";
 import { FOOTER_RINGS } from "./footerRings";
 import SkylineStrip from "./SkylineStrip";
 
-const LINK = "inline-flex min-h-10 items-center rounded text-white/85 underline-offset-4 transition-colors hover:text-white hover:underline hover:decoration-amber focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white";
+const LINK = "inline-flex min-h-11 items-center rounded text-white/85 underline-offset-4 transition-colors hover:text-white hover:underline hover:decoration-amber focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white";
 const HEAD = "mb-2 text-sm font-bold tracking-wide text-amber";
 
 /**

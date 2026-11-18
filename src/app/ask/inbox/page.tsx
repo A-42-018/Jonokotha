@@ -14,6 +14,7 @@ export default async function Inbox() {
   if (!signedIn) {
     return (
       <div className="space-y-3 text-center">
+        <h1 className="jk-h1">{t.askInboxTitle}</h1>
         <p>{t.askNeedsSignIn}</p>
         <Link href={loginUrl("/ask/inbox")} className={buttonClass()}>{t.signIn}</Link>
       </div>

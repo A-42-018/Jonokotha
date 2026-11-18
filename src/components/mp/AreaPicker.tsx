@@ -25,8 +25,10 @@ function Level({ index, chain, onPick, onOff }: { index: number; chain: string[]
   const q = useQuery({ queryKey: ["areas", parent ?? "top"], queryFn: () => fetchAreas(parent), retry: (n, e) => !isNotSwitchedOn(e) && n < 1 });
   const off = q.isError && isNotSwitchedOn(q.error);
   useEffect(() => { if (off && index === 0) onOff(); }, [off, index, onOff]);
-  if (q.isPending) return <p role="status" className="text-sm text-muted">{t.arLoadingAreas}</p>;
-  if (off) return null;
+  // The first level reserves the height of the "planned" panel it may turn into, so the page below does not jump.
+  if (q.isPending) return <p role="status" className={`text-sm text-muted ${index === 0 ? "min-h-[11.5rem] sm:min-h-32" : ""}`}>{t.arLoadingAreas}</p>;
+  // The first level keeps its reserved box for the one render between "error" and the planned panel that replaces the cascade.
+  if (off) return index === 0 ? <div aria-hidden className="min-h-[11.5rem] sm:min-h-32" /> : null;
   if (q.isError) return (
     <div role="alert" className="flex flex-wrap items-center gap-3 rounded-xl border border-amber/60 bg-amber/10 p-3 text-sm">
       <p>{t.arAreasError}</p>
@@ -102,7 +104,7 @@ export default function AreaPicker({ mode, onConfirm, intro }: { mode: "find" | 
       {matches.some((m) => m.constituency.is_demo || m.representatives.some((r) => r.is_sample)) && <p className="rounded-xl border border-amber/60 bg-amber/10 p-3 text-sm">{t.mpSampleBanner}</p>}
       <section aria-label={t.arCascade} className="space-y-3">
         {cascadeOff ? (
-          <PlannedPanel as="h3" title={t.arCascadeOffTitle} body={t.arCascadeOffBody} />
+          <PlannedPanel as="h2" title={t.arCascadeOffTitle} body={t.arCascadeOffBody} />
         ) : (
           Array.from({ length: chain.length + 1 }, (_, i) => <Level key={i} index={i} chain={chain} onPick={pick} onOff={() => setCascadeOff(true)} />)
         )}
@@ -145,7 +147,7 @@ export default function AreaPicker({ mode, onConfirm, intro }: { mode: "find" | 
           );
         })}
       </div>
-      <PlannedPanel as="h3" title={t.arCorrectTitle} body={t.arCorrectBody} />
+      <PlannedPanel as="h2" title={t.arCorrectTitle} body={t.arCorrectBody} />
     </div>
   );
 }
