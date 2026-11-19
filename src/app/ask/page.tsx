@@ -8,6 +8,7 @@ import { DEMO_CONSTITUENCY } from "@/lib/demo-data";
 import { SAMPLE_FAQ } from "@/lib/ask";
 import { dict, getLang } from "@/lib/i18n";
 import { currentUser } from "@/lib/supabase/server";
+import { demoOn } from "@/lib/demo-mode-server";
 
 export const dynamic = "force-dynamic";
 
@@ -15,7 +16,7 @@ export default async function Ask() {
   const lang = await getLang();
   const t = dict[lang];
   let signedIn = false;
-  try { signedIn = !!(await currentUser()).user; } catch { /* signed out */ }
+  try { signedIn = !!(await currentUser()).user || (await demoOn()); } catch { /* signed out */ }
   const constituency = (await getConstituencyId()) ?? DEMO_CONSTITUENCY.id;
   return (
     <div className="space-y-5">

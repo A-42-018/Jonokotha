@@ -34,6 +34,10 @@ function Inner({ constituency }: { constituency: string }) {
         return (
           <li key={p.ref}>
             <Card as="div">
+              {p.image_url && /^(\/demo\/|https:\/\/)/.test(p.image_url) && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={p.image_url} alt="" loading="lazy" decoding="async" className="mb-2 h-36 w-full rounded-lg object-cover sm:h-44" />
+              )}
               <div className="flex flex-wrap items-center gap-2">
                 <Badge tone={TONE[p.status]}>{t[`pjSt_${p.status}`]}</Badge>
                 <CapabilityLabel status={p.capability} />

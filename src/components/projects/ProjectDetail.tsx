@@ -60,6 +60,10 @@ function Inner({ refId, signedIn = false, loginHref = "/login" }: { refId: strin
         </div>
         <h1 className="break-words jk-h1">{p.title}</h1>
         <p className="text-sm text-muted">{t.pdUpdated} {fmtDay(p.updated_at, lang)}</p>
+        {p.image_url && /^(\/demo\/|https:\/\/)/.test(p.image_url) && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={p.image_url} alt="" loading="lazy" decoding="async" className="h-48 w-full rounded-xl object-cover sm:h-64" />
+        )}
       </header>
 
       <Card as="section" aria-labelledby="pd-about">

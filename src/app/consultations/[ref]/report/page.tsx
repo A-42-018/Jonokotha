@@ -1,3 +1,4 @@
+import { flagOrDemo } from "@/lib/demo-mode-server";
 import { notFound } from "next/navigation";
 import ConsultationReport from "@/components/consult/ConsultationReport";
 import { FLAGS } from "@/lib/flags";
@@ -7,7 +8,7 @@ export const dynamic = "force-dynamic";
 
 /** "আপনারা বললেন, যা করা হলো": the published report of one consultation. */
 export default async function Report({ params }: PageProps<"/consultations/[ref]/report">) {
-  if (!FLAGS.consultations) notFound();
+  if (!(await flagOrDemo(FLAGS.consultations))) notFound();
   const { ref } = await params;
   const t = dict[await getLang()];
   return (

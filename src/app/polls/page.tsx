@@ -8,6 +8,7 @@ import { FLAGS } from "@/lib/flags-more";
 import { loginUrl } from "@/lib/guard";
 import { dict, getLang } from "@/lib/i18n";
 import { currentUser } from "@/lib/supabase/server";
+import { demoOn } from "@/lib/demo-mode-server";
 
 export const dynamic = "force-dynamic";
 
@@ -15,7 +16,7 @@ export const dynamic = "force-dynamic";
 export default async function Polls() {
   const t = dict[await getLang()];
   let signedIn = false;
-  try { signedIn = !!(await currentUser()).user; } catch { /* signed out */ }
+  try { signedIn = !!(await currentUser()).user || (await demoOn()); } catch { /* signed out */ }
   const constituency = (await getConstituencyId()) ?? DEMO_CONSTITUENCY.id;
   return (
     <div className="space-y-4">

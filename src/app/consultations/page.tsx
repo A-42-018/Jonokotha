@@ -1,3 +1,4 @@
+import { flagOrDemo } from "@/lib/demo-mode-server";
 import { notFound } from "next/navigation";
 import ConsultationsList from "@/components/consult/ConsultationsList";
 import { getConstituencyId } from "@/lib/constituency-server";
@@ -9,7 +10,7 @@ export const dynamic = "force-dynamic";
 
 /** Release 1.1 (masterplan 7.14). With the flag off (the default) the page does not exist, so nothing links to a dead end. */
 export default async function Consultations() {
-  if (!FLAGS.consultations) notFound();
+  if (!(await flagOrDemo(FLAGS.consultations))) notFound();
   const t = dict[await getLang()];
   return (
     <div className="space-y-4">

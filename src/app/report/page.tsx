@@ -9,6 +9,7 @@ import { CATEGORIES, type Category } from "@/lib/categories";
 import { loginUrl } from "@/lib/guard";
 import { dict, getLang } from "@/lib/i18n";
 import { currentUser } from "@/lib/supabase/server";
+import { demoOn } from "@/lib/demo-mode-server";
 
 /** `?category=roads` (from the home problem-type tiles) preselects that type. Unknown values are ignored. */
 export default async function Report({ searchParams }: PageProps<"/report">) {
@@ -16,7 +17,7 @@ export default async function Report({ searchParams }: PageProps<"/report">) {
   const category = typeof raw === "string" && (CATEGORIES as readonly string[]).includes(raw) ? (raw as Category) : undefined;
   const { user } = await currentUser();
   // Keep the chosen type through sign-in: the login page returns to `next`.
-  if (!user) redirect(category ? loginUrl(`/report?category=${category}`) : "/login");
+  if (!user && !(await demoOn())) redirect(category ? loginUrl(`/report?category=${category}`) : "/login");
   const lang = await getLang();
   return (
     <>
