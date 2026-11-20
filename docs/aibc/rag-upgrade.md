@@ -1,0 +1,16 @@
+# Retrieval upgrade: contextual chunks, semantic chunking, graph evidence
+
+Date: 2026-11-20. Code: `src/lib/ai/chunking.ts`, `src/lib/ai/context.ts`, `src/lib/ai/knowledge.ts`, `src/lib/ai/routing.ts`, migration `0091_graph_evidence_ingest_agent.sql` (**written, not applied to the live database**). Tests: `tests/unit/chunking.test.ts`, `tests/unit/chunk-context.test.ts`.
+
+## What changed
+
+1. **Variable-length, semantic chunking** (`chunkText`). Service rules (up to 1,500 characters per language) are split into sentences (Bangla danda and Latin punctuation) and packed into chunks of different lengths, at most 500 characters. When embeddings are configured, a new chunk starts where the cosine similarity between neighbouring sentences drops below 0.55 (and the chunk has at least 120 characters). Without embeddings, or if the embedding call fails, it packs by size only, and each chunk records which method made it (`chunk_method` in the chunk metadata: `semantic` or `sentence`). The agency directory rows are one short chunk per language and stay as they were.
+2. **Contextual chunks.** Every rule chunk starts with one context line, for example `[Pothole repair | source: City Corporation site, checked 2026-11-16 | agency: City Corporation | part 2 of 3]`. The line is built from the source's own metadata (`context_method: template`). With `KNOWLEDGE_CONTEXT_LLM=1` and a model available, the model writes a one-line context instead (the Anthropic "contextual retrieval" idea, prompt `chunk-context@v1`, agent `ingest`). The model line is rejected if it contains a number that is not in the document, and the template line is the fallback, so ingestion never depends on a model. Text sent to the model is redacted first.
+3. **Graph evidence for routing.** After retrieval, `agency_graph_evidence(issue, agencies)` (migration 0091) walks `graph_edges` (`issue -in_category-> category <-in_category- issue -routed_to-> agency`) and returns, per candidate agency, how many earlier issues of the same category in the same constituency were routed to it. The routing suggestion stores this as `graph_support`, so staff see it next to the cited sources. It is **not** a citation and does not change which agency is chosen. If the migration is not applied, the call returns nothing and routing behaves as before.
+
+## What is measured, and what is not
+
+- Unit tests cover the splitting, the topic-break rule, the fallback when the embedder fails, the context line and the model-line safety checks.
+- **Not measured:** retrieval quality before and after. There is no labelled retrieval set, and the embeddings key was not set in the recorded evaluation (`eval-results.md`). Do not quote an improvement figure for this change.
+- **Not run against a database:** migration 0091 and the changed ingestion were written without a local Supabase (no Docker daemon in this session). Run `npm run test:db` and `tests/api/ai-office.test.ts` on a machine with the local stack before applying 0091 anywhere.
+- Re-run `POST /admin/knowledge/ingest` after deploying so existing rule chunks are rebuilt with the new chunking; unchanged chunks are matched by checksum and kept, changed ones are replaced.

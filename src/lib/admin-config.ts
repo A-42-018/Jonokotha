@@ -2,6 +2,7 @@ import { z } from "zod";
 import { ApiError, auditAdminRead, fromDbError, parse, rpc, type Ctx, type Result } from "./api";
 import { clearFlagCache } from "./capabilities";
 import { serviceClient } from "./supabase/service";
+import { aiAvailable, localProvider } from "./ai/ollama";
 
 // Phase 5 / B5.3: administration APIs. Authorization is in the database (is_admin(), which includes MFA); these handlers validate
 // input and shape output. Secrets are never returned: integrations report only whether a key is present.
@@ -140,10 +141,10 @@ export async function systemHealth(c: Ctx): Promise<Result> {
     checks.notification_delivery = { ok: !h.error && (o.deliveries_dead ?? 0) === 0, detail: h.error ? "unknown" : `${o.deliveries_dead ?? 0} dead in 24h` };
     const j = await svc.from("background_jobs").select("id", { count: "exact", head: true }).eq("status", "dead");
     checks.jobs = { ok: !j.error && (j.count ?? 0) === 0, detail: j.error ? "unknown" : `${j.count ?? 0} dead-lettered` };
-    checks.ai_provider = { ok: !!process.env.ANTHROPIC_API_KEY, detail: process.env.ANTHROPIC_API_KEY ? "key present" : "no key: offline fallbacks in use" };
+    checks.ai_provider = { ok: aiAvailable(), detail: localProvider() ? `local model (ollama:${localProvider()!.model})` : process.env.ANTHROPIC_API_KEY ? "key present" : "no key: offline fallbacks in use" };
   } else {
     for (const k of ["storage", "queues", "notification_delivery", "jobs"]) checks[k] = { ok: false, detail: "service role not configured on this server" };
-    checks.ai_provider = { ok: !!process.env.ANTHROPIC_API_KEY, detail: process.env.ANTHROPIC_API_KEY ? "key present" : "no key: offline fallbacks in use" };
+    checks.ai_provider = { ok: aiAvailable(), detail: localProvider() ? `local model (ollama:${localProvider()!.model})` : process.env.ANTHROPIC_API_KEY ? "key present" : "no key: offline fallbacks in use" };
   }
   await auditAdminRead(c, "system_health", null);
   return { data: { ok: Object.values(checks).every((x) => x.ok), checked_at: new Date().toISOString(), checks } };

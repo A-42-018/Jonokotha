@@ -2,6 +2,8 @@ import { createHash } from "node:crypto";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { embed, embeddingsConfigured, EmbeddingError, toVector } from "./embeddings";
+import { chunkText, contextHeader, withContext, type Embedder } from "./chunking";
+import { contextLlmEnabled, modelContext } from "./context";
 
 export const KnowledgeRule = z.strictObject({
   id: z.string().regex(/^[a-z0-9-]{3,60}$/), title_bn: z.string().min(3).max(200), title_en: z.string().min(3).max(200),
@@ -56,12 +58,23 @@ export async function ingestKnowledge(svc: SupabaseClient, rules: KnowledgeRule[
       { locale: "en", agency_id: a.id, metadata: meta, content: `${a.name_en} handles: ${cs.map((c) => en.get(c) ?? c).join(", ")}. Contact: ${contact}. Source: ${a.source}` },
     ], embedOn));
   }
+  const embedder: Embedder | undefined = embedOn ? embed : undefined;
+  const llmOn = contextLlmEnabled();
   for (const r of rules) {
-    const { data: ag } = r.agency_key ? await svc.from("agencies").select("id,categories").eq("key", r.agency_key).maybeSingle() : { data: null };
-    const meta = { kind: "rule", rule_id: r.id, agency_key: r.agency_key ?? null, categories: ag?.categories ?? [] };
-    add(await syncSource(svc, { name: `rule:${r.id}`, url: r.source_url, fetched_at: `${r.checked_at}T00:00:00Z`, is_demo: r.is_demo, collection_method: "manual" }, [
-      { locale: "bn", agency_id: ag?.id ?? null, metadata: meta, content: `${r.title_bn}: ${r.text_bn}` }, { locale: "en", agency_id: ag?.id ?? null, metadata: meta, content: `${r.title_en}: ${r.text_en}` },
-    ], embedOn));
+    const { data: ag } = r.agency_key ? await svc.from("agencies").select("id,categories,name_en").eq("key", r.agency_key).maybeSingle() : { data: null };
+    const base = { kind: "rule", rule_id: r.id, agency_key: r.agency_key ?? null, categories: ag?.categories ?? [] };
+    const chunks: Chunk[] = [];
+    for (const loc of ["bn", "en"] as const) {
+      const title = loc === "bn" ? r.title_bn : r.title_en, text = loc === "bn" ? r.text_bn : r.text_en;
+      const parts = await chunkText(text, { embed: embedder });
+      for (const [n, p] of parts.entries()) {
+        const header = contextHeader({ title, source: r.source_name, checkedAt: r.checked_at, agency: ag?.name_en ?? null, part: [n + 1, parts.length] });
+        const modelLine = llmOn ? await modelContext({ title, text }, p.text) : null;
+        chunks.push({ locale: loc, agency_id: ag?.id ?? null, content: withContext(modelLine ? `[${title} | ${modelLine}]` : header, p.text),
+          metadata: { ...base, chunk_index: n + 1, chunk_count: parts.length, chunk_method: p.method, context_method: modelLine ? "model" : "template" } });
+      }
+    }
+    add(await syncSource(svc, { name: `rule:${r.id}`, url: r.source_url, fetched_at: `${r.checked_at}T00:00:00Z`, is_demo: r.is_demo, collection_method: "manual" }, chunks, embedOn));
   }
   return out;
 }

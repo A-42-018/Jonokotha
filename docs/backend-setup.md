@@ -48,6 +48,9 @@ Server-only settings, all optional; a feature without its setting says `unavaila
 | `SUPABASE_SERVICE_ROLE_KEY` | photo storage and signed URLs, AI suggestions (copilot, routing, duplicates), AI run log, knowledge ingest, notification worker |
 | `TRANSCRIBE_BASE_URL`, `TRANSCRIBE_API_KEY`, `TRANSCRIBE_MODEL` | `/ai/transcribe` (any OpenAI-compatible `/audio/transcriptions`: Whisper family or a hosted bn-BD model) |
 | `EMBEDDINGS_BASE_URL`, `EMBEDDINGS_API_KEY` | semantic duplicate search and semantic routing retrieval (otherwise lexical) |
+| `AI_PROVIDER=ollama`, `OLLAMA_BASE_URL`, `OLLAMA_MODEL` | use a local Ollama model instead of Claude for every agent (`docs/aibc/local-llm.md`); an Anthropic key is then not needed |
+| `KNOWLEDGE_CONTEXT_LLM=1` | knowledge ingestion asks the model for a one-line context per chunk (`docs/aibc/rag-upgrade.md`); off by default, a template line is used |
+| `JONOKOTHA_URL`, `CRON_SECRET`, `ALERT_WEBHOOK_URL` (n8n side) | the n8n urgent-case workflow (`docs/aibc/n8n-workflow.md`) |
 | `MALWARE_SCAN_URL`, `MALWARE_SCAN_TOKEN` | scan hook for uploads (POST bytes, answer `{"clean": true}`); if set it fails closed |
 | `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` | Web Push (`node scripts/gen-vapid.mjs` prints a key pair) |
 | `EMAIL_PROVIDER` (`resend` or `postmark`), `EMAIL_API_KEY`, `EMAIL_FROM`, `NEXT_PUBLIC_APP_URL` | transactional email (notifications, invitations) |

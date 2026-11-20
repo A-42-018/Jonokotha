@@ -6,6 +6,7 @@ import { helperAi } from "@/lib/ai/helper";
 import { styleFor } from "@/lib/ai/style";
 import { flagState } from "@/lib/capabilities";
 import { liveFlags } from "@/lib/helper/navigate";
+import { aiAvailable } from "@/lib/ai/ollama";
 
 const Turn = z.strictObject({ role: z.enum(["user", "bot"]), text: z.string().max(500) });
 const Body = z.strictObject({
@@ -23,7 +24,7 @@ export async function POST(req: Request) {
     const out = reply(b, { signedIn: !!c.user, loginUrl });
     // The model layer: only for a signed-in person, only with its own switch on (unlike other routes, a missing row means OFF here), only for what the scripted brain answered weakly.
     const weak = out.source === "kb" || out.intent === "out_of_scope" || (out.source === "rules" && out.confidence < 0.8 && !out.intent.startsWith("nav_") && out.intent !== "page_help");
-    if (weak && c.user && process.env.ANTHROPIC_API_KEY && (await flagState(c.sb, "helper_ai"))?.enabled === true) {
+    if (weak && c.user && aiAvailable() && (await flagState(c.sb, "helper_ai"))?.enabled === true) {
       const last = [...b.messages].reverse().find((m) => m.role === "user")?.text ?? "";
       const ai = await helperAi(last, out.lang, b.page, liveFlags(), { actorId: c.user.id, requestId: c.rid, simpleLanguage: (await styleFor(c.sb, c.user.id)).simpleLanguage });
       if (ai) return { data: { ...out, blocks: ai.blocks, source: "ai" as const, intent: "ai_answer", mood: "talk" as const } };

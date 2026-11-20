@@ -4,6 +4,7 @@ import { anthropic } from "../anthropic";
 import { logAiRun, type AiAgent, type AiStatus } from "./log";
 import { glossaryText } from "./glossary";
 import type { Prompt } from "./prompts";
+import { localProvider, LocalModelError, ollamaStructured } from "./ollama";
 
 /**
  * One way to call the model (masterplan §17): a forced tool call whose input schema comes from the Zod schema, the result
@@ -60,17 +61,33 @@ export function costUsd(usage: { input: number; output: number } | null): number
 export const hashInput = (s: string) => createHash("sha256").update(s).digest("hex");
 
 export async function runAgent<T>(o: RunOptions<T>): Promise<AiOutcome<T>> {
-  const model = defaultModel();
+  const local = localProvider();   // AI_PROVIDER=ollama: a local model instead of Claude (src/lib/ai/ollama.ts)
+  const model = local ? `ollama:${local.model}` : defaultModel();
   const base = { agent: o.agent, model, promptId: o.prompt.id, promptVersion: o.prompt.version, inputHash: hashInput(o.input), issueId: o.issueId ?? null, actorId: o.actorId ?? null, requestId: o.requestId ?? null };
   const finish = async (status: AiStatus, extra: { output?: unknown; usage?: { input: number; output: number } | null; errorClass?: string; latencyMs: number }) => {
     const runId = await logAiRun({ ...base, status, output: extra.output ?? null, latencyMs: extra.latencyMs, usage: extra.usage ?? null, costUsd: costUsd(extra.usage ?? null), errorClass: extra.errorClass ?? null });
     return runId;
   };
 
-  if (!process.env.ANTHROPIC_API_KEY) return { ok: false, reason: "no_key", runId: null }; // manual path, nothing to log
+  if (!local && !process.env.ANTHROPIC_API_KEY) return { ok: false, reason: "no_key", runId: null }; // manual path, nothing to log
 
   const started = Date.now();
   let usage: { input: number; output: number } | null = null;
+  if (local) {
+    try {
+      const r = await ollamaStructured(local, { system: buildSystem(o.prompt, o.simpleLanguage).map((b) => b.text).join("\n"), input: o.input, schema: o.schema, maxTokens: o.maxTokens ?? 600, timeoutMs: o.timeoutMs ?? 60_000 });
+      const latencyMs = Date.now() - started;
+      usage = r.usage;
+      const parsed = o.schema.safeParse(r.content);
+      if (!parsed.success) return { ok: false, reason: "invalid_output", runId: await finish("invalid_output", { usage, latencyMs, errorClass: "schema" }) };
+      return { ok: true, data: parsed.data, latencyMs, runId: await finish("ok", { output: parsed.data, usage, latencyMs }) };
+    } catch (e) {
+      const latencyMs = Date.now() - started;
+      const timedOut = e instanceof LocalModelError && e.kind === "timeout";
+      const invalid = e instanceof LocalModelError && e.kind === "bad_response";
+      return { ok: false, reason: invalid ? "invalid_output" : timedOut ? "timeout" : "error", runId: await finish(invalid ? "invalid_output" : timedOut ? "timeout" : "error", { usage, latencyMs, errorClass: e instanceof LocalModelError ? e.kind : "Error" }) };
+    }
+  }
   try {
     const res = await anthropic().messages.create({
       model,

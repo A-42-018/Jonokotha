@@ -46,6 +46,7 @@ export const GUIDES: Record<string, Guide> = {
   "/help/channels": g(b("বার্তায় সমস্যা জানানো", "Report by message"), b("এই পাতায় বার্তার মাধ্যমে সমস্যা জানানোর নিয়ম আছে।", "This page explains how to report by message."), []),
   "/about": g(b("জনকথা সম্পর্কে", "About Jonokotha"), b("জনকথা কী, কী করা যায় আর কী করা যায় না, এখানে লেখা আছে।", "What Jonokotha is, what it does and does not do."), []),
   "/privacy": g(b("গোপনীয়তা নীতি", "Privacy policy"), b("আপনার তথ্য কীভাবে রাখা হয়, তা এখানে লেখা আছে।", "How your information is kept is written here."), []),
+  "/docs": g(b("কারিগরি তথ্য", "Technical docs"), b("এই পাতা ইংরেজিতে লেখা। এখানে এআই কীভাবে কাজ করে আর কী মাপা হয়েছে, তা আছে।", "How the AI works and what was measured, for reviewers. This page is in English."), []),
   "/terms": g(b("শর্তাবলি", "Terms"), b("ব্যবহারের শর্ত এখানে লেখা আছে।", "The terms of use are written here."), []),
   "/accessibility": g(b("সবার ব্যবহারের সুবিধা", "Accessibility"), b("সবাই যেন সহজে ব্যবহার করতে পারে, সেজন্য কী করা হয়েছে আর কী বাকি, তা এখানে।", "What has been done so everyone can use the site, and what is left."), []),
   "/metrics": g(b("সংখ্যার মানে", "What the numbers mean"), b("এই পাতায় জনকথার সংখ্যাগুলোর মানে আর হিসাবের নিয়ম লেখা আছে।", "This page explains what the numbers mean and how they are counted."), []),
