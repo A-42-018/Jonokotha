@@ -47,10 +47,10 @@ const STACK: [string, string][] = [
   ["App", "Next.js 16 (App Router), React 19, TypeScript, Tailwind 4, installable PWA"],
   ["Data", "Supabase Postgres with row-level security on every table, pgvector (1024 dimensions, HNSW), Supabase Storage and Auth"],
   ["Models", "Claude through the Anthropic SDK; BAAI/bge-m3 embeddings through an OpenAI-compatible endpoint; an optional local model through Ollama (AI_PROVIDER=ollama, docs/aibc/local-llm.md)"],
-  ["Retrieval", "Sourced agency directory and service rules; a context line on every rule chunk; variable-length chunks that break on topic change when embeddings are set; cosine or lexical search; graph evidence from earlier routings (needs migration 0091). docs/aibc/rag-upgrade.md"],
+  ["Retrieval", "Sourced agency directory and service rules; a context line on every rule chunk; variable-length chunks that break on topic change when embeddings are set; cosine or lexical search; graph evidence from earlier routings (migration 0091, applied 2026-11-20). docs/aibc/rag-upgrade.md"],
   ["Graph", "Relations are Postgres edges queried with recursive SQL; Apache AGE was evaluated and not adopted"],
   ["MCP", "One server we built: /api/mcp, Streamable HTTP with JSON responses, five tools, staff token, row-level security"],
-  ["Automation", "Vercel Cron, GitHub Actions, an n8n workflow that alerts on urgent cases (workflows/n8n/urgent-cases.json), and a Supabase Realtime refresh of the office queue (needs migration 0092)"],
+  ["Automation", "Vercel Cron, GitHub Actions, an n8n workflow that alerts on urgent cases (workflows/n8n/urgent-cases.json), and a Supabase Realtime refresh of the office queue (migration 0092, applied 2026-11-20)"],
   ["Quality", "Vitest, Testing Library, Playwright, axe-core, Lighthouse, a local-Supabase database suite, a 118-case AI evaluation gate"],
 ];
 
@@ -120,9 +120,9 @@ export default function DocsPage() {
         <ul className="list-disc space-y-1 ps-5">{PRIVACY.map((x) => <li key={x}>{x}</li>)}</ul>
       </Card>
 
-      <Card tone="warning" title="Not switched on in production yet">
+      <Card tone="warning" title="Not proven in production yet">
         <ul className="list-disc space-y-1 ps-5">
-          <li>Migrations 0091 (graph evidence for routing, an extra AI agent label) and 0092 (Realtime on issues) are written but not applied to the live database.</li>
+          <li>Migrations 0091 (graph evidence for routing, an extra AI agent label) and 0092 (Realtime on issues) were applied to the live database on 2026-11-20 and checked in the catalog. Neither has been exercised with a real staff session yet, so graph evidence and the live queue refresh are untested in production.</li>
           <li>The local-model provider and the n8n workflow run only where someone starts Ollama or n8n; the live site uses Claude.</li>
           <li>Embeddings are optional and were not set during the recorded evaluation, so semantic chunking runs in size-only mode until they are.</li>
         </ul>
