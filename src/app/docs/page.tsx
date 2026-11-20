@@ -49,7 +49,7 @@ const STACK: [string, string][] = [
   ["Models", "Claude through the Anthropic SDK; BAAI/bge-m3 embeddings through an OpenAI-compatible endpoint; an optional local model through Ollama (AI_PROVIDER=ollama, docs/aibc/local-llm.md)"],
   ["Retrieval", "Sourced agency directory and service rules; a context line on every rule chunk; variable-length chunks that break on topic change when embeddings are set; cosine or lexical search; graph evidence from earlier routings (migration 0091, applied 2026-11-20). docs/aibc/rag-upgrade.md"],
   ["Graph", "Relations are Postgres edges queried with recursive SQL; Apache AGE was evaluated and not adopted"],
-  ["MCP", "One server we built: /api/mcp, Streamable HTTP with JSON responses, five tools, staff token, row-level security"],
+  ["MCP", "Two servers we built, both Streamable HTTP with JSON responses. /api/mcp: five tools for staff, the staff member's own token, row-level security, every call audited. /api/mcp/public: five read-only tools for public civic data (categories, agency directory, verified helplines, public reports and their timelines), no sign-in, anonymous role, rate limited per IP."],
   ["Automation", "Vercel Cron, GitHub Actions, an n8n workflow that alerts on urgent cases (workflows/n8n/urgent-cases.json), and a Supabase Realtime refresh of the office queue (migration 0092, applied 2026-11-20)"],
   ["Quality", "Vitest, Testing Library, Playwright, axe-core, Lighthouse, a local-Supabase database suite, a 118-case AI evaluation gate"],
 ];

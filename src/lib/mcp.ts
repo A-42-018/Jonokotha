@@ -13,7 +13,7 @@ export const PROTOCOL_VERSION = "2025-03-26";
 const KEY = z.string().max(60).regex(/^[a-z0-9-]+$/);
 const REF = z.string().regex(/^[A-Za-z0-9-]{3,40}$/);
 
-interface Tool { name: string; description: string; schema: z.ZodType; write?: boolean; run: (sb: SupabaseClient, a: never, who: { id: string }) => Promise<unknown> }
+export interface Tool { name: string; description: string; schema: z.ZodType; write?: boolean; run: (sb: SupabaseClient, a: never, who: { id: string }) => Promise<unknown> }
 
 const tools: Tool[] = [
   { name: "search_cases", description: "Search issues in your office scope by words, status or category. Returns reference, title, category, status, area and date (no reporter details).",
@@ -55,33 +55,49 @@ const tools: Tool[] = [
     } },
 ];
 
-export const listTools = () => tools.map((t) => ({ name: t.name, description: t.description, inputSchema: z.toJSONSchema(t.schema), annotations: { readOnlyHint: !t.write, destructiveHint: false } }));
+export const describeTools = (list: Tool[]) => list.map((t) => ({ name: t.name, description: t.description, inputSchema: z.toJSONSchema(t.schema), annotations: { readOnlyHint: !t.write, destructiveHint: false } }));
+export const listTools = () => describeTools(tools);
 
 export interface RpcReq { jsonrpc?: string; id?: string | number | null; method?: string; params?: Record<string, unknown> }
 const err = (id: RpcReq["id"], code: number, message: string) => ({ jsonrpc: "2.0", id: id ?? null, error: { code, message } });
 
+export interface ServerConfig {
+  name: string; instructions: string; tools: Tool[];
+  /** Staff server: every call is audited through record_mcp_call and refused when the audit fails. The public server has no caller to audit (it is rate limited per IP instead). */
+  audit: boolean;
+}
+
+const STAFF: ServerConfig = {
+  name: "jonokotha", tools, audit: true,
+  instructions: "Read-only access to the cases you may already see. Personal data is not exposed. Writes are only proposals that a person must approve.",
+};
+
 /** Handles one JSON-RPC request; returns null for notifications. */
-export async function handleRpc(req: RpcReq, sb: SupabaseClient, who: { id: string }): Promise<object | null> {
+export async function handleRpcWith(cfg: ServerConfig, req: RpcReq, sb: SupabaseClient, who: { id: string }): Promise<object | null> {
   if (req?.jsonrpc !== "2.0" || typeof req.method !== "string") return err(req?.id, -32600, "Invalid request");
   const isNote = req.id === undefined;
   switch (req.method) {
-    case "initialize": return { jsonrpc: "2.0", id: req.id, result: { protocolVersion: PROTOCOL_VERSION, capabilities: { tools: {} }, serverInfo: { name: "jonokotha", version: "1" },
-      instructions: "Read-only access to the cases you may already see. Personal data is not exposed. Writes are only proposals that a person must approve." } };
+    case "initialize": return { jsonrpc: "2.0", id: req.id, result: { protocolVersion: PROTOCOL_VERSION, capabilities: { tools: {} }, serverInfo: { name: cfg.name, version: "1" }, instructions: cfg.instructions } };
     case "ping": return { jsonrpc: "2.0", id: req.id, result: {} };
-    case "tools/list": return { jsonrpc: "2.0", id: req.id, result: { tools: listTools() } };
+    case "tools/list": return { jsonrpc: "2.0", id: req.id, result: { tools: describeTools(cfg.tools) } };
     case "tools/call": {
-      const p = req.params ?? {}, tool = tools.find((t) => t.name === p.name);
+      const p = req.params ?? {}, tool = cfg.tools.find((t) => t.name === p.name);
       if (!tool) return err(req.id, -32602, "Unknown tool");
       const args = tool.schema.safeParse(p.arguments ?? {});
       if (!args.success) return { jsonrpc: "2.0", id: req.id, result: { isError: true, content: [{ type: "text", text: `Invalid arguments: ${args.error.issues.map((i) => i.path.join(".") + " " + i.message).join("; ")}` }] } };
       try {
         const result = await tool.run(sb, args.data as never, who);
-        const count = Array.isArray(result) ? result.length : result ? 1 : 0;
-        const { error } = await sb.rpc("record_mcp_call", { p_tool: tool.name, p_args: args.data, p_results: count });
-        if (error) return { jsonrpc: "2.0", id: req.id, result: { isError: true, content: [{ type: "text", text: "The call could not be audited, so it was not allowed." }] } };
+        if (cfg.audit) {
+          const count = Array.isArray(result) ? result.length : result ? 1 : 0;
+          const { error } = await sb.rpc("record_mcp_call", { p_tool: tool.name, p_args: args.data, p_results: count });
+          if (error) return { jsonrpc: "2.0", id: req.id, result: { isError: true, content: [{ type: "text", text: "The call could not be audited, so it was not allowed." }] } };
+        }
         return { jsonrpc: "2.0", id: req.id, result: { content: [{ type: "text", text: JSON.stringify(result) }], isError: false } };
       } catch { return { jsonrpc: "2.0", id: req.id, result: { isError: true, content: [{ type: "text", text: "The tool failed or you are not allowed to do that." }] } }; }
     }
     default: return isNote ? null : err(req.id, -32601, "Method not found");
   }
 }
+
+/** The staff server (src/app/api/mcp/route.ts). */
+export const handleRpc = (req: RpcReq, sb: SupabaseClient, who: { id: string }) => handleRpcWith(STAFF, req, sb, who);

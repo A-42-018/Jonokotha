@@ -32,6 +32,12 @@ Two environments built the product in parallel, one on the `frontend` branch and
 - Five tools: `search_cases`, `agency_directory`, `case_timeline`, `area_statistics` (all read-only) and `propose_note`, which only creates a pending `ai_suggestions` row that a human must accept in the office screen.
 - Every call is audited by tool name and argument keys. Notes pass through PII redaction first.
 
+**Second MCP server we built: public civic data** (`src/lib/mcp-public.ts`, route `src/app/api/mcp/public/route.ts`)
+- Same protocol and the same JSON-RPC handler as the staff server (`handleRpcWith`), but no sign-in: it reads only what a website visitor can read, through the anonymous Supabase role, never the service-role key.
+- Five read-only tools: `list_categories`, `agency_directory`, `helplines` (verified entries only), `search_public_cases` and `public_case_status` (public status and timeline of one report).
+- No private or AI fields are selected (a unit test checks the tool source for them). There is no caller to audit, so it is rate limited per IP (60 a minute), with 16 KB bodies and batches of at most 5.
+- Checked: 9 unit tests; a real run against the dev server with the project's anon key returned live categories (12), the LGED agency row and the public status and 2-event timeline of `JK-2026-1005`. Helplines returned no rows because none are verified yet.
+
 **MCP servers we used while building**: **TO CONFIRM.** The Claude desktop app session had these MCP tools available: built-in browser (preview and check pages), iOS Simulator, computer use, Claude in Chrome, scheduled tasks, terminal, Claude Docs. List only those you actually used for Jonokotha, and for each say what it was used for (for example: the built-in browser to check the deployed app, the Supabase CLI against the local database). The repo itself has no `.mcp.json`, so no project-level MCP server was configured.
 
 ## 3. AI-DLC (AI development lifecycle) as practised
