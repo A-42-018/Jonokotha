@@ -1,6 +1,6 @@
 # Retrieval upgrade: contextual chunks, semantic chunking, graph evidence
 
-Date: 2026-11-20. Code: `src/lib/ai/chunking.ts`, `src/lib/ai/context.ts`, `src/lib/ai/knowledge.ts`, `src/lib/ai/routing.ts`, migration `0091_graph_evidence_ingest_agent.sql` (**written, not applied to the live database**). Tests: `tests/unit/chunking.test.ts`, `tests/unit/chunk-context.test.ts`.
+Date: 2026-11-20. Code: `src/lib/ai/chunking.ts`, `src/lib/ai/context.ts`, `src/lib/ai/knowledge.ts`, `src/lib/ai/routing.ts`, migration `0091_graph_evidence_ingest_agent.sql` (**applied to the live database on 2026-11-20**, checked in the catalog only). Tests: `tests/unit/chunking.test.ts`, `tests/unit/chunk-context.test.ts`.
 
 ## What changed
 
@@ -12,5 +12,5 @@ Date: 2026-11-20. Code: `src/lib/ai/chunking.ts`, `src/lib/ai/context.ts`, `src/
 
 - Unit tests cover the splitting, the topic-break rule, the fallback when the embedder fails, the context line and the model-line safety checks.
 - **Not measured:** retrieval quality before and after. There is no labelled retrieval set, and the embeddings key was not set in the recorded evaluation (`eval-results.md`). Do not quote an improvement figure for this change.
-- **Not run against a database:** migration 0091 and the changed ingestion were written without a local Supabase (no Docker daemon in this session). Run `npm run test:db` and `tests/api/ai-office.test.ts` on a machine with the local stack before applying 0091 anywhere.
+- **Not run against a database before applying:** migration 0091 and the changed ingestion were written without a local Supabase (no Docker daemon in this session). On 2026-11-20 0091 was applied to production after read-only checks of its prerequisites; the function exists, is executable by signed-in users and not by anon, but it has not been called with a real staff session. Run `npm run test:db` and `tests/api/ai-office.test.ts` on a machine with the local stack before applying 0091 anywhere.
 - Re-run `POST /admin/knowledge/ingest` after deploying so existing rule chunks are rebuilt with the new chunking; unchanged chunks are matched by checksum and kept, changed ones are replaced.
