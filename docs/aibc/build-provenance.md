@@ -97,7 +97,7 @@ There is no `CLAUDE.md`, `.claude/` directory or `.mcp.json` in the repo.
 - **Retrieval:** pgvector with HNSW indexes, 1024-dimension embeddings, checksummed chunks re-ingested only when changed (`src/lib/ai/knowledge.ts`). Graph relations are Postgres edges (`graph_edges`), not a graph database.
 - **Boundary data:** district outlines for "find my seat from my location" come from geoBoundaries gbOpen BGD ADM2 (build 12 Dec 2023, CC BY 3.0 IGO, https://www.geoboundaries.org/), simplified to about 330 m and bundled as `src/lib/data/bd-districts.json` (server only). Seat boundaries are not bundled; the person chooses the seat within the district.
 
-## 7. Additions of 2026-11-20 (branch `aibc-form-requirements`)
+## 7. Additions of 2026-11-20 (branch `ai-depth-features`)
 
 Each item says what exists, how it was checked and what was not. None of it is switched on in the live site until the branch is merged and deployed; migrations 0091 and 0092 are written but **not applied** to the live database.
 
