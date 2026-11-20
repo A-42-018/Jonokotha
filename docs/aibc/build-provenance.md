@@ -96,3 +96,17 @@ There is no `CLAUDE.md`, `.claude/` directory or `.mcp.json` in the repo.
 - **Evaluation data:** 118 synthetic cases written by the team, not real citizen reports.
 - **Retrieval:** pgvector with HNSW indexes, 1024-dimension embeddings, checksummed chunks re-ingested only when changed (`src/lib/ai/knowledge.ts`). Graph relations are Postgres edges (`graph_edges`), not a graph database.
 - **Boundary data:** district outlines for "find my seat from my location" come from geoBoundaries gbOpen BGD ADM2 (build 12 Dec 2023, CC BY 3.0 IGO, https://www.geoboundaries.org/), simplified to about 330 m and bundled as `src/lib/data/bd-districts.json` (server only). Seat boundaries are not bundled; the person chooses the seat within the district.
+
+## 7. Additions of 2026-11-20 (branch `ai-depth-features`)
+
+Each item says what exists, how it was checked and what was not. None of it is switched on in the live site until the branch is merged and deployed; migrations 0091 and 0092 are written but **not applied** to the live database.
+
+| Item | Where | Checked how | Not checked |
+|---|---|---|---|
+| Live technical page `/docs` (agents, measured results with limits, stack, privacy, what is not switched on) | `src/app/docs/page.tsx` | Rendered in the browser pane at desktop and 375 px width, no console errors, no horizontal scroll; a guide entry for Dadu is required by `tests/unit/helper-content.test.ts` and was added | Screen reader pass |
+| Retrieval upgrade: semantic chunking, context line per chunk (template, or model-written when `KNOWLEDGE_CONTEXT_LLM=1`), graph evidence on routing suggestions | `docs/aibc/rag-upgrade.md` | 15 unit tests | No retrieval-quality measurement; no database run of migration 0091 |
+| Optional local model through Ollama (`AI_PROVIDER=ollama`) | `src/lib/ai/ollama.ts`, `docs/aibc/local-llm.md` | 9 unit tests; a real run of the 118-case intake evaluation on a local `qwen2.5:3b`: 41.5% category accuracy, below the 61.0% keyword fallback, so it is not recommended for citizens (`local-llm.md`) | Bangla quality beyond that evaluation; speed on other hardware |
+| n8n workflow that alerts on urgent open cases | `workflows/n8n/urgent-cases.json`, `docs/aibc/n8n-workflow.md` | Ran in a real local n8n against mock endpoints (success path and a 401) | Real endpoint with a real database; scheduled runs |
+| Supabase Realtime refresh of the office queue | `src/components/office/OfficeLive.tsx`, migration 0092 | 3 unit tests with a mocked client; CSP now allows the Supabase `wss://` origin | A real Realtime connection (needs the migration applied and a staff login) |
+
+Tools used for this work: Claude Code (Anthropic) in the Claude desktop app, the built-in browser pane to check `/docs`, Ollama and n8n run locally on the developer's laptop.

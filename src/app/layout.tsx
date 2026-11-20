@@ -15,6 +15,9 @@ import OfflineBanner from "@/components/ui/OfflineBanner";
 import TopNav from "@/components/ui/TopNav";
 import { ToastProvider } from "@/components/ui/Toast";
 import DaduLauncher from "@/components/dadu/DaduLauncher";
+import DemoBanner from "@/components/DemoBanner";
+import { demoOn } from "@/lib/demo-mode-server";
+import { demoText } from "@/lib/demo/text";
 import { getArea } from "@/lib/constituency-server";
 import { DADU } from "@/lib/flags-dadu";
 import { currentUser } from "@/lib/supabase/server";
@@ -42,6 +45,7 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const lang = await getLang();
   const t = dict[lang];
+  const inDemo = await demoOn();
   const areaPromise = getArea();   // started now so it runs while the user lookup waits on the database
   let email: string | null = null;
   let isStaff = false;
@@ -58,6 +62,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     <html lang={lang} className={`${head.variable} ${body.variable}`}>
       <body className="flex min-h-screen flex-col">
         <I18nProvider lang={lang} dicts={{ [lang]: t }}>
+        {inDemo && <DemoBanner text={demoText.banner[lang]} gallery={demoText.gallery[lang]} exit={demoText.exit[lang]} />}
         <TopNav
           isStaff={isStaff}
           userId={userId}

@@ -11,6 +11,8 @@ const need = [
   // Phase 7 (all optional; WhatsApp, SMS and read-aloud stay "planned" until an account exists. Prices are never assumed: set them from your contract.)
   ["WHATSAPP_TOKEN", false], ["WHATSAPP_PHONE_NUMBER_ID", false], ["WHATSAPP_APP_SECRET", false], ["WHATSAPP_VERIFY_TOKEN", false], ["WHATSAPP_COST_PER_MESSAGE_USD", false],
   ["SMS_API_URL", false], ["SMS_API_KEY", false], ["SMS_SENDER", false], ["SMS_WEBHOOK_SECRET", false], ["SMS_COST_PER_SEGMENT_USD", false],
+  // Optional local model (docs/aibc/local-llm.md) and model-written chunk context (docs/aibc/rag-upgrade.md)
+  ["AI_PROVIDER", false], ["OLLAMA_BASE_URL", false], ["OLLAMA_MODEL", false], ["KNOWLEDGE_CONTEXT_LLM", false],
   ["TTS_API_URL", false], ["TTS_API_KEY", false], ["TTS_VOICE", false], ["AZURE_SPEECH_KEY", false], ["AZURE_SPEECH_REGION", false], ["AZURE_SPEECH_DAILY_CHARS", false],
 ];
 // Masterplan §26 names accepted as aliases (keep equal to src/lib/env-aliases.ts; tests/unit/env-aliases.test.ts checks it).

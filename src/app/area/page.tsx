@@ -4,6 +4,7 @@ import { getConstituencyId } from "@/lib/constituency-server";
 import { DEMO_CONSTITUENCY } from "@/lib/demo-data";
 import { FLAGS } from "@/lib/flags-more";
 import { currentUser } from "@/lib/supabase/server";
+import { demoOn } from "@/lib/demo-mode-server";
 
 export const dynamic = "force-dynamic";
 
@@ -11,7 +12,7 @@ export const dynamic = "force-dynamic";
 export default async function Area() {
   const constituency = (await getConstituencyId()) ?? DEMO_CONSTITUENCY.id;
   let signedIn = false;
-  try { signedIn = !!(await currentUser()).user; } catch { /* signed out */ }
+  try { signedIn = !!(await currentUser()).user || (await demoOn()); } catch { /* signed out */ }
   return (
     <div className="space-y-4">
       {FLAGS.channels && <AreaAlerts constituency={constituency} />}

@@ -4,13 +4,14 @@ import { buttonClass } from "@/components/ui/Button";
 import { dict, getLang } from "@/lib/i18n";
 import { loginUrl } from "@/lib/guard";
 import { currentUser } from "@/lib/supabase/server";
+import { demoOn } from "@/lib/demo-mode-server";
 
 export const dynamic = "force-dynamic";
 
 export default async function Inbox() {
   const t = dict[await getLang()];
   let signedIn = false;
-  try { signedIn = !!(await currentUser()).user; } catch { /* signed out */ }
+  try { signedIn = !!(await currentUser()).user || (await demoOn()); } catch { /* signed out */ }
   if (!signedIn) {
     return (
       <div className="space-y-3 text-center">

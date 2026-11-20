@@ -1,4 +1,5 @@
 // Browser-side client for /api/v1 (docs/api-v1.md). One place for the envelope, the error format and Idempotency-Key.
+import { demoOnBrowser } from "@/lib/demo-mode";
 import { isMfaRequired, mfaUrl } from "@/lib/mfa";
 import type { Emergency } from "@/lib/types";
 
@@ -18,6 +19,12 @@ export interface ApiInit { method?: string; body?: unknown; form?: FormData; ide
 
 /** Calls `/api/v1/<path>` and returns `{ data, page }`. Throws ApiError (status 0 when there was no response). */
 export async function api<T>(path: string, init: ApiInit = {}, doFetch: typeof fetch = fetch): Promise<{ data: T; page?: Page; replayed: boolean }> {
+  // Demo mode (see demo-mode.ts): answer from code, never from the server. Loaded on demand, so normal pages carry none of it.
+  if (demoOnBrowser()) {
+    const { simulate } = await import("@/lib/demo-sim");
+    const sim = await simulate(path, { method: init.method ?? (init.body !== undefined || init.form ? "POST" : "GET"), body: init.body, form: !!init.form });
+    if (sim) return { data: sim.data as T, page: sim.page, replayed: false };
+  }
   const headers: Record<string, string> = {};
   if (init.idempotencyKey) headers["Idempotency-Key"] = init.idempotencyKey;
   if (init.body !== undefined) headers["Content-Type"] = "application/json";

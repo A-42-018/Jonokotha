@@ -22,8 +22,8 @@ export function buildCsp({ supabaseUrl, nonce }: CspOptions = {}): string {
     // Report photos are previewed from blob: URLs; map tiles come from OpenStreetMap; MP photos come from this project's public storage bucket.
     "img-src": ["'self'", "data:", "blob:", "https://tile.openstreetmap.org", ...(supa ? [supa] : [])],
     "font-src": ["'self'"],
-    // Sign-in (Supabase) and map labels (glyph server). Add the speech or AI hosts here if they ever move to the browser.
-    "connect-src": ["'self'", ...(supa ? [supa] : []), "https://demotiles.maplibre.org", "https://tile.openstreetmap.org"],
+    // Sign-in and live office updates (Supabase over https and wss) and map labels (glyph server). Add the speech or AI hosts here if they ever move to the browser.
+    "connect-src": ["'self'", ...(supa ? [supa, supa.replace(/^http/, "ws")] : []), "https://demotiles.maplibre.org", "https://tile.openstreetmap.org"],
     // MapLibre runs its tile worker from /vendor (same origin) and may use a blob worker.
     "worker-src": ["'self'", "blob:"],
     "manifest-src": ["'self'"],

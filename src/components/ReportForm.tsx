@@ -39,6 +39,8 @@ import { country } from "@/lib/country";
 import type { Emergency } from "@/lib/types";
 import { useToast } from "./ui/Toast";
 import { useKeyboardInset } from "./ui/useKeyboardInset";
+import { demoOnBrowser } from "@/lib/demo-mode";
+import { demoDraft } from "@/lib/demo/intake";
 
 export { hasPersonalNumber };
 
@@ -191,7 +193,8 @@ function ReportFormInner({ t, lang, constituencyId, initialCategory }: { t: Dict
   async function makeDraft() {
     setBusy("draft");
     try {
-      const res = await fetch("/api/intake", { method: "POST", body: JSON.stringify({ text: quick }) });
+      // Simulated demo mode: draft the form from the words typed, in code, without calling the AI service.
+      const res = demoOnBrowser() ? new Response(JSON.stringify({ draft: demoDraft(quick) })) : await fetch("/api/intake", { method: "POST", body: JSON.stringify({ text: quick }) });
       if (!res.ok) throw new Error("draft failed");
       const { draft } = (await res.json()) as { draft: Partial<ReportValues> };
       for (const f of ["title", "description", "area"] as const) setValue(f, draft[f] ?? "", { shouldDirty: true });

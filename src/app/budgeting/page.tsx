@@ -1,3 +1,4 @@
+import { flagOrDemo } from "@/lib/demo-mode-server";
 import { notFound } from "next/navigation";
 import { PbList } from "@/components/r2/Pb";
 import { getConstituencyId } from "@/lib/constituency-server";
@@ -9,7 +10,7 @@ export const dynamic = "force-dynamic";
 
 /** Participatory budgeting (F8.6, Release 2). */
 export default async function Budgeting() {
-  if (!R2.budgeting) notFound();
+  if (!(await flagOrDemo(R2.budgeting))) notFound();
   const t = dict[await getLang()];
   return (
     <div className="space-y-4">

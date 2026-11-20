@@ -1,3 +1,4 @@
+import { flagOrDemo } from "@/lib/demo-mode-server";
 import { notFound } from "next/navigation";
 import CommitmentsList from "@/components/tracker/CommitmentsList";
 import { getConstituencyId } from "@/lib/constituency-server";
@@ -9,7 +10,7 @@ export const dynamic = "force-dynamic";
 
 /** Commitment tracker (F7.7, Release 1.1). With the flag off the page does not exist. */
 export default async function Commitments() {
-  if (!FLAGS.commitments) notFound();
+  if (!(await flagOrDemo(FLAGS.commitments))) notFound();
   const t = dict[await getLang()];
   return (
     <div className="space-y-4">

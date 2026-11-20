@@ -4,7 +4,8 @@ import { DADU } from "@/lib/flags-dadu";
 import { dict, getLang } from "@/lib/i18n";
 
 export default async function Help() {
-  const t = dict[await getLang()];
+  const lang = await getLang();
+  const t = dict[lang];
   const list = (items: string[], ordered = false) => {
     const L = ordered ? "ol" : "ul";
     return <L className={`${ordered ? "list-decimal" : "list-disc"} space-y-1 ps-5`}>{items.map((x) => <li key={x}>{x}</li>)}</L>;
@@ -27,6 +28,7 @@ export default async function Help() {
       <Card title={t.hpReportTitle}><p>{t.hpReportBody}</p></Card>
       <div className="flex flex-wrap gap-x-4">
         <Link href="/help/contact" className="inline-flex min-h-11 items-center text-civic underline">{t.spHelpLink}</Link>
+        <Link href="/demo" className="inline-flex min-h-11 items-center text-civic underline">{lang === "bn" ? "ডেমো উদাহরণ দেখুন" : "See demo examples"}</Link>
         <Link href="/privacy" className="inline-flex min-h-11 items-center text-civic underline">{t.hpPrivacyLink}</Link>
       </div>
     </div>

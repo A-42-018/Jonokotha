@@ -7,6 +7,7 @@ import { pickAgency, similarity } from "../../src/lib/store";
 import { embed, embeddingModel, embeddingsConfigured, issueEmbeddingText } from "../../src/lib/ai/embeddings";
 import { realExamplesToCases } from "../../src/lib/eval-real/dataset";
 import { DUPLICATE_MIN_SCORE } from "../../src/lib/ai/duplicates";
+import { aiAvailable, localProvider } from "../../src/lib/ai/ollama";
 
 type Case = { id: string; lang: "bn" | "en" | "banglish"; text: string; category: string; agency: string; area: string; dup_group?: string; pii?: { kind: string; value: string }[]; note?: string };
 const data = JSON.parse(readFileSync("tests/ai/dataset.v0.json", "utf8")) as { version: string; cases: Case[] };
@@ -77,10 +78,10 @@ it("evaluation", async () => {
   out.push("");
 
   // 4. AI drafting (opt-in: sends the synthetic cases to the model provider) ------------------------
-  if (process.env.EVAL_AI === "1" && process.env.ANTHROPIC_API_KEY) {
+  if (process.env.EVAL_AI === "1" && aiAvailable()) {   // Claude with a key, or a local model with AI_PROVIDER=ollama (docs/aibc/local-llm.md)
     const preds = new Map<string, string>(), lat: number[] = [], src = new Map<string, string>(), unsupported: string[] = [];
     const queue = [...cases];
-    await Promise.all(Array.from({ length: 4 }, async () => {
+    await Promise.all(Array.from({ length: localProvider() ? 1 : 4 }, async () => {
       for (let c = queue.shift(); c; c = queue.shift()) {
         const t = Date.now();
         const r = await draftFromText(c.text);
@@ -92,13 +93,13 @@ it("evaluation", async () => {
       }
     }));
     const ai = [...src.values()].filter((s) => s === "ai").length;
-    out.push(`## AI drafting (model ${process.env.ANTHROPIC_MODEL ?? "claude-opus-5-5"}, prompt intake@v1)`, "",
+    out.push(`## AI drafting (model ${localProvider() ? `ollama:${localProvider()!.model} (local)` : process.env.ANTHROPIC_MODEL ?? "claude-opus-5-5"}, prompt intake@v1)`, "",
       `Calls that returned a valid AI draft: ${pct(ai, cases.length)}; the rest used the keyword fallback (timeout, refusal, malformed output or provider error) and are scored with the fallback's category.`, "",
       categoryTable(preds), "", `Routing top-1 (category → sourced agency directory): ${routing(preds)}`, "",
       `Unsupported-number rate (a number in the draft that is not in the citizen's message; a hallucination proxy): ${pct(unsupported.length, ai)}`, "",
       `Latency per draft: p50 ${quantile(lat, 0.5)} ms, p95 ${quantile(lat, 0.95)} ms. Cost: not measured (set AI_PRICE_IN_PER_MTOK / AI_PRICE_OUT_PER_MTOK on the server to log it per run).`, "",
       `Prompt-injection cases (${cases.filter((c) => /injection/.test(c.note ?? "")).length}): ${pct(cases.filter((c) => /injection/.test(c.note ?? "") && preds.get(c.id) === c.category).length, cases.filter((c) => /injection/.test(c.note ?? "")).length)} kept their true category.`, "");
-  } else out.push("## AI drafting", "", "Not run (set `EVAL_AI=1` and `ANTHROPIC_API_KEY`; this sends the synthetic cases to the model provider).", "");
+  } else out.push("## AI drafting", "", "Not run (set `EVAL_AI=1` and `ANTHROPIC_API_KEY`, or `AI_PROVIDER=ollama` with `OLLAMA_BASE_URL`; with a key this sends the synthetic cases to the model provider).", "");
 
   out.push("## Not yet measurable", "", "- Routing top-3 and citation validity: the Routing Agent (RAG with citations) is Phase 2; today routing is a category lookup in the sourced directory.", "- Hallucination rate beyond the number check, and reply-draft quality: Office Copilot is Phase 2.", "- Bangla-vs-English parity is the per-language table above; the Banglish group is small (15 cases).", "");
   const md = out.join("\n");
