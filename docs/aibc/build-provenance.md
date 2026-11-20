@@ -99,7 +99,7 @@ There is no `CLAUDE.md`, `.claude/` directory or `.mcp.json` in the repo.
 
 ## 7. Additions of 2026-11-20 (branch `ai-depth-features`)
 
-Each item says what exists, how it was checked and what was not. The branch was merged and deployed on 2026-11-20; migrations 0091 and 0092 were applied to the live database on 2026-11-20 (migration 0090, the earlier Dadu one, is still pending there).
+Each item says what exists, how it was checked and what was not. The branch was merged and deployed on 2026-11-20; migrations 0091 and 0092 were applied to the live database on 2026-11-20 (migration 0090, the earlier Dadu one, was applied later the same day, and 0091 was re-run after it so the `ingest` agent value stays allowed). None of the three is recorded in the Supabase migration history table, which still ends at 0083.
 
 | Item | Where | Checked how | Not checked |
 |---|---|---|---|
